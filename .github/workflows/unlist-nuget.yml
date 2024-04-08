@@ -7,7 +7,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.event.release.target_commitish }}
-  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+  PROJECT_NAME: 'Hyperbee.Pipeline'
     
 jobs:
   publish:

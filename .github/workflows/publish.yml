@@ -6,8 +6,8 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.event.release.target_commitish }}
-  SOLUTION_NAME: ${{ vars.SOLUTION_NAME }}
-  PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+  SOLUTION_NAME: 'Hyperbee.Pipeline.sln'
+  PROJECT_NAME: 'Hyperbee.Pipeline'
   DOTNET_VERSION: '8.0.x'
   NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
   BUILD_CONFIGURATION: ''

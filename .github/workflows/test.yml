@@ -16,7 +16,7 @@ on:
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  SOLUTION_NAME: ${{ vars.SOLUTION_NAME }}
+  SOLUTION_NAME: 'Hyperbee.Pipeline.sln'
   DOTNET_VERSION: '8.0.x'
     
 jobs:
