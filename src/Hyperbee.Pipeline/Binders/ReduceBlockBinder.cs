@@ -18,7 +18,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext>
             var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
             var nextArguments = (IEnumerable<TElement>) nextArgument;
 
-            var accumulator = default(TNext);
+            var accumulator = default( TNext );
 
             foreach ( var elementArgument in nextArguments )
             {

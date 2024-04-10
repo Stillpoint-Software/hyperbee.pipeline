@@ -26,7 +26,7 @@ internal class PipeStatementBinder<TInput, TOutput>
             var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
 
             var contextControl = (IPipelineContextControl) context;
-                
+
             if ( contextControl.HandleCancellationRequested( nextArgument ) )
                 return default;
 

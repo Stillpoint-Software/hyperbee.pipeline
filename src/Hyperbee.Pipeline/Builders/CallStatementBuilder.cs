@@ -26,7 +26,7 @@ public partial class PipelineBuilder<TInput, TOutput>
         };
 
         // task wrapper
-        
+
         Task AsyncNext( IPipelineContext context, TOutput argument )
         {
             next( context, argument );

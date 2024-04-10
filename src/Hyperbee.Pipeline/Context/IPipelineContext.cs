@@ -9,7 +9,7 @@ public interface IPipelineContext
 
     ContextItems Items { get; }
     IServiceProvider ServiceProvider { get; init; }
-    
+
     Exception Exception { get; set; }
     bool Throws { get; }
 
@@ -19,11 +19,11 @@ public interface IPipelineContext
 
     object CancellationValue { get; }
     bool HasCancellationValue { get; }
-    
+
     void CancelAfter();
     void CancelAfter( object cancellationValue );
     IPipelineContext Clone( bool throws );
-    
+
     string Name { get; set; }
     int Id { get; }
 

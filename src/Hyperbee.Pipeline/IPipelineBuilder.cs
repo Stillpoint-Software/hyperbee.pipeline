@@ -38,7 +38,7 @@ public partial interface IPipelineStartBuilder<TInput, TOutput> : IPipelineBuild
     // head actions: (e.g. Hook) that are only valid at the start of the pipeline 
 }
 
-public partial interface IPipelineBuilder<TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput> 
+public partial interface IPipelineBuilder<TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
 {
     // normal actions
 }
@@ -53,7 +53,7 @@ public interface IPipelineFinalBuilder<in TInput, TOutput> : IPipelineBuilder
 public interface IPipelineBuilder
 {
     // no actions allowed that modify the pipeline
-    
+
     // used to bind the tail of an inner builder to the continuation of its parent.
     // this is necessary because you can't directly cast delegates. 
     FunctionAsync<TIn, TOut> CastFunction<TIn, TOut>();

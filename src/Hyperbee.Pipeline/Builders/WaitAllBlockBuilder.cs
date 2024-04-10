@@ -16,7 +16,7 @@ public partial interface IPipelineBuilder<TInput, TOutput>
 public partial class PipelineBuilder<TInput, TOutput>
 {
     public IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
-        Func<Builders<TOutput, TOutput>, 
+        Func<Builders<TOutput, TOutput>,
             Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
@@ -57,7 +57,7 @@ public partial class PipelineBuilder<TInput, TOutput>
         var builderInstances = builders( new Builders<TOutput, TOutput>() );
 
         if ( builderInstances.Length == 0 )
-            throw new ArgumentOutOfRangeException( nameof(builders) );
+            throw new ArgumentOutOfRangeException( nameof( builders ) );
 
         var functions = builderInstances
             .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null ) } )

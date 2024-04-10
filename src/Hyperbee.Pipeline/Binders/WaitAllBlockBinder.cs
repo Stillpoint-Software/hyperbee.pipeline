@@ -41,7 +41,7 @@ internal class WaitAllBlockBinder<TInput, TOutput>
             if ( contextControl.HandleCancellationRequested( nextArgument ) )
                 return default;
 
-            using ( contextControl.CreateFrame( context, Configure, nameof(WaitAllAsync) ) )
+            using ( contextControl.CreateFrame( context, Configure, nameof( WaitAllAsync ) ) )
             {
                 return await Next( WaitAllAsync, context, nextArgument ).ConfigureAwait( false );
             }
@@ -50,7 +50,7 @@ internal class WaitAllBlockBinder<TInput, TOutput>
             // The reducer is the step action, and because it is a step, we need to ensure
             // that middleware is called. Middleware requires us to pass in the execution
             // function that it wraps. This requires an additional level of wrapping.
-            
+
             async Task<TNext> WaitAllAsync( IPipelineContext context1, TOutput _ )
             {
                 var results = new WaitAllResult[nexts.Length];

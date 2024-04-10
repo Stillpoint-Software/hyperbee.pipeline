@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Hyperbee.Pipeline.Context;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -72,7 +72,7 @@ public class PipelineCancellationTests
 
         var result = await command( new PipelineContext() );
 
-        Assert.IsInstanceOfType( result, typeof(int) );
+        Assert.IsInstanceOfType( result, typeof( int ) );
         Assert.AreEqual( 2, result );
     }
 
