@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.targets = Directory.Build.targets
 		LICENSE = LICENSE
 		README.md = README.md
+		solution-helper.psm1 = solution-helper.psm1
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline", "src\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj", "{6725FAD8-FADC-413A-B352-0CF583DD1CC2}"
@@ -19,7 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{1FA7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4DBDB7F5-3F66-4572-80B5-3322449C77A4}"
 	ProjectSection(SolutionItems) = preProject
+		.github\workflows\create-prerelease.yml = .github\workflows\create-prerelease.yml
+		.github\workflows\create-release.yml = .github\workflows\create-release.yml
+		.github\workflows\format.yml = .github\workflows\format.yml
+		.github\workflows\issue-branch.yml = .github\workflows\issue-branch.yml
 		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\test-report.yml = .github\workflows\test-report.yml
 		.github\workflows\test.yml = .github\workflows\test.yml
 		.github\workflows\update-version.yml = .github\workflows\update-version.yml
 	EndProjectSection
