@@ -65,7 +65,7 @@ public class PipelineCachingTests
             .Start<string>()
             .PipeCacheAsync( b => b
                 .PipeAsync( ComplexAsync )
-                .Pipe( (ctx, arg) => arg + 100 ))
+                .Pipe( ( ctx, arg ) => arg + 100 ) )
             .Build();
 
         var factory = CreateContextFactory();
@@ -215,7 +215,7 @@ public class PipelineCachingTests
         var container = new ServiceContainer();
 
         container.AddService(
-            typeof(IMemoryCache),
+            typeof( IMemoryCache ),
             new MemoryCache( new MemoryCacheOptions
             {
                 Clock = clock,
@@ -224,7 +224,7 @@ public class PipelineCachingTests
             } ) );
 
         container.AddService(
-            typeof(PipelineMemoryCacheOptions),
+            typeof( PipelineMemoryCacheOptions ),
             new PipelineMemoryCacheOptions()
         );
 
