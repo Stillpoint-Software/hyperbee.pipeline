@@ -24,9 +24,9 @@ public class PipelineFactory
 
     public static IPipelineStartBuilder<Arg.Empty, Arg.Empty> Start()
     {
-        return new PipelineBuilder<Arg.Empty, Arg.Empty> 
-        { 
-            Function = ( context, argument ) => Task.FromResult( argument ) 
+        return new PipelineBuilder<Arg.Empty, Arg.Empty>
+        {
+            Function = ( context, argument ) => Task.FromResult( argument )
         };
     }
 
@@ -34,7 +34,7 @@ public class PipelineFactory
     {
         return new PipelineBuilder<TInput, TInput>
         {
-            Function = ( context, argument ) => Task.FromResult( argument ), 
+            Function = ( context, argument ) => Task.FromResult( argument ),
             Middleware = functionMiddleware
         };
     }

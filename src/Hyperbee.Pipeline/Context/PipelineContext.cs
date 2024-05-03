@@ -32,7 +32,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
     }
 
     private object _cancellationValue;
-    private readonly Counter _counter; 
+    private readonly Counter _counter;
 
     private sealed class Counter // create a shared counter instance to support context parallelism
     {
@@ -55,7 +55,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
         private set
         {
             if ( HasCancellationValue )
-                throw new InvalidOperationException( $"{nameof(CancellationValue)} has already been set." );
+                throw new InvalidOperationException( $"{nameof( CancellationValue )} has already been set." );
 
             _cancellationValue = value;
             HasCancellationValue = true;
@@ -66,7 +66,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
 
     public ContextItems Items { get; }
     public IServiceProvider ServiceProvider { get; init; }
-    
+
     public Exception Exception { get; set; }
     public bool Throws { get; }
 
@@ -95,7 +95,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
         get => Id;
         set => Id = value;
     }
-    
+
     public void CancelAfter() => CancellationSource.Cancel();
 
     public void CancelAfter( object cancellationValue )

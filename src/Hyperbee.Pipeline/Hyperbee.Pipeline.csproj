@@ -17,6 +17,7 @@
     <Description>Composable async pipelines</Description>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+	<PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
 
   </PropertyGroup>
   <ItemGroup>
@@ -28,7 +29,7 @@
     <Pack>True</Pack>
     <PackagePath>\</PackagePath>
   </None>
-	<None Include="..\..\README.md">
+	<None Include="README.md">
 	  <Pack>True</Pack>
 	  <PackagePath>\</PackagePath>
 	</None>

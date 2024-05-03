@@ -5,16 +5,16 @@ namespace Hyperbee.Pipeline.Context;
 public class PipelineContextFactory : IPipelineContextFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    
+
     private PipelineContextFactory( IServiceProvider serviceProvider )
     {
         // private instantiation guarantees a single instance.
         // this is important so that both DI and manual (non-DI) usage
         // use the same instance.
-        
+
         _serviceProvider = serviceProvider;
     }
-    
+
     public IPipelineContext Create( ILogger logger )
     {
         return new PipelineContext
@@ -26,9 +26,13 @@ public class PipelineContextFactory : IPipelineContextFactory
 
     public static IPipelineContextFactory Instance { get; private set; }
 
-    public static IPipelineContextFactory CreateFactory( IServiceProvider serviceProvider = null )
+    public static IPipelineContextFactory CreateFactory( IServiceProvider serviceProvider = null, bool resetFactory = false )
     {
-        // get-or-create
+        if ( resetFactory )
+        {
+            return Instance = new PipelineContextFactory( serviceProvider );
+        }
+
         return Instance ??= new PipelineContextFactory( serviceProvider );
     }
 }

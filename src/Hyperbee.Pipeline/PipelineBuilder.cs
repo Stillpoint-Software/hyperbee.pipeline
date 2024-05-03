@@ -10,7 +10,7 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
     internal PipelineBuilder()
     {
     }
-    
+
     public FunctionAsync<TInput, TOutput> Build()
     {
         // build and return the outermost method

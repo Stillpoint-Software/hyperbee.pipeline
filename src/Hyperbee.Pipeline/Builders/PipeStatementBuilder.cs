@@ -26,7 +26,7 @@ public partial class PipelineBuilder<TInput, TOutput>
         };
 
         // task wrapper
-        
+
         Task<TNext> AsyncNext( IPipelineContext context, TOutput argument )
         {
             return Task.FromResult( next( context, argument ) );
