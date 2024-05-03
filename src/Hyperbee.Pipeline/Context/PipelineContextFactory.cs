@@ -26,9 +26,13 @@ public class PipelineContextFactory : IPipelineContextFactory
 
     public static IPipelineContextFactory Instance { get; private set; }
 
-    public static IPipelineContextFactory CreateFactory( IServiceProvider serviceProvider = null )
+    public static IPipelineContextFactory CreateFactory( IServiceProvider serviceProvider = null, bool resetFactory = false )
     {
-        // get-or-create
+        if ( resetFactory )
+        {
+            return Instance = new PipelineContextFactory( serviceProvider );
+        }
+
         return Instance ??= new PipelineContextFactory( serviceProvider );
     }
 }
