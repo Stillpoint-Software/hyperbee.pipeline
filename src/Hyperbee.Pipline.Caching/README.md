@@ -2,7 +2,7 @@
 
 The `Hyperbee.Pipeline.Caching` library is a set of extentsions to `Hyperbee.Pipeline` that adds support for caching within a pipeline using `Microsoft.Extensions.Caching` libraries.
 
-## Examples
+## Memory Cache Examples
 For simple pipelines the previous step's return value can be used as the key:
 
 ```csharp
@@ -53,9 +53,22 @@ var result = await command( factory.Create( logger ), "test" );
 Assert.AreEqual( 104, result );
 ```
 
+## Distributed Cache
+
+Distributed Caches work in the same way, but requires the registration of a `IDistributedCache`, an optional `ICacheSerializer` serializer (defaults to Json) and only supports `Async` methods
+
+```csharp
+var command = PipelineFactory
+    .Start<string>()
+    .PipeDistributedCacheAsync( CharacterCountAsync )
+    .Build();
+```
+
 ## Dependacy Injection
 
-Because this uses the existing DI built into pipelines, caching can be configured with an existing cache:
+Because this uses the existing DI built into pipelines, caching can be configured with an existing cache.
+
+### Memory Cache
 
 ```csharp
 // Add Memory Cache
@@ -74,3 +87,22 @@ services.AddPipeline( (factoryServices, rootProvider) =>
     factoryServices.AddPipelineDefaultCacheSettings( absoluteExpirationRelativeToNow: TimeSpan.FromHours( 1 ) )
 } );
 ```
+
+### Distributed Cache
+
+An [Establish caching services](https://learn.microsoft.com/en-us/aspnet/core/performance/caching/distributed?view=aspnetcore-8.0#establish-distributed-caching-services) such as SQL needs to be configured:
+```csharp
+services.AddDistributedSqlServerCache(options =>
+{
+    options.ConnectionString = builder.Configuration.GetConnectionString(
+        "DistCache_ConnectionString");
+    options.SchemaName = "dbo";
+    options.TableName = "TestCache";
+});
+```
+
+An Optional `ICacheSerializer` can be registered. If one is missing the `JsonCacheSerializer` which uses `System.Text.Json.JsonSerializer` is used.
+```csharp
+services.AddTransient<ICacheSerializer, JsonCacheSerializer>()
+```
+

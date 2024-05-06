@@ -8,7 +8,7 @@ using NSubstitute;
 namespace Hyperbee.Pipeline.Caching.Tests;
 
 [TestClass]
-public class PipelineCachingTests
+public class PipelineMemoryCachingTests
 {
 
     [TestMethod]
