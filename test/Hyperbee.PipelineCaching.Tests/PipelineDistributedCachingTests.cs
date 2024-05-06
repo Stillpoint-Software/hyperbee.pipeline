@@ -192,14 +192,15 @@ public class PipelineDistributedCachingTests
 
         var cache = new MemoryDistributedCacheOptions
         {
-            Clock = clock, ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 )
+            Clock = clock,
+            ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 )
         };
 
         var options = Substitute.For<IOptions<MemoryDistributedCacheOptions>>();
         options.Value.Returns( cache );
 
         container.AddService(
-            typeof(IDistributedCache),
+            typeof( IDistributedCache ),
             new MemoryDistributedCache( options ) );
 
         container.AddService(
