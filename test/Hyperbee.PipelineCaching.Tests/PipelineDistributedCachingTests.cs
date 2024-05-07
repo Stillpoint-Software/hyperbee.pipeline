@@ -192,14 +192,15 @@ public class PipelineDistributedCachingTests
 
         var cache = new MemoryDistributedCacheOptions
         {
-            Clock = clock, ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 )
+            Clock = clock,
+            ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 )
         };
 
         var options = Substitute.For<IOptions<MemoryDistributedCacheOptions>>();
         options.Value.Returns( cache );
 
         container.AddService(
-            typeof(IDistributedCache),
+            typeof( IDistributedCache ),
             new MemoryDistributedCache( options ) );
 
         container.AddService(
@@ -215,59 +216,3 @@ public class PipelineDistributedCachingTests
         public DateTimeOffset UtcNow { get; set; }
     }
 }
-//
-//
-// public class TestDistributedCache( MemoryCacheOptions options ) : IDistributedCache
-// {
-//     private readonly MemoryCache _cache = new( options );
-//
-//     public byte[]? Get( string key )
-//     {
-//         return _cache.Get(key) as byte[];
-//     }
-//
-//     public Task<byte[]?> GetAsync( string key, CancellationToken token = default )
-//     {
-//         return Task.FromResult( this.Get( key ) );
-//     }
-//
-//     public void Set( string key, byte[] value, DistributedCacheEntryOptions options )
-//     {
-//         _cache.Set( key, value,
-//             new MemoryCacheEntryOptions
-//             {
-//                 AbsoluteExpirationRelativeToNow = options.AbsoluteExpirationRelativeToNow,
-//                 AbsoluteExpiration = options.AbsoluteExpiration,
-//                 SlidingExpiration = options.SlidingExpiration,
-//             } );
-//     }
-//
-//     public Task SetAsync( string key, byte[] value, DistributedCacheEntryOptions options,
-//         CancellationToken token = default )
-//     {
-//         this.Set( key, value, options );
-//         return Task.CompletedTask;
-//     }
-//
-//     public void Refresh( string key )
-//     {
-//         // NoOp
-//     }
-//
-//     public Task RefreshAsync( string key, CancellationToken token = default )
-//     {
-//         // NoOp
-//         return Task.CompletedTask;
-//     }
-//
-//     public void Remove( string key )
-//     {
-//         _cache.Remove( key );
-//     }
-//
-//     public Task RemoveAsync( string key, CancellationToken token = default )
-//     {
-//         this.Remove( key );
-//         return Task.CompletedTask;
-//     }
-// }
