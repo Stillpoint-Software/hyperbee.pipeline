@@ -183,3 +183,5 @@ Classes for building composable async pipelines supporting:
 
 # Help
  See our list of items [Todo](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/todo.md)
+
+ [![Hyperbee.Extensions.DependencyInjection](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/assets/hyperbee.svg?raw=true)](https://github.com/Stillpoint-Software/Hyperbee.Pipeline)
