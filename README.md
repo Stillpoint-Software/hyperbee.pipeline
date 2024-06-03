@@ -181,6 +181,10 @@ Classes for building composable async pipelines supporting:
 | `main`     | [![Build status](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/actions/workflows/publish.yml/badge.svg)](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/actions/workflows/publish.yml)                 |
 
 
+
+# Benchmarks
+ See [Benchmarks](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/test/Hyperbee.Pipeline.Benchmark/benchmark/results/Hyperbee.Pipeline.Benchmark.PipelineBenchmarks-report-github.md)
+
 # Help
  See our list of items [Todo](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/todo.md)
 

@@ -49,6 +49,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Auth", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Auth.Tests", "test\Hyperbee.Pipeline.Auth.Tests\Hyperbee.Pipeline.Auth.Tests.csproj", "{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Pipeline.Benchmark", "test\Hyperbee.Pipleline.Benchmark\Hyperbee.Pipeline.Benchmark.csproj", "{4117A842-A068-41DD-AA16-AE158025EA9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +96,7 @@ Global
 		{884A8242-351E-4363-9B34-E8C202CF7787} = {870D9301-BE3D-44EA-BF9C-FCC2E87FE4CD}
 		{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
+		{4117A842-A068-41DD-AA16-AE158025EA9A} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {32874F5B-B467-4F28-A8E2-82C2536FB228}
