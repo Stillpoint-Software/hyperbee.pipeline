@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Hyperbee.Pipeline.Auth\Hyperbee.Pipeline.Auth.csproj" />
+    <ProjectReference Include="..\..\src\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
+    <ProjectReference Include="..\..\src\Hyperbee.Pipline.Caching\Hyperbee.Pipeline.Caching.csproj" />
+    <ProjectReference Include="..\Hyperbee.Pipeline.Auth.Tests\Hyperbee.Pipeline.Auth.Tests.csproj" />
+  </ItemGroup>
+
+</Project>

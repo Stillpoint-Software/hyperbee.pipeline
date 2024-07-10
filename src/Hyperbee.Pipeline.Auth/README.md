@@ -1,64 +1,35 @@
-﻿# Hyperbee.Pipeline
+# Hyperbee.Pipeline.Claims
 
-The `Hyperbee.Pipeline` library is a sophisticated tool for constructing asynchronous fluent pipelines in .NET. A pipeline, in this context, refers to a sequence of data processing elements arranged in series, where the output of one element serves as the input for the subsequent element.
+The `Hyperbee.Pipeline.Auth` library is a set of extentsions to `Hyperbee.Pipeline` that adds support for authorization within the pipeline.
 
-```csharp
-// Takes a string and returns a number
-var question = PipelineFactory
-    .Start<string>()
-    .PipeIf((ctx, arg) => arg == "Adams", builder => builder
-        .Pipe((ctx, arg) => 42)
-        .Cancel()
-    )
-    .Pipe((ctx, arg) => 0)
-    .Build();
 
-var answer1 = await question(new PipelineContext(), "Adams");
-Assert.AreEqual(42, answer1);
-
-var answer2 = await question(new PipelineContext(), "Smith");
-Assert.AreEqual(0, answer2);
-```
-
-## Hook
-
-The `Hook` and `HookAsync` methods allow you to add a hook that is called for every statement in the pipeline. This hook takes the current context, the current argument, and a delegate to the next part of the pipeline. It can manipulate the argument before and after calling the next part of the pipeline.
-
-Here's an example of how to use `HookAsync`:
+## Examples
 
 ```csharp
+// Will return the claim if available
 var command = PipelineFactory
     .Start<string>()
-    .HookAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" )
-    .Pipe( ( ctx, arg ) => arg + "1" )
-    .Pipe( ( ctx, arg ) => arg + "2" )
+    .PipeIfClaim( Claim )
     .Build();
 
-var result = await command( new PipelineContext() );
-
-Assert.AreEqual( "{1}{2}", result );
 ```
-
-## Wrap
-
-The `Wrap` and `WrapAsync` method allows you to wrap a part of the pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
-
-Here’s an example of how to use `WrapAsync`:
 
 ```csharp
+// WithAuth takes a function to validate the claim. 
 var command = PipelineFactory
     .Start<string>()
-    .Pipe( ( ctx, arg ) => arg + "1" )
-    .Pipe( ( ctx, arg ) => arg + "2" )
-    .WrapAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" )
-    .Pipe( ( ctx, arg ) => arg + "3" )
+    .WithAuth( ValidateClaim )
     .Build();
 
-var result = await command( new PipelineContext() );
-
-Assert.AreEqual( "{12}3", result );
-
+private async Task<bool> ValidateClaim( IPipelineContext context, string roleValue, ClaimsPrincipal claimsPrincipal )
+    {
+        return claimsPrincipal.HasClaim( x => x.Value == roleValue );
+    }
 ```
+
+## Dependacy Injection
+
+
 
 ## Dependency Injection
 
@@ -83,6 +54,23 @@ services.AddPipeline( (factoryServices, rootProvider) =>
 {
     factoryServices.AddTransient<IThing>()
     factoryServices.ProxyService<IPrincipalProvider>( rootProvider ); // pull from root container
+} );
+```
+
+```csharp
+// Add httpContextAccessor if using web api
+ services.AddHttpContextAccessor();
+
+// Add with the pipelines
+services.AddClaimPrincipalAccessor();
+```
+
+Or create your own claims principal use for the pipelines:
+
+```csharp
+services.AddPipeline( (factoryServices, rootProvider) =>
+{
+    factoryServices.AddClaimPrincipalAccessor( IClaimsPrincipal claimsPrincipal )
 } );
 ```
 
@@ -200,3 +188,4 @@ Classes for building composable async pipelines supporting:
   * Value projections
   * Early returns
   * Child pipelines
+

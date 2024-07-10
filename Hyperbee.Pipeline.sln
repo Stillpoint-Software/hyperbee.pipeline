@@ -20,14 +20,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{1FA7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4DBDB7F5-3F66-4572-80B5-3322449C77A4}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\create-prerelease.yml = .github\workflows\create-prerelease.yml
 		.github\workflows\create-release.yml = .github\workflows\create-release.yml
 		.github\workflows\format.yml = .github\workflows\format.yml
 		.github\workflows\issue-branch.yml = .github\workflows\issue-branch.yml
 		.github\workflows\publish.yml = .github\workflows\publish.yml
 		.github\workflows\test-report.yml = .github\workflows\test-report.yml
 		.github\workflows\test.yml = .github\workflows\test.yml
-		.github\workflows\update-version.yml = .github\workflows\update-version.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Tests", "test\Hyperbee.Pipeline.Tests\Hyperbee.Pipeline.Tests.csproj", "{17DA1657-DF82-440F-B1F1-D888BFA9626B}"
@@ -41,9 +39,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{884A8242-3
 		docs\todo.md = docs\todo.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Pipeline.Caching", "src\Hyperbee.Pipline.Caching\Hyperbee.Pipeline.Caching.csproj", "{833A7497-542F-4B88-A76A-DA520E000F6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Caching", "src\Hyperbee.Pipline.Caching\Hyperbee.Pipeline.Caching.csproj", "{833A7497-542F-4B88-A76A-DA520E000F6F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyperbee.Pipeline.Caching.Tests", "test\Hyperbee.PipelineCaching.Tests\Hyperbee.Pipeline.Caching.Tests.csproj", "{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Caching.Tests", "test\Hyperbee.PipelineCaching.Tests\Hyperbee.Pipeline.Caching.Tests.csproj", "{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Auth", "src\Hyperbee.Pipeline.Auth\Hyperbee.Pipeline.Auth.csproj", "{85FBEEBD-0E57-4B54-83AF-6A501779CBD5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Auth.Tests", "test\Hyperbee.Pipeline.Auth.Tests\Hyperbee.Pipeline.Auth.Tests.csproj", "{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hyperbee.Pipeline.Benchmark", "test\Hyperbee.Pipleline.Benchmark\Hyperbee.Pipeline.Benchmark.csproj", "{4117A842-A068-41DD-AA16-AE158025EA9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +71,18 @@ Global
 		{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85FBEEBD-0E57-4B54-83AF-6A501779CBD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85FBEEBD-0E57-4B54-83AF-6A501779CBD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85FBEEBD-0E57-4B54-83AF-6A501779CBD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85FBEEBD-0E57-4B54-83AF-6A501779CBD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4117A842-A068-41DD-AA16-AE158025EA9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +93,8 @@ Global
 		{17DA1657-DF82-440F-B1F1-D888BFA9626B} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 		{884A8242-351E-4363-9B34-E8C202CF7787} = {870D9301-BE3D-44EA-BF9C-FCC2E87FE4CD}
 		{B7E5FBB3-AF2A-4E48-8E6A-10887DC6C4C0} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
+		{3E5F6864-2BAD-4349-8C7A-D199A715FA3C} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
+		{4117A842-A068-41DD-AA16-AE158025EA9A} = {F9B24CD9-E06B-4834-84CB-8C29E5F10BE0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {32874F5B-B467-4F28-A8E2-82C2536FB228}

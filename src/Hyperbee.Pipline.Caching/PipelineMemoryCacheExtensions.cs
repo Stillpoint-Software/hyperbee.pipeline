@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Hyperbee.Pipeline.Caching;
 
-public static class PipelineCacheExtensions
+public static class PipelineMemoryCacheExtensions
 {
     public static IPipelineBuilder<TInput, TNext> PipeCache<TInput, TOutput, TNext>(
         this IPipelineBuilder<TInput, TOutput> builder,
