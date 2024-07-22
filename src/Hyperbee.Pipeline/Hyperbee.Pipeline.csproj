@@ -6,7 +6,7 @@
 
     <Authors>Stillpoint Software, Inc.</Authors>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>pipeline;async</PackageTags>
+    <PackageTags>pipeline;async;NET;middleware;fluent pipeline</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
