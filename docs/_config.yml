@@ -1,0 +1,26 @@
+title: Hyperbee Pipeline
+description: Documentation for Hyperbee Pipeline.
+remote_theme: pmarsceill/just-the-docs
+baseurl: "/hyperbee.json/"
+url: "https://stillpoint-software.github.io"
+
+aux_links:
+  "GitHub Repository":
+    - "//github.com/Stillpoint-Software/hyperbee.pipeline"
+
+footer_content: |
+  <div>
+    <span>&copy; <span id="copyright-year"></span> <a href='https://www.stillpointsoftware.net/'>Stillpoint Software</a>.</span>
+    <script>
+      document.getElementById("copyright-year").textContent = new Date().getFullYear();
+    </script>
+  </div>
+
+# logo: "/assets/icon.png"
+search_enabled: true # Enable search
+
+# External navigation links
+nav_external_links:
+  - title: Stillpoint Software
+    url: https://www.stillpointsoftware.net/
+    opens_in_new_tab: true
