@@ -1,7 +1,7 @@
 ---
 layout: default
-title: Child Pipeline
+title: Child Pipelines
 nav_order: 3
 ---
 
-# Child Pipleline
+# Child Piplelines
