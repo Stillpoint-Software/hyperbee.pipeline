@@ -1,3 +1,8 @@
+---
+layout: default
+title: Hyperbee Pipeline
+nav_order: 4
+---
 
 # Middleware
 Pipelines support custom middleware. Custom middleware can be created by implementing an extension method that uses a `Hook` or `Wrap` builder.

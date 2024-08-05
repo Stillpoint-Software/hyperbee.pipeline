@@ -1,3 +1,9 @@
+---
+layout: default
+title: Hyperbee Pipeline
+nav_order: 3
+---
+
 # Dependency Injection
 
 ## Dependency Injection

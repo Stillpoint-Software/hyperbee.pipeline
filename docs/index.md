@@ -1,4 +1,10 @@
-﻿# Hyperbee.Pipeline
+---
+layout: default
+title: Hyperbee Pipeline
+nav_order: 1
+---
+
+# Hyperbee.Pipeline
 
 `Hyperbee.Pipeline` allows you to construct asynchronous fluent pipelines in .NET. A pipeline, in this context, refers to a 
 sequence of data processing elements arranged in series, where the output of one element serves as the input for the subsequent 
@@ -19,7 +25,7 @@ Some key features are:
 * Early returns and cancellation
 * Child pipelines
 
-* 
+
 ```csharp
 // Takes a string and returns a number
 var question = PipelineFactory
@@ -61,7 +67,7 @@ Assert.AreEqual( "{1}{2}", result );
 
 The `Wrap` and `WrapAsync` method allows you to wrap a part of the pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
 
-Here’s an example of how to use `WrapAsync`:
+Here�s an example of how to use `WrapAsync`:
 
 ```csharp
 var command = PipelineFactory
@@ -209,12 +215,13 @@ var result = await command1( new PipelineContext(), "pipeline" );
 Assert.AreEqual( "hello pipeline again!", result );
 ```
 
-## Additional Documentation 
-Classes for building composable async pipelines supporting:
+## Credits
 
-  * [Middleware](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/middleware.md)
-  * [Conditional flow](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/execution.md)
-  * [Dependency Injection](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/dependencyInjection.md)
-  * Value projections
-  * Early returns
-  * Child pipelines
+Hyperbee.Pipeline is built upon the great work of several open-source projects. Special thanks to:
+
+- [Just The Docs](https://github.com/just-the-docs/just-the-docs) for the documentation theme.
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](https://github.com/Stillpoint-Software/.github/blob/main/.github/CONTRIBUTING.md) 
+for more details.
