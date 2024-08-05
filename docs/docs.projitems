@@ -19,4 +19,4 @@
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)_includes\nav_footer_custom.html" />
   </ItemGroup>
-</Project> 
+</Project>

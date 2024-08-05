@@ -67,7 +67,7 @@ Assert.AreEqual( "{1}{2}", result );
 
 The `Wrap` and `WrapAsync` method allows you to wrap a part of the pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
 
-Here’s an example of how to use `WrapAsync`:
+Hereâ€™s an example of how to use `WrapAsync`:
 
 ```csharp
 var command = PipelineFactory
