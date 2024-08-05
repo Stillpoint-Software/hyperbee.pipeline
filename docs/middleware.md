@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Hyperbee Pipeline
+title: Middleware
 nav_order: 4
 ---
 
