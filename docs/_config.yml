@@ -16,9 +16,6 @@ footer_content: |
     </script>
   </div>
 
-exclude:
-  - todo.md
-
 # logo: "/assets/icon.png"
 search_enabled: true # Enable search
 
