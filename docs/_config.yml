@@ -1,7 +1,7 @@
 title: Hyperbee Pipeline
 description: Documentation for Hyperbee Pipeline.
 remote_theme: pmarsceill/just-the-docs
-baseurl: "/hyperbee.json/"
+baseurl: "/hyperbee.pipeline/"
 url: "https://stillpoint-software.github.io"
 
 aux_links:
