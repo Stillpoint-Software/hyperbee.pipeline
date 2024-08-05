@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Hyperbee Pipeline
+title: Child Pipeline
 nav_order: 3
 ---
 
