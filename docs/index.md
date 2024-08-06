@@ -53,14 +53,14 @@ Pipelines are built using `PipelineFactory`. Once built, a pipeline is just an a
 an optional input value as parameters, and returns a result. 
 
 ```csharp
-    var command = PipelineFactory
-        .Start<string>()
-        .Pipe( ( ctx, arg ) => $"hello {arg}" )
-        .Build();
+var command = PipelineFactory
+    .Start<string>()
+    .Pipe( ( ctx, arg ) => $"hello {arg}" )
+    .Build();
 
-    var result = await command( new PipelineContext(), "pipeline" );
+var result = await command( new PipelineContext(), "pipeline" );
 
-    Assert.AreEqual( "hello pipeline", result );
+Assert.AreEqual( "hello pipeline", result );
 ```
 
 ## Dependency Injection

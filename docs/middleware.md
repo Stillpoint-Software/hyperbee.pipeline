@@ -100,7 +100,6 @@ var command = PipelineFactory
 var result = await command( new PipelineContext() );
 
 Assert.AreEqual( "{12}3", result );
-
 ```
 
 ### Example
@@ -144,7 +143,9 @@ _output:_
 [02] begin transaction (name = 'T')
 [02] end transaction (name = 'T')
 ```
-The `WithTransaction` wrapped all the pipeline steps and was only executed at the beginning and and of the command with the `next` method being the entire group of actions.
+
+The `WithTransaction` wrapped all the pipeline steps and was only executed at the beginning and and of the command with the
+`next` method being the entire group of actions.
 
 ## Composition
 
