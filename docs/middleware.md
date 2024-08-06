@@ -1,4 +1,4 @@
----
+﻿---
 layout: default
 title: Middleware
 nav_order: 4
@@ -86,7 +86,7 @@ The `WithLogging` hooked into the beginning and end of each pipeline step with t
 `Wraps` are middleware that surround a group of pipeline actions. The `Wrap` and `WrapAsync` method allows you to wrap a part of the 
 pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
 
-Here�s an example of how to use `WrapAsync`:
+Here’s an example of how to use `WrapAsync`:
 
 ```csharp
 var command = PipelineFactory
@@ -100,7 +100,6 @@ var command = PipelineFactory
 var result = await command( new PipelineContext() );
 
 Assert.AreEqual( "{12}3", result );
-
 ```
 
 ### Example
@@ -144,7 +143,9 @@ _output:_
 [02] begin transaction (name = 'T')
 [02] end transaction (name = 'T')
 ```
-The `WithTransaction` wrapped all the pipeline steps and was only executed at the beginning and and of the command with the `next` method being the entire group of actions.
+
+The `WithTransaction` wrapped all the pipeline steps and was only executed at the beginning and and of the command with the
+`next` method being the entire group of actions.
 
 ## Composition
 
