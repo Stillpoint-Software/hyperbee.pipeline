@@ -7,9 +7,34 @@ nav_order: 4
 # Middleware
 Pipelines support custom middleware. Custom middleware can be created by implementing an extension method that uses a `Hook` or `Wrap` builder.
 
-## Hooks
+## Middleware Syntax
 
-`Hooks` are middleware that surround individual pipeline actions.
+| Method     | Description 
+| ---------- | ----------- 
+| Hook       | Applies middleware to each step in the pipeline.
+| Wrap       | Wraps the middleware around the preceeding steps.
+
+
+## Hook
+
+`Hooks` are middleware that surround individual pipeline actions. The `Hook` and `HookAsync` methods allow you to add a hook that is called 
+for every statement in the pipeline. This hook takes the current context, the current argument, and a delegate to the next part of the 
+pipeline. It can manipulate the argument before and after calling the next part of the pipeline.
+
+Here's an example of how to use `HookAsync` with an inline lambda:
+
+```csharp
+var command = PipelineFactory
+    .Start<string>()
+    .HookAsync( async ( ctx, arg, next ) => await next( ctx, arg + "[" ) + "]" )
+    .Pipe( ( ctx, arg ) => arg + "1" )
+    .Pipe( ( ctx, arg ) => arg + "2" )
+    .Build();
+
+var result = await command( new PipelineContext() );
+
+Assert.AreEqual( "[1][2]", result );
+```
 
 ### Example
 Example of a `hook` middleware that surrounds each step. Hooks must be constrained to only be available at the start 
@@ -58,7 +83,25 @@ The `WithLogging` hooked into the beginning and end of each pipeline step with t
 
 ## Wraps
 
-`Wraps` are middleware that surround a group of pipeline actions.
+`Wraps` are middleware that surround a group of pipeline actions. The `Wrap` and `WrapAsync` method allows you to wrap a part of the 
+pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
+
+Here’s an example of how to use `WrapAsync`:
+
+```csharp
+var command = PipelineFactory
+    .Start<string>()
+    .Pipe( ( ctx, arg ) => arg + "1" )
+    .Pipe( ( ctx, arg ) => arg + "2" )
+    .WrapAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" )
+    .Pipe( ( ctx, arg ) => arg + "3" )
+    .Build();
+
+var result = await command( new PipelineContext() );
+
+Assert.AreEqual( "{12}3", result );
+
+```
 
 ### Example
 Example of a `wrap` middleware that surrounds a block of steps. Create `Wrap` middleware by extending `IPipelineBuilder<TInput, TOutput>`.
