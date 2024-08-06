@@ -1,4 +1,4 @@
----
+﻿---
 layout: default
 title: Middleware
 nav_order: 4
@@ -86,7 +86,7 @@ The `WithLogging` hooked into the beginning and end of each pipeline step with t
 `Wraps` are middleware that surround a group of pipeline actions. The `Wrap` and `WrapAsync` method allows you to wrap a part of the 
 pipeline. This is useful when you want to apply a transformation to only a part of the pipeline.
 
-Here�s an example of how to use `WrapAsync`:
+Here’s an example of how to use `WrapAsync`:
 
 ```csharp
 var command = PipelineFactory
