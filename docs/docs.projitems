@@ -9,9 +9,10 @@
     <Import_RootNamespace>docs</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)childPipeline.md" />
-    <None Include="$(MSBuildThisFileDirectory)dependencyInjection.md" />
-    <None Include="$(MSBuildThisFileDirectory)execution.md" />
+    <None Include="$(MSBuildThisFileDirectory)child-pipeline.md" />
+    <None Include="$(MSBuildThisFileDirectory)dependency-injection.md" />
+    <None Include="$(MSBuildThisFileDirectory)command-pattern.md" />
+    <None Include="$(MSBuildThisFileDirectory)syntax.md" />
     <None Include="$(MSBuildThisFileDirectory)index.md" />
     <None Include="$(MSBuildThisFileDirectory)middleware.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
