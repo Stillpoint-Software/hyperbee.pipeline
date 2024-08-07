@@ -64,7 +64,7 @@ internal abstract class BlockBinder<TInput, TOutput> : Binder<TInput, TOutput>
     // use cases where the next argument is not the same as the output type
     // like ReduceBlockBinder and ForEachBlockBinder
 
-    protected virtual async Task<TNext> ProcessBlockAsync<TArgument,TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
+    protected virtual async Task<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
     {
         return await blockFunction( context, nextArgument ).ConfigureAwait( false );
     }
@@ -82,7 +82,7 @@ internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TI
 
     protected override async Task<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
     {
-        if ( Condition != null && !Condition( context, CastTypeArg<TArgument,TOutput>( nextArgument ) ) )
+        if ( Condition != null && !Condition( context, CastTypeArg<TArgument, TOutput>( nextArgument ) ) )
         {
             return CastTypeArg<TArgument, TNext>( nextArgument );
         }
@@ -91,7 +91,7 @@ internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TI
     }
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static TResult CastTypeArg<TType,TResult>( TType input )
+    private static TResult CastTypeArg<TType, TResult>( TType input )
     {
         return (TResult) (object) input;
     }

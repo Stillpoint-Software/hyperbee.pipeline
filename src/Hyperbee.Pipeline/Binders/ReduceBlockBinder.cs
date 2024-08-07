@@ -49,17 +49,17 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
         return async ( context, argument ) =>
         {
             var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-            
-            if ( canceled ) 
+
+            if ( canceled )
                 return default;
 
             var nextArguments = (IEnumerable<TElement>) nextArgument;
-            var accumulator = default(TNext); 
+            var accumulator = default( TNext );
 
             // Process each element and apply the reducer
             foreach ( var elementArgument in nextArguments )
             {
-                var result = await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false ); 
+                var result = await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
                 accumulator = Reducer( accumulator, result );
             }
 

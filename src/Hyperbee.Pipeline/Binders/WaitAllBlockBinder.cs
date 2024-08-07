@@ -106,8 +106,8 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         return async ( context, argument ) =>
         {
             var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-            
-            if ( canceled ) 
+
+            if ( canceled )
                 return default;
 
             // WaitAllBlockBinder is unique in that it is both a block configure and a step.

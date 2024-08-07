@@ -47,8 +47,8 @@ internal class PipeBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput,
         return async ( context, argument ) =>
         {
             var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-            
-            if ( canceled ) 
+
+            if ( canceled )
                 return default;
 
             return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );

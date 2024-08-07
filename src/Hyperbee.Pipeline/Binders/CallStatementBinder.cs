@@ -74,8 +74,8 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
         return async ( context, argument ) =>
         {
             var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-            
-            if ( canceled ) 
+
+            if ( canceled )
                 return default;
 
             return await ProcessStatementAsync(
