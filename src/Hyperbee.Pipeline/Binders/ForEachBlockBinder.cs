@@ -1,27 +1,59 @@
-﻿namespace Hyperbee.Pipeline.Binders;
+﻿//using Hyperbee.Pipeline.Context;
 
-internal class ForEachBlockBinder<TInput, TOutput, TElement>
-{
-    private FunctionAsync<TInput, TOutput> Pipeline { get; }
+namespace Hyperbee.Pipeline.Binders;
 
-    public ForEachBlockBinder( FunctionAsync<TInput, TOutput> function )
+//internal class ForEachBlockBinder<TInput, TOutput, TElement>
+//{
+//    private FunctionAsync<TInput, TOutput> Pipeline { get; }
+
+//    public ForEachBlockBinder( FunctionAsync<TInput, TOutput> function )
+//    {
+//        Pipeline = function;
+//    }
+
+//    public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TElement, object> next )
+//    {
+//        return async ( context, argument ) =>
+//        {
+//            var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
+//            var nextArguments = (IEnumerable<TElement>) nextArgument;
+
+//            foreach ( var elementArgument in nextArguments )
+//            {
+//                await next( context, elementArgument ).ConfigureAwait( false );
+//            }
+
+//            return nextArgument;
+//        };
+//    }
+//}
+
+    internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInput, TOutput>
     {
-        Pipeline = function;
-    }
-
-    public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TElement, object> next )
-    {
-        return async ( context, argument ) =>
+        public ForEachBlockBinder( FunctionAsync<TInput, TOutput> function )
+            : base( function, default )
         {
-            var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
-            var nextArguments = (IEnumerable<TElement>) nextArgument;
+        }
 
-            foreach ( var elementArgument in nextArguments )
+        public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TElement, object> next )
+
+        {
+            return async ( context, argument ) =>
             {
-                await next( context, elementArgument ).ConfigureAwait( false );
-            }
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+                
+                if ( canceled ) 
+                    return default;
 
-            return nextArgument;
-        };
+                var nextArguments = (IEnumerable<TElement>) nextArgument;
+
+                foreach ( var elementArgument in nextArguments )
+                {
+                    await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
+                }
+
+                return nextArgument;
+            };
+        }
     }
-}
+

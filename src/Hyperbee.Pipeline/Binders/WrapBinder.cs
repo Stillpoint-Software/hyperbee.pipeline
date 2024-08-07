@@ -22,14 +22,13 @@ internal class WrapBinder<TInput, TOutput>
         {
             var contextControl = (IPipelineContextControl) context;
 
-            using ( contextControl.CreateFrame( context, Configure, defaultName ) )
-            {
-                return await Middleware(
-                    context,
-                    argument,
-                    async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
-                ).ConfigureAwait( false );
-            }
+            using var _ = contextControl.CreateFrame( context, Configure, defaultName );
+
+            return await Middleware(
+                context,
+                argument,
+                async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
+            ).ConfigureAwait( false );
         };
     }
 }
