@@ -1,11 +1,12 @@
-﻿using Hyperbee.Pipeline.Data;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Data;
 
 namespace Hyperbee.Pipeline;
 
 public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
 {
-    internal FunctionAsync<TInput, TOutput> Function { get; init; }
-    internal MiddlewareAsync<object, object> Middleware { get; init; }
+    internal Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
+    internal Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
 
     internal PipelineBuilder()
     {
@@ -18,7 +19,8 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
         {
             try
             {
-                var result = await Function( context, argument ).ConfigureAwait( false );
+                var compiledPipeline = Function.Compile();
+                var result = await compiledPipeline( context, argument ).ConfigureAwait( false );
 
                 if ( context.CancellationToken.IsCancellationRequested )
                     return Converter.TryConvertTo<TOutput>( context.CancellationValue, out var converted ) ? converted : default;
@@ -44,7 +46,8 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
         {
             try
             {
-                await Function( context, argument ).ConfigureAwait( false );
+                var compiledPipeline = Function.Compile();
+                await compiledPipeline( context, argument ).ConfigureAwait( false );
             }
             catch ( Exception ex )
             {
@@ -60,7 +63,8 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
     {
         return async ( context, argument ) =>
         {
-            var result = await Function( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
+            var compiledPipeline = Function.Compile();
+            var result = await compiledPipeline( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
             return Cast<TOut>( result );
         };
 
@@ -79,10 +83,10 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
 
     public record PipelineFunction : IPipelineFunction<TInput, TOutput>
     {
-        public FunctionAsync<TInput, TOutput> Function { get; init; }
-        public MiddlewareAsync<object, object> Middleware { get; init; }
+        public Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
+        public Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
 
-        public void Deconstruct( out FunctionAsync<TInput, TOutput> function, out MiddlewareAsync<object, object> middleware )
+        public void Deconstruct( out Expression<FunctionAsync<TInput, TOutput>> function, out Expression<MiddlewareAsync<object, object>> middleware )
         {
             function = Function;
             middleware = Middleware;

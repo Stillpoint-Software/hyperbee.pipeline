@@ -1,4 +1,6 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using Hyperbee.Pipeline.Binders;
 
 namespace Hyperbee.Pipeline;
 
@@ -54,4 +56,5 @@ public partial class PipelineBuilder<TInput, TOutput>
             Middleware = Middleware
         };
     }
+
 }

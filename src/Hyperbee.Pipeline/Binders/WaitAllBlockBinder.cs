@@ -1,4 +1,6 @@
-﻿using Hyperbee.Pipeline.Context;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -6,17 +8,17 @@ namespace Hyperbee.Pipeline.Binders;
 
 internal class WaitAllBlockBinder<TInput, TOutput>
 {
-    private FunctionAsync<TInput, TOutput> Pipeline { get; }
-    private MiddlewareAsync<object, object> Middleware { get; }
-    private Action<IPipelineContext> Configure { get; }
-    private Function<TOutput, bool> Condition { get; }
+    private Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }
+    private Expression<MiddlewareAsync<object, object>> Middleware { get; }
+    private Expression<Action<IPipelineContext>> Configure { get; }
+    private Expression<Function<TOutput, bool>> Condition { get; }
 
-    public WaitAllBlockBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public WaitAllBlockBinder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<MiddlewareAsync<object, object>> middleware, Expression<Action<IPipelineContext>> configure )
         : this( null, function, middleware, configure )
     {
     }
 
-    public WaitAllBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public WaitAllBlockBinder( Expression<Function<TOutput, bool>> condition, Expression<FunctionAsync<TInput, TOutput>> function, Expression<MiddlewareAsync<object, object>> middleware, Expression<Action<IPipelineContext>> configure )
     {
         Condition = condition;
         Pipeline = function;
@@ -24,15 +26,45 @@ internal class WaitAllBlockBinder<TInput, TOutput>
         Configure = configure;
     }
 
-    public FunctionAsync<TInput, TNext> Bind<TNext>( FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
+    public Expression<FunctionAsync<TInput, TOutput>> Bind<TNext>( Expression<FunctionAsync<TInput, TOutput>[]> next, WaitAllReducer<TOutput, TNext> reducer )
+    {
+        // Get the MethodInfo for the BindImpl method
+        var bindImplMethodInfo = typeof( WaitAllBlockBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic | BindingFlags.Static )!
+            .MakeGenericMethod( typeof( TInput ), typeof( TOutput ), typeof( TNext ) );
+
+        // Create the call expression to BindImpl
+        var callBind = Expression.Call(
+            bindImplMethodInfo,
+            next,
+            Pipeline,
+            Middleware,
+            Configure,
+            Condition,
+            Expression.Constant( reducer )
+        );
+
+        // Create and return the final expression
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
+        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
+    }
+
+    public static FunctionAsync<TInput, TNext> BindImpl<TNext>( 
+        FunctionAsync<TOutput, object>[] nexts, 
+        FunctionAsync<TInput, TOutput> pipeline, 
+        MiddlewareAsync<object, object> middleware, 
+        Action<IPipelineContext> configure,
+        Function<TOutput, bool> condition,
+        WaitAllReducer<TOutput, TNext> reducer )
     {
         ArgumentNullException.ThrowIfNull( reducer );
 
         return async ( context, argument ) =>
         {
-            var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
+            var nextArgument = await pipeline( context, argument ).ConfigureAwait( false );
 
-            if ( Condition != null && !Condition( context, nextArgument ) )
+            if ( condition != null && !condition( context, nextArgument ) )
                 return (TNext) (object) nextArgument;
 
             // mind cancellation and execute
@@ -41,9 +73,9 @@ internal class WaitAllBlockBinder<TInput, TOutput>
             if ( contextControl.HandleCancellationRequested( nextArgument ) )
                 return default;
 
-            using ( contextControl.CreateFrame( context, Configure, nameof( WaitAllAsync ) ) )
+            using ( contextControl.CreateFrame( context, configure, nameof( WaitAllAsync ) ) )
             {
-                return await Next( WaitAllAsync, context, nextArgument ).ConfigureAwait( false );
+                return await Next( WaitAllAsync, middleware, context, nextArgument ).ConfigureAwait( false );
             }
 
             // WaitAllBlockBinder is unique in that it is both a block configure and a step.
@@ -71,12 +103,12 @@ internal class WaitAllBlockBinder<TInput, TOutput>
         };
     }
 
-    private async Task<TNext> Next<TNext>( FunctionAsync<TOutput, TNext> waitAll, IPipelineContext context, TOutput nextArgument )
+    private static async Task<TNext> Next<TNext>( FunctionAsync<TOutput, TNext> waitAll, MiddlewareAsync<object, object> middleware, IPipelineContext context, TOutput nextArgument )
     {
-        if ( Middleware == null )
+        if ( middleware == null )
             return await waitAll( context, nextArgument ).ConfigureAwait( false );
 
-        return (TNext) await Middleware(
+        return (TNext) await middleware(
             context,
             nextArgument,
             async ( context1, argument1 ) => await waitAll( context1, (TOutput) argument1 ).ConfigureAwait( false )
