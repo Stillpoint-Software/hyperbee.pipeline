@@ -2,10 +2,10 @@
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
+internal class CallIfBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
 {
-    public CallBlockBinder( FunctionAsync<TInput, TOutput> function )
-        : base( function, default )
+    public CallIfBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function )
+        : base( condition, function, default )
     {
     }
 
