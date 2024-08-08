@@ -23,10 +23,10 @@ public partial class PipelineBuilder<TInput, TOutput>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
         var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext> 
-        { 
-            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ), 
-            Middleware = Middleware 
+        return new PipelineBuilder<TInput, TNext>
+        {
+            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ),
+            Middleware = Middleware
         };
     }
 }
