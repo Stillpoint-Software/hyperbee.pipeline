@@ -6,19 +6,14 @@ using Hyperbee.Pipeline.Binders.Abstractions;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
+internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 {
     public CallBlockBinder( Expression<FunctionAsync<TInput, TOutput>> function )
-        : base( null, function, default )
+        : base( function, default )
     {
     }
 
-    public CallBlockBinder( Expression<Function<TOutput, bool>> condition, Expression<FunctionAsync<TInput, TOutput>> function )
-        : base( condition, function, default )
-    {
-    }
-
-    public Expression<FunctionAsync<TInput, TOutput>> Bind( FunctionAsync<TOutput, object> next )
+    public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
     {
         // Get the MethodInfo for the BindImpl method
         var bindImplMethodInfo = typeof( CallBlockBinder<TInput, TOutput> )
@@ -28,9 +23,8 @@ internal class CallBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput,
         // Create the call expression to BindImpl
         var callBind = Expression.Call(
             bindImplMethodInfo,
-            ExpressionBinder.ToExpression( next ),
-            Pipeline,
-            Condition
+            next,
+            Pipeline
         );
 
         // Create and return the final expression
@@ -39,7 +33,7 @@ internal class CallBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput,
         return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
     }
 
-    private FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TOutput, object> next, FunctionAsync<TInput, TOutput> pipeline, Function<TOutput, bool> condition )
+    private FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TOutput, object> next, FunctionAsync<TInput, TOutput> pipeline )
     {
         return async ( context, argument ) =>
         {

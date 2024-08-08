@@ -5,36 +5,26 @@ using System.Reflection;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class PipeBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
+internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 {
     public PipeBlockBinder( Expression<FunctionAsync<TInput, TOutput>> function )
-        : base( null, function, default )
+        : base( function, default )
     {
     }
 
-    public PipeBlockBinder( Expression<Function<TOutput, bool>> condition, Expression<FunctionAsync<TInput, TOutput>> function )
-        : base( condition, function, default )
-    {
-    }
-
-    public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( FunctionAsync<TOutput, TNext> next )
+    public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
     {
         var paramContext = Expression.Parameter( typeof( TInput ), "context" );
         var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
 
         var invokePipeline = Expression.Invoke( Pipeline, paramContext, paramArgument );
-        var invokeCondition = Condition != null 
-            ? Expression.Invoke( Condition, invokePipeline ) 
-            : (Expression) Expression.Constant( true );
 
         var invokeNext = Expression.Invoke( 
-            ExpressionBinder.ToExpression( next ), 
+            next, 
             paramContext, 
             invokePipeline );
 
-        var body = Expression.Condition( invokeCondition, invokeNext, Expression.Convert( invokePipeline, typeof( TNext ) ) );
-
-        return Expression.Lambda<FunctionAsync<TInput, TNext>>( body, paramContext, paramArgument );
+        return Expression.Lambda<FunctionAsync<TInput, TNext>>( invokeNext, paramContext, paramArgument );
     }
 
 }
@@ -48,12 +38,7 @@ internal class PipeBlockBinder<TInput, TOutput>
     private Function<TOutput, bool> Condition { get; }
 
     public PipeBlockBinder( FunctionAsync<TInput, TOutput> function )
-        : base( null, function, default )
-    {
-    }
-
-    public PipeBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function )
-        : base( condition, function, default )
+        : base( function, default )
     {
     }
 
@@ -71,4 +56,3 @@ internal class PipeBlockBinder<TInput, TOutput>
     }
 }
 */
-
