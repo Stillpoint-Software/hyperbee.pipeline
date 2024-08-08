@@ -10,8 +10,6 @@ public partial interface IPipelineBuilder<TInput, TOutput>
 
 public partial class PipelineBuilder<TInput, TOutput>
 {
-    // CallIf
-
     public IPipelineBuilder<TInput, TOutput> CallIf( Function<TOutput, bool> condition, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
     {
         return CallIf( condition, true, builder );
@@ -25,6 +23,10 @@ public partial class PipelineBuilder<TInput, TOutput>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
         var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
 
-        return new PipelineBuilder<TInput, TOutput> { Function = new CallIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ), Middleware = Middleware };
+        return new PipelineBuilder<TInput, TOutput> 
+        { 
+            Function = new CallIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ), 
+            Middleware = Middleware 
+        };
     }
 }
