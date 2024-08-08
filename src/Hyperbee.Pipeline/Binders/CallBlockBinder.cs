@@ -2,34 +2,33 @@
 using Hyperbee.Pipeline.Context;
 using System.Reflection;
 
+using Hyperbee.Pipeline.Binders.Abstractions;
+
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallBlockBinder<TInput, TOutput>
+internal class CallBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
 {
-    private Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }
-    private Expression<Function<TOutput, bool>> Condition { get; }
-
     public CallBlockBinder( Expression<FunctionAsync<TInput, TOutput>> function )
-        : this( null, function )
+        : base( null, function, default )
     {
     }
 
     public CallBlockBinder( Expression<Function<TOutput, bool>> condition, Expression<FunctionAsync<TInput, TOutput>> function )
+        : base( condition, function, default )
     {
-        Condition = condition;
-        Pipeline = function;
     }
-    public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
+
+    public Expression<FunctionAsync<TInput, TOutput>> Bind( FunctionAsync<TOutput, object> next )
     {
         // Get the MethodInfo for the BindImpl method
         var bindImplMethodInfo = typeof( CallBlockBinder<TInput, TOutput> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic | BindingFlags.Static )!
+            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic )!
             .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
 
         // Create the call expression to BindImpl
         var callBind = Expression.Call(
             bindImplMethodInfo,
-            next,
+            ExpressionBinder.ToExpression( next ),
             Pipeline,
             Condition
         );
@@ -40,15 +39,16 @@ internal class CallBlockBinder<TInput, TOutput>
         return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
     }
 
-    private static FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TOutput, object> next, FunctionAsync<TInput, TOutput> pipeline, Function<TOutput, bool> condition )
+    private FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TOutput, object> next, FunctionAsync<TInput, TOutput> pipeline, Function<TOutput, bool> condition )
     {
         return async ( context, argument ) =>
         {
-            var nextArgument = await pipeline( context, argument ).ConfigureAwait( false );
+            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
 
-            if ( condition == null || condition( context, nextArgument ) )
-                await next( context, nextArgument ).ConfigureAwait( false );
+            if ( canceled )
+                return default;
 
+            await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
             return nextArgument;
         };
     }

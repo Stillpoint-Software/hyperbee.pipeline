@@ -1,34 +1,28 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallStatementBinder<TInput, TOutput>
+internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TOutput>
 {
-    private Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }
-    private Expression<MiddlewareAsync<object, object>> Middleware { get; }
-    private Expression<Action<IPipelineContext>> Configure { get; }
-
     public CallStatementBinder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<MiddlewareAsync<object, object>> middleware, Expression<Action<IPipelineContext>> configure )
+        : base( function, middleware, configure )
     {
-        Pipeline = function;
-        Middleware = middleware;
-        Configure = configure;
     }
 
-    public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<ProcedureAsync<TOutput>> next, MethodInfo method = null )
+    public Expression<FunctionAsync<TInput, TOutput>> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
     {
         // Get the MethodInfo for the BindImpl method
         var bindImplMethodInfo = typeof( CallStatementBinder<TInput, TOutput> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic | BindingFlags.Static )!
+            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic )!
             .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
 
         // Create the call expression to BindImpl
         var callBind = Expression.Call(
             bindImplMethodInfo,
-            next,
+            ExpressionBinder.ToExpression( next ),
             Pipeline,
             Configure,
             Expression.Constant( method, typeof( MethodInfo ) )
@@ -51,20 +45,21 @@ internal class CallStatementBinder<TInput, TOutput>
 
         return async ( context, argument ) =>
         {
-            var nextArgument = await pipeline( context, argument ).ConfigureAwait( false );
+            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
 
-            var contextControl = (IPipelineContextControl) context;
-
-            if ( contextControl.HandleCancellationRequested( nextArgument ) )
+            if ( canceled )
                 return default;
 
-            using ( contextControl.CreateFrame( context, configure, defaultName ) )
-            {
-                return await Next( next, middleware, context, nextArgument ).ConfigureAwait( false );
-            }
+            return await ProcessStatementAsync(
+                async ( ctx, arg ) =>
+                {
+                    await next( ctx, arg ).ConfigureAwait( false );
+                    return arg;
+                }, context, nextArgument, defaultName ).ConfigureAwait( false );
         };
     }
 
+    /*
     private async Task<TOutput> Next( ProcedureAsync<TOutput> next, MiddlewareAsync<object, object> middleware, IPipelineContext context, TOutput nextArgument )
     {
         if ( Middleware == null )
@@ -84,5 +79,7 @@ internal class CallStatementBinder<TInput, TOutput>
         ).ConfigureAwait( false );
 
         return nextArgument;
-    }
+    }*/
+
 }
+

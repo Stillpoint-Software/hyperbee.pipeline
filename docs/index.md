@@ -1,4 +1,10 @@
-﻿# Hyperbee Pipeline
+---
+layout: default
+title: Hyperbee Pipeline
+nav_order: 1
+---
+
+# Hyperbee Pipeline
 
 `Hyperbee.Pipeline` allows you to construct asynchronous fluent pipelines in .NET. A pipeline, in this context, refers to a 
 sequence of data processing elements arranged in series, where the output of one element serves as the input for the subsequent 
@@ -33,8 +39,7 @@ pipelines are not only robust and maintainable but also highly adaptable to chan
 
 ## Getting Started
 
-To get started with Hyperbee.Json, refer to the [documentation](https://stillpoint-software.github.io/hyperbee.pipeline) for 
-detailed instructions and examples. 
+To get started with Hyperbee.Pipeline, refer to the documentation for detailed instructions and examples. 
 
 Install via NuGet:
 
@@ -48,14 +53,14 @@ Pipelines are built using `PipelineFactory`. Once built, a pipeline is just an a
 an optional input value as parameters, and returns a result. 
 
 ```csharp
-    var command = PipelineFactory
-        .Start<string>()
-        .Pipe( ( ctx, arg ) => $"hello {arg}" )
-        .Build();
+var command = PipelineFactory
+    .Start<string>()
+    .Pipe( ( ctx, arg ) => $"hello {arg}" )
+    .Build();
 
-    var result = await command( new PipelineContext(), "pipeline" );
+var result = await command( new PipelineContext(), "pipeline" );
 
-    Assert.AreEqual( "hello pipeline", result );
+Assert.AreEqual( "hello pipeline", result );
 ```
 
 ## Dependency Injection

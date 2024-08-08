@@ -16,7 +16,7 @@ internal class WrapBinder<TInput, TOutput>
         Configure = configure;
     }
 
-    public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TInput, TOutput>> next )
+    public Expression<FunctionAsync<TInput, TOutput>> Bind( FunctionAsync<TInput, TOutput> next )
     {
         // Get the MethodInfo for the BindImpl method
         var bindImplMethodInfo = typeof( WrapBinder<TInput, TOutput> )
@@ -26,7 +26,7 @@ internal class WrapBinder<TInput, TOutput>
         // Create the call expression to BindImpl
         var callBind = Expression.Call(
             bindImplMethodInfo,
-            next,
+            ExpressionBinder.ToExpression( next ),
             Middleware,
             Configure
         );
@@ -45,14 +45,13 @@ internal class WrapBinder<TInput, TOutput>
         {
             var contextControl = (IPipelineContextControl) context;
 
-            using ( contextControl.CreateFrame( context, configure, defaultName ) )
-            {
-                return await middleware(
-                    context,
-                    argument,
-                    async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
-                ).ConfigureAwait( false );
-            }
+            using var _ = contextControl.CreateFrame( context, configure, defaultName );
+
+            return await middleware(
+                context,
+                argument,
+                async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
+            ).ConfigureAwait( false );
         };
     }
 }

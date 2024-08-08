@@ -4,18 +4,18 @@ using System.Reflection;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class HookBinder<TInput1, TOutput1> // explicit Type Args due to <object,object> usage
+internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,object> usage
 {
-    private Expression<MiddlewareAsync<TInput1, TOutput1>> Middleware { get; }
+    private Expression<MiddlewareAsync<TInput, TOutput>> Middleware { get; }
 
-    public HookBinder( Expression<MiddlewareAsync<TInput1, TOutput1>> middleware )
+    public HookBinder( Expression<MiddlewareAsync<TInput, TOutput>> middleware )
     {
         if ( middleware == null )
         {
             // Create and return the final expression
             var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
-            var paramArgument = Expression.Parameter( typeof( TInput1 ), "argument" );
-            Middleware = Expression.Lambda<MiddlewareAsync<TInput1, TOutput1>>(
+            var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
+            Middleware = Expression.Lambda<MiddlewareAsync<TInput, TOutput>>(
                 null
                 // TODO: empty middleware async ( context, argument, next ) => await next( context, argument ).ConfigureAwait( false )
                 , paramContext, paramArgument );
@@ -25,27 +25,27 @@ internal class HookBinder<TInput1, TOutput1> // explicit Type Args due to <objec
 
     }
 
-    public Expression<MiddlewareAsync<TInput1, TOutput1>> Bind( MiddlewareAsync<TInput1, TOutput1> middleware )
+    public Expression<MiddlewareAsync<TInput, TOutput>> Bind( MiddlewareAsync<TInput, TOutput> middleware )
     {
         // Get the MethodInfo for the BindImpl method
-        var bindImplMethodInfo = typeof( HookBinder<TInput1, TOutput1> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic | BindingFlags.Static )!
-            .MakeGenericMethod( typeof( TInput1 ), typeof( TOutput1 ) );
+        var bindImplMethodInfo = typeof( HookBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic )!
+            .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
 
         // Create the call expression to BindImpl
         var callBind = Expression.Call(
             bindImplMethodInfo,
-            Expression.Constant( middleware, typeof( MiddlewareAsync<TInput1, TOutput1> ) ),
+            ExpressionBinder.ToExpression( middleware ),
             Middleware
         );
 
         // Create and return the final expression
         var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
-        var paramArgument = Expression.Parameter( typeof( TInput1 ), "argument" );
-        return Expression.Lambda<MiddlewareAsync<TInput1, TOutput1>>( callBind, paramContext, paramArgument );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
+        return Expression.Lambda<MiddlewareAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
     }
 
-    private static MiddlewareAsync<TInput1, TOutput1> BindImpl( MiddlewareAsync<TInput1, TOutput1> middleware, MiddlewareAsync<TInput1, TOutput1> inner )
+    private MiddlewareAsync<TInput, TOutput> BindImpl( MiddlewareAsync<TInput, TOutput> middleware, MiddlewareAsync<TInput, TOutput> inner )
     {
         return async ( context, argument, function ) =>
             await middleware(

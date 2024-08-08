@@ -1,3 +1,9 @@
+---
+layout: default
+title: Dependency Injection
+nav_order: 3
+---
+
 # Dependency Injection
 
 ## Dependency Injection

@@ -1,4 +1,6 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System;
+using Hyperbee.Pipeline.Binders;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Hyperbee.Pipeline;
 
@@ -51,7 +53,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ),
+            Function = new CallBlockBinder<TInput, TOutput>( condition, Function ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = Middleware
         };
     }
