@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Hyperbee.Pipeline.Data;
 
 namespace Hyperbee.Pipeline;
@@ -15,11 +15,12 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     public FunctionAsync<TInput, TOutput> Build()
     {
         // build and return the outermost method
+        var compiledPipeline = Function.Compile();
+
         return async ( context, argument ) =>
         {
             try
             {
-                var compiledPipeline = Function.Compile();
                 var result = await compiledPipeline( context, argument ).ConfigureAwait( false );
 
                 if ( context.CancellationToken.IsCancellationRequested )
@@ -41,12 +42,13 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
 
     public ProcedureAsync<TInput> BuildAsProcedure()
     {
+        var compiledPipeline = Function.Compile();
+
         // build and return the outermost method
         return async ( context, argument ) =>
         {
             try
             {
-                var compiledPipeline = Function.Compile();
                 await compiledPipeline( context, argument ).ConfigureAwait( false );
             }
             catch ( Exception ex )
@@ -61,9 +63,10 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
 
     FunctionAsync<TIn, TOut> IPipelineBuilder.CastFunction<TIn, TOut>()
     {
+        var compiledPipeline = Function.Compile();
+
         return async ( context, argument ) =>
         {
-            var compiledPipeline = Function.Compile();
             var result = await compiledPipeline( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
             return Cast<TOut>( result );
         };

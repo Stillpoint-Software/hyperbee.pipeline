@@ -12,34 +12,26 @@ namespace Hyperbee.Pipeline.Benchmark;
 
 public class PipelineBenchmarks
 {
+    private FunctionAsync<string, int> _commandExecution;
+    private FunctionAsync<string, string> _commandMiddleware;
+    private FunctionAsync<string, string> _commandEnumeration;
+    private FunctionAsync<int, int> _commandCancellation;
+    private FunctionAsync<string, int> _commandAuth;
 
-    [Benchmark]
-    public void PipelineExecution()
+    [GlobalSetup]
+    public void Setup()
     {
-        var command = PipelineFactory
+        _commandExecution = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => int.Parse( arg ) )
             .Build();
 
-        command( new PipelineContext(), "5" );
-    }
-
-    [Benchmark]
-    public void PipelineMiddleware()
-    {
-
-        var command = PipelineFactory
+        _commandMiddleware = PipelineFactory
             .Start<string>()
             .HookAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" )
             .Pipe( ( ctx, arg ) => arg + "1" )
             .Build();
 
-        command( new PipelineContext() );
-    }
-
-    [Benchmark]
-    public void PipelineEnumeration()
-    {
         var count = 0;
 
         var command1 = PipelineFactory
@@ -48,7 +40,7 @@ public class PipelineBenchmarks
             .Pipe( ( ctx, arg ) => count += 10 )
             .Build();
 
-        var command = PipelineFactory
+        _commandEnumeration = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
             .PipeAsync( async ( ctx, arg ) =>
@@ -61,13 +53,7 @@ public class PipelineBenchmarks
             .Pipe( ( ctx, arg ) => string.Join( ' ', arg ) )
             .Build();
 
-        command( new PipelineContext(), "e f" );
-    }
-
-    [Benchmark]
-    public void PipelineCancellation()
-    {
-        var command = PipelineFactory
+        _commandCancellation = PipelineFactory
             .Start<int>()
             .Pipe( ( ctx, arg ) => 1 )
             .Pipe( ( ctx, arg ) =>
@@ -78,7 +64,35 @@ public class PipelineBenchmarks
             .Pipe( ( ctx, arg ) => 3 )
             .Build();
 
-        command( new PipelineContext() );
+        _commandAuth = PipelineFactory
+            .Start<string>()
+            .PipeIfClaim( new Claim( "Role", "reader" ), b => b.Pipe( Complex ) )
+            .Build();
+
+    }
+
+    [Benchmark]
+    public void PipelineExecution()
+    {
+        _commandExecution( new PipelineContext(), "5" );
+    }
+
+    [Benchmark]
+    public void PipelineMiddleware()
+    {
+        _commandMiddleware( new PipelineContext() );
+    }
+
+    [Benchmark]
+    public void PipelineEnumeration()
+    {
+        _commandEnumeration( new PipelineContext(), "e f" );
+    }
+
+    [Benchmark]
+    public void PipelineCancellation()
+    {
+        _commandCancellation( new PipelineContext() );
     }
 
     [Benchmark]
@@ -87,13 +101,7 @@ public class PipelineBenchmarks
         var factory = CreateContextFactory();
         ILogger<PipelineBenchmarks> logger = null!;
 
-
-        var command = PipelineFactory
-                .Start<string>()
-                .PipeIfClaim( new Claim( "Role", "reader" ), b => b.Pipe( Complex ) )
-                .Build();
-
-        command( factory.Create( logger ), "reader" );
+        _commandAuth( factory.Create( logger ), "reader" );
     }
 
     [Benchmark]
