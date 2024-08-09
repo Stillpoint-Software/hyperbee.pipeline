@@ -15,7 +15,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
         Reducer = reducer;
     }
 
-    public Expression<FunctionAsync<TInput, TNext>> Bind( Expression<FunctionAsync<TInput, TNext>> next )
+    public Expression<FunctionAsync<TInput, TNext>> Bind( Expression<FunctionAsync<TElement, TNext>> next )
     {
         // Get the MethodInfo for the BindImpl method
         var bindImplAsyncMethodInfo = typeof( ReduceBlockBinder<TInput, TOutput, TElement, TNext> )

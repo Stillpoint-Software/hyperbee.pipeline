@@ -3,6 +3,7 @@ using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
+
 internal abstract class Binder<TInput, TOutput>
 {
     protected Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }

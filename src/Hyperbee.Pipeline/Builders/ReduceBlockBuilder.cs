@@ -1,32 +1,55 @@
 ﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class ReduceBlockBuilder
 {
-    IPipelineBuilder<TInput, TNext> Reduce<TElement, TNext>( Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder );
-    IPipelineBuilder<TInput, TNext> ReduceAsync<TElement, TNext>( bool inheritMiddleware, Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder );
-}
-
-public partial class PipelineBuilder<TInput, TOutput>
-{
-    public IPipelineBuilder<TInput, TNext> Reduce<TElement, TNext>( Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder )
+    public static ReduceBlockBuilderWrapper<TInput, TOutput> Reduce<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent )
     {
-        return ReduceAsync( true, reducer, builder );
+        return new ReduceBlockBuilderWrapper<TInput, TOutput>( parent );
     }
 
-    public IPipelineBuilder<TInput, TNext> ReduceAsync<TElement, TNext>( bool inheritMiddleware, Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder )
+    public class ReduceBlockBuilderWrapper<TInput, TOutput>( IPipelineBuilder<TInput, TOutput> parent )
+    {
+        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>(
+            Func<TNext, TNext, TNext> reducer,
+            Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder
+        )
+        {
+            return ReduceBlockBuilder<TInput, TOutput, TElement, TNext>.ReduceAsync( parent, true, reducer, builder );
+        }
+
+        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>(
+            bool inheritMiddleware,
+            Func<TNext, TNext, TNext> reducer,
+            Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder
+        )
+        {
+            return ReduceBlockBuilder<TInput, TOutput, TElement, TNext>.ReduceAsync( parent, inheritMiddleware, reducer, builder );
+        }
+    }
+}
+
+internal static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
+{
+    public static IPipelineBuilder<TInput, TNext> ReduceAsync(
+        IPipelineBuilder<TInput, TOutput> parent,
+        bool inheritMiddleware,
+        Func<TNext, TNext, TNext> reducer,
+        Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder )
     {
         ArgumentNullException.ThrowIfNull( builder );
-        ArgumentNullException.ThrowIfNull( reducer );
 
-        var block = PipelineFactory.Start<TElement>( inheritMiddleware ? Middleware : null );
-        var function = ((PipelineBuilder<TInput, TNext>) builder( block )).Function;
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
+        var function = ((PipelineBuilder<TElement, TNext>) builder( block )).Function;
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, Function ).Bind( function ),
-            Middleware = Middleware
+            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
         };
     }
 }

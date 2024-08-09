@@ -13,4 +13,10 @@ public interface IPipelineFunction<TInput, TOutput>
 {
     Expression<FunctionAsync<TInput, TOutput>> Function { get; }
     MiddlewareAsync<object, object> Middleware { get; }
+
+    void Deconstruct( out Expression<FunctionAsync<TInput, TOutput>> function, out MiddlewareAsync<object, object> middleware )
+    {
+        function = Function;
+        middleware = Middleware;
+    }
 }
