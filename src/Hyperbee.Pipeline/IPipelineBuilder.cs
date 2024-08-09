@@ -20,6 +20,14 @@ public struct Arg
     public struct Empty;
 }
 
+public struct TypeArg<TArg>
+{
+}
+
+public struct TypeArg<TArg1,TArg2>
+{
+}
+
 // pipeline builders have constraints about where they can be applied when creating a pipeline.
 //
 // start builders:
@@ -33,12 +41,12 @@ public struct Arg
 // 
 // we solve for this using interfaces.
 
-public partial interface IPipelineStartBuilder<TInput, TOutput> : IPipelineBuilder<TInput, TOutput>
+public interface IPipelineStartBuilder<in TInput, TOutput> : IPipelineBuilder<TInput, TOutput>
 {
     // head actions: (e.g. Hook) that are only valid at the start of the pipeline 
 }
 
-public partial interface IPipelineBuilder<TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
+public interface IPipelineBuilder<in TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
 {
     // normal actions
 }

@@ -1,28 +1,47 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Xml.Linq;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class CallStatementBuilder
 {
-    IPipelineBuilder<TInput, TOutput> Call( Procedure<TOutput> next, string name );
-    IPipelineBuilder<TInput, TOutput> Call( Procedure<TOutput> next, Action<IPipelineContext> config = null );
-    IPipelineBuilder<TInput, TOutput> CallAsync( ProcedureAsync<TOutput> next, string name );
-    IPipelineBuilder<TInput, TOutput> CallAsync( ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null );
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, string name )
+    {
+        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, name );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, Action<IPipelineContext> config = null )
+    {
+        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, config );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, string name )
+    {
+        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, name );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null )
+    {
+        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, config );
+    }
 }
 
-public partial class PipelineBuilder<TInput, TOutput>
+public static class CallStatementBuilder<TInput, TOutput> 
 {
-    public IPipelineBuilder<TInput, TOutput> Call( Procedure<TOutput> next, string name ) => Call( next, config => config.Name = name );
+    public static IPipelineBuilder<TInput, TOutput> Call( IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, string name ) => Call( parent, next, config => config.Name = name );
 
-    public IPipelineBuilder<TInput, TOutput> Call( Procedure<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> Call( IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, Action<IPipelineContext> config = null )
     {
         ArgumentNullException.ThrowIfNull( next );
 
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallStatementBinder<TInput, TOutput>( Function, Middleware, config ).Bind( AsyncNext, next.Method ),
-            Middleware = Middleware
+            Function = new CallStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
+            Middleware = parentMiddleware
         };
 
         // task wrapper
@@ -34,16 +53,18 @@ public partial class PipelineBuilder<TInput, TOutput>
         }
     }
 
-    public IPipelineBuilder<TInput, TOutput> CallAsync( ProcedureAsync<TOutput> next, string name ) => CallAsync( next, config => config.Name = name );
+    public static IPipelineBuilder<TInput, TOutput> CallAsync( IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, string name ) => CallAsync( parent, next, config => config.Name = name );
 
-    public IPipelineBuilder<TInput, TOutput> CallAsync( ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> CallAsync( IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null )
     {
         ArgumentNullException.ThrowIfNull( next );
 
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallStatementBinder<TInput, TOutput>( Function, Middleware, config ).Bind( next ),
-            Middleware = Middleware
+            Function = new CallStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
+            Middleware = parentMiddleware
         };
     }
 }
