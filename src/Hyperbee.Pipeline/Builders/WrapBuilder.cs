@@ -21,8 +21,8 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new WrapBinder<TInput, TOutput>( 
-                ExpressionBinder.ToExpression( pipelineMiddleware ), 
+            Function = new WrapBinder<TInput, TOutput>(
+                ExpressionBinder.ToExpression( pipelineMiddleware ),
                 config ).Bind( Function ),
             Middleware = Middleware
         };

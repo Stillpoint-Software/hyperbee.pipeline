@@ -1,8 +1,7 @@
 ﻿using System.Linq.Expressions;
-using Hyperbee.Pipeline.Context;
 using System.Reflection;
-
 using Hyperbee.Pipeline.Binders.Abstractions;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -16,12 +15,12 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
     public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
     {
         // Get the MethodInfo for the helper method
-        var bindImplAsyncMethodInfo = typeof(CallBlockBinder<TInput, TOutput>)
-            .GetMethod( nameof(BindImplAsync), BindingFlags.NonPublic | BindingFlags.Instance )!;
+        var bindImplAsyncMethodInfo = typeof( CallBlockBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!;
 
         // Create parameters for the lambda expression
-        var paramContext = Expression.Parameter( typeof(IPipelineContext), "context" );
-        var paramArgument = Expression.Parameter( typeof(TInput), "argument" );
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
 
         // Create a call expression to the helper method
         var callBindImplAsync = Expression.Call(

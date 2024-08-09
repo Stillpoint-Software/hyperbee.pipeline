@@ -1,8 +1,7 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
-
-using System.Linq.Expressions;
-using Hyperbee.Pipeline.Context;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -17,7 +16,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
     }
 
     public Expression<FunctionAsync<TInput, TNext>> Bind( Expression<FunctionAsync<TInput, TNext>> next )
-    {        
+    {
         // Get the MethodInfo for the BindImpl method
         var bindImplAsyncMethodInfo = typeof( ReduceBlockBinder<TInput, TOutput, TElement, TNext> )
             .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!;

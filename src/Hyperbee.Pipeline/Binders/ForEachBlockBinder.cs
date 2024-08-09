@@ -1,8 +1,7 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
-
-using System.Linq.Expressions;
-using Hyperbee.Pipeline.Context;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders;
 

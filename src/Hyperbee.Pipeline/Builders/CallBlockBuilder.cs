@@ -24,7 +24,7 @@ public partial class PipelineBuilder<TInput, TOutput>
         ArgumentNullException.ThrowIfNull( builder );
 
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
-        var function =  builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
+        var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
 
         return new PipelineBuilder<TInput, TOutput>
         {

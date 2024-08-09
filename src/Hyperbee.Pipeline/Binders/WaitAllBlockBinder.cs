@@ -1,6 +1,6 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions;
 using Hyperbee.Pipeline.Extensions.Implementation;
@@ -11,16 +11,16 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
 {
     private MiddlewareAsync<object, object> Middleware { get; }
 
-    public WaitAllBlockBinder( 
-        Expression<FunctionAsync<TInput, TOutput>> function, 
-        MiddlewareAsync<object, object> middleware, 
+    public WaitAllBlockBinder(
+        Expression<FunctionAsync<TInput, TOutput>> function,
+        MiddlewareAsync<object, object> middleware,
         Action<IPipelineContext> configure )
         : base( null, function, configure )
     {
         Middleware = middleware;
     }
 
-    public WaitAllBlockBinder( 
+    public WaitAllBlockBinder(
         Function<TOutput, bool> condition,
         Expression<FunctionAsync<TInput, TOutput>> function,
         MiddlewareAsync<object, object> middleware,

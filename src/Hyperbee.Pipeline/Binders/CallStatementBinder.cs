@@ -17,8 +17,8 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
         var defaultName = (method ?? next.Method).Name;
 
         // Get the MethodInfo for the helper method
-        var bindImplAsyncMethodInfo = typeof( CallStatementBinder<TInput, TOutput>)
-            .GetMethod( nameof(BindImplAsync), BindingFlags.NonPublic | BindingFlags.Instance )!;
+        var bindImplAsyncMethodInfo = typeof( CallStatementBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!;
 
         // Create parameters for the lambda expression
         var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );

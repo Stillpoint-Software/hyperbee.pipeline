@@ -19,13 +19,13 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
         var defaultName = (method ?? next.Method).Name;
 
         // Get the MethodInfo for the helper method
-        var bindImplAsyncMethodInfo = typeof(PipeStatementBinder<TInput, TOutput>)
-            .GetMethod( nameof(BindImplAsync), BindingFlags.NonPublic | BindingFlags.Instance )!
-            .MakeGenericMethod( typeof(TNext) );
+        var bindImplAsyncMethodInfo = typeof( PipeStatementBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!
+            .MakeGenericMethod( typeof( TNext ) );
 
         // Create parameters for the lambda expression
-        var paramContext = Expression.Parameter( typeof(IPipelineContext), "context" );
-        var paramArgument = Expression.Parameter( typeof(TInput), "argument" );
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
 
         // Create a call expression to the helper method
         var callBindImplAsync = Expression.Call(
