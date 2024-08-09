@@ -1,54 +1,85 @@
 ﻿using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
 public delegate TOutput WaitAllReducer<in TInput, out TOutput>( IPipelineContext context, TInput input, WaitAllResult[] results );
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class WaitAllBlockBuilder
 {
-    IPipelineBuilder<TInput, TNext> WaitAll<TNext>( Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, WaitAllReducer<TOutput, TNext> reducer, Action<IPipelineContext> config = null );
-    IPipelineBuilder<TInput, TNext> WaitAll<TNext>( bool inheritMiddleware, Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, WaitAllReducer<TOutput, TNext> reducer, Action<IPipelineContext> config = null );
-    IPipelineBuilder<TInput, TOutput> WaitAll( Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, Action<IPipelineContext> config = null );
-    IPipelineBuilder<TInput, TOutput> WaitAll( bool inheritMiddleware, Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, Action<IPipelineContext> config = null );
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+        WaitAllReducer<TOutput, TNext> reducer, 
+        Action<IPipelineContext> config = null )
+    {
+        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, true, builders, reducer, config );
+    }
+
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        bool inheritMiddleware, 
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+        WaitAllReducer<TOutput, TNext> reducer, 
+        Action<IPipelineContext> config = null )
+    {
+        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, inheritMiddleware, builders, reducer, config );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+        Action<IPipelineContext> config = null )
+    {
+        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, true, builders, config );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        bool inheritMiddleware, 
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+        Action<IPipelineContext> config = null )
+    {
+        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, inheritMiddleware, builders, config );
+    }
 }
 
-public partial class PipelineBuilder<TInput, TOutput>
+public static class WaitAllBlockBuilder<TInput, TOutput> 
 {
-    public IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>( 
+        IPipelineBuilder<TInput, TOutput> parent,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
-        return WaitAll( true, builders, reducer, config );
+        return WaitAll( parent, true, builders, reducer, config );
     }
 
-    public IPipelineBuilder<TInput, TOutput> WaitAll(
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>,
-                IPipelineBuilder>[]> builders,
+    public static IPipelineBuilder<TInput, TOutput> WaitAll( 
+        IPipelineBuilder<TInput, TOutput> parent,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
-        return WaitAll( true, builders, config );
+        return WaitAll( parent, true, builders, config );
     }
 
-    public IPipelineBuilder<TInput, TOutput> WaitAll(
+    public static IPipelineBuilder<TInput, TOutput> WaitAll( 
+        IPipelineBuilder<TInput, TOutput> parent,
         bool inheritMiddleware,
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
-        return WaitAll( true, builders, DefaultReducer, config );
+        return WaitAll( parent, true, builders, DefaultReducer, config );
 
         // create a default reducer that returns the arg from the previous step
         static TOutput DefaultReducer( IPipelineContext ctx, TOutput arg, WaitAllResult[] results ) => arg;
     }
 
-    public IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>( 
+        IPipelineBuilder<TInput, TOutput> parent,
         bool inheritMiddleware,
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
@@ -59,15 +90,17 @@ public partial class PipelineBuilder<TInput, TOutput>
         if ( builderInstances.Length == 0 )
             throw new ArgumentOutOfRangeException( nameof( builders ) );
 
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
         var functions = builderInstances
-            .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null ) } )
+            .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null ) } )
             .Select( x => x.builder( x.block ).CastFunction<TOutput, object>() )
             .ToArray();
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new WaitAllBlockBinder<TInput, TOutput>( Function, Middleware, config ).Bind( functions, reducer ),
-            Middleware = Middleware
+            Function = new WaitAllBlockBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( functions, reducer ),
+            Middleware = parentMiddleware
         };
     }
 }

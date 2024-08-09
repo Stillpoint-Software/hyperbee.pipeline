@@ -1,41 +1,54 @@
 ﻿using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class WrapBuilder
 {
-    IPipelineBuilder<TInput, TOutput> WrapAsync( MiddlewareAsync<TInput, TOutput> pipelineMiddleware, string name );
-    IPipelineBuilder<TInput, TOutput> WrapAsync( MiddlewareAsync<TInput, TOutput> pipelineMiddleware, Action<IPipelineContext> config = null );
-    IPipelineBuilder<TInput, TOutput> WrapAsync( IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware, Action<IPipelineContext> config = null );
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, MiddlewareAsync<TInput, TOutput> pipelineMiddleware, string name )
+    {
+        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config => config.Name = name );
+    }
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, MiddlewareAsync<TInput, TOutput> pipelineMiddleware, Action<IPipelineContext> config = null )
+    {
+        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
+    }
+
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware, Action<IPipelineContext> config = null )
+    {
+        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
+    }
 }
 
-public partial class PipelineBuilder<TInput, TOutput>
+public static class WrapBuilder<TInput, TOutput> 
 {
-    public IPipelineBuilder<TInput, TOutput> WrapAsync( MiddlewareAsync<TInput, TOutput> pipelineMiddleware, string name ) => WrapAsync( pipelineMiddleware, config => config.Name = name );
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync( IPipelineBuilder<TInput, TOutput> parent, MiddlewareAsync<TInput, TOutput> pipelineMiddleware, string name ) => WrapAsync( parent, pipelineMiddleware, config => config.Name = name );
 
-    public IPipelineBuilder<TInput, TOutput> WrapAsync( MiddlewareAsync<TInput, TOutput> pipelineMiddleware, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync( IPipelineBuilder<TInput, TOutput> parent, MiddlewareAsync<TInput, TOutput> pipelineMiddleware, Action<IPipelineContext> config = null )
     {
         if ( pipelineMiddleware == null )
-            return this;
+            return parent;
 
-        return new PipelineBuilder<TInput, TOutput>
-        {
-            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( Function ),
-            Middleware = Middleware
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        return new PipelineBuilder<TInput, TOutput> 
+        { 
+            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ), 
+            Middleware = parentMiddleware 
         };
     }
 
-    public IPipelineBuilder<TInput, TOutput> WrapAsync( IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> WrapAsync( IPipelineBuilder<TInput, TOutput> parent, IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware, Action<IPipelineContext> config = null )
     {
         if ( pipelineMiddleware == null )
-            return this;
+            return parent;
 
-        var builder = this as IPipelineBuilder<TInput, TOutput>;
+        var builder = parent;
 
         foreach ( var middleware in pipelineMiddleware )
         {
-            builder = WrapAsync( middleware, config );
+            builder = WrapAsync( parent, middleware, config );
         }
 
         return builder;

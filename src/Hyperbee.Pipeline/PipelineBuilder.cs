@@ -2,7 +2,7 @@
 
 namespace Hyperbee.Pipeline;
 
-public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
+public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
 {
     internal FunctionAsync<TInput, TOutput> Function { get; init; }
     internal MiddlewareAsync<object, object> Middleware { get; init; }
@@ -67,7 +67,7 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
         static TType Cast<TType>( object value ) => (TType) value;
     }
 
-    // custom builder and binders need access to Function and Middleware
+    // custom builders and binders need access to Function and Middleware
     IPipelineFunction<TInput, TOutput> IPipelineFunctionProvider<TInput, TOutput>.GetPipelineFunction()
     {
         return new PipelineFunction
@@ -81,11 +81,5 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
     {
         public FunctionAsync<TInput, TOutput> Function { get; init; }
         public MiddlewareAsync<object, object> Middleware { get; init; }
-
-        public void Deconstruct( out FunctionAsync<TInput, TOutput> function, out MiddlewareAsync<object, object> middleware )
-        {
-            function = Function;
-            middleware = Middleware;
-        }
     }
 }

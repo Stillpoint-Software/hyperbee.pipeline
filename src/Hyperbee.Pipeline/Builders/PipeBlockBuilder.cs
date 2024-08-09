@@ -1,33 +1,37 @@
 ﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class PipeBlockBuilderExtensions
 {
-    IPipelineBuilder<TInput, TNext> Pipe<TNext>( Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder );
-    IPipelineBuilder<TInput, TNext> Pipe<TNext>( bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder );
-}
-
-public partial class PipelineBuilder<TInput, TOutput>
-{
-    // Pipe the result of an inner builder to the next pipeline step. Acts like a Func.
-
-    public IPipelineBuilder<TInput, TNext> Pipe<TNext>( Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( this IPipelineBuilder<TInput, TOutput> parent, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
-        return Pipe( true, builder );
+        return PipeBlockBuilder<TInput, TOutput, TNext>.Pipe( parent, true, builder );
     }
 
-    public IPipelineBuilder<TInput, TNext> Pipe<TNext>( bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( this IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    {
+        return PipeBlockBuilder<TInput, TOutput, TNext>.Pipe( parent, inheritMiddleware, builder );
+    }
+}
+
+public static class PipeBlockBuilder<TInput, TOutput, TNext> 
+{
+    public static IPipelineBuilder<TInput, TNext> Pipe( IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
         ArgumentNullException.ThrowIfNull( builder );
 
-        var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext>
-        {
-            Function = new PipeBlockBinder<TInput, TOutput>( Function ).Bind( function ),
-            Middleware = Middleware
+        return new PipelineBuilder<TInput, TNext> 
+        { 
+            Function = new PipeBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ), 
+            Middleware = parentMiddleware 
         };
     }
 }
+

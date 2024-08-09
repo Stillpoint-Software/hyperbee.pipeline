@@ -1,37 +1,47 @@
 ﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineStartBuilder<TInput, TOutput>
+public static class HookBuilder
 {
-    IPipelineStartBuilder<TInput, TOutput> HookAsync( MiddlewareAsync<object, object> functionMiddleware );
-    IPipelineStartBuilder<TInput, TOutput> HookAsync( IEnumerable<MiddlewareAsync<object, object>> functionMiddleware );
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>( this IPipelineStartBuilder<TInput, TOutput> parent, MiddlewareAsync<object, object> functionMiddleware )
+    {
+        return HookBuilder<TInput, TOutput>.HookAsync( parent, functionMiddleware );
+    }
+
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>( this IPipelineStartBuilder<TInput, TOutput> parent, IEnumerable<MiddlewareAsync<object, object>> functionMiddleware )
+    {
+        return HookBuilder<TInput, TOutput>.HookAsync( parent, functionMiddleware );
+    }
 }
 
-public partial class PipelineBuilder<TInput, TOutput>
+public static class HookBuilder<TInput, TOutput> 
 {
-    public IPipelineStartBuilder<TInput, TOutput> HookAsync( MiddlewareAsync<object, object> functionMiddleware )
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync( IPipelineStartBuilder<TInput, TOutput> parent, MiddlewareAsync<object, object> functionMiddleware )
     {
         if ( functionMiddleware == null )
-            return this;
+            return parent;
 
-        return new PipelineBuilder<TInput, TOutput>
-        {
-            Function = Function,
-            Middleware = new HookBinder<object, object>( Middleware ).Bind( functionMiddleware )
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        return new PipelineBuilder<TInput, TOutput> 
+        { 
+            Function = parentFunction, 
+            Middleware = new HookBinder<object, object>( parentMiddleware ).Bind( functionMiddleware ) 
         };
     }
 
-    public IPipelineStartBuilder<TInput, TOutput> HookAsync( IEnumerable<MiddlewareAsync<object, object>> functionMiddleware )
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync( IPipelineStartBuilder<TInput, TOutput> parent, IEnumerable<MiddlewareAsync<object, object>> functionMiddleware )
     {
         if ( functionMiddleware == null )
-            return this;
+            return parent;
 
-        var builder = this as IPipelineStartBuilder<TInput, TOutput>;
+        var builder = parent;
 
         foreach ( var middleware in functionMiddleware )
         {
-            builder = HookAsync( middleware );
+            builder = HookAsync( parent, middleware );
         }
 
         return builder;
