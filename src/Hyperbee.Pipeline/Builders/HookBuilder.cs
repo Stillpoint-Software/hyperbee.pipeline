@@ -1,32 +1,32 @@
-using Hyperbee.Pipeline.Binders;
+﻿using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
 public static class HookBuilder
 {
-    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>( 
-        this IPipelineStartBuilder<TInput, TOutput> parent, 
-        MiddlewareAsync<object, object> functionMiddleware 
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>(
+        this IPipelineStartBuilder<TInput, TOutput> parent,
+        MiddlewareAsync<object, object> functionMiddleware
     )
     {
         return HookBuilder<TInput, TOutput>.HookAsync( parent, functionMiddleware );
     }
 
-    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>( 
-        this IPipelineStartBuilder<TInput, TOutput> parent, 
-        IEnumerable<MiddlewareAsync<object, object>> functionMiddleware 
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync<TInput, TOutput>(
+        this IPipelineStartBuilder<TInput, TOutput> parent,
+        IEnumerable<MiddlewareAsync<object, object>> functionMiddleware
     )
     {
         return HookBuilder<TInput, TOutput>.HookAsync( parent, functionMiddleware );
     }
 }
 
-internal static class HookBuilder<TInput, TOutput> 
+internal static class HookBuilder<TInput, TOutput>
 {
-    public static IPipelineStartBuilder<TInput, TOutput> HookAsync( 
-        IPipelineStartBuilder<TInput, TOutput> parent, 
-        MiddlewareAsync<object, object> functionMiddleware 
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync(
+        IPipelineStartBuilder<TInput, TOutput> parent,
+        MiddlewareAsync<object, object> functionMiddleware
     )
     {
         if ( functionMiddleware == null )
@@ -41,9 +41,9 @@ internal static class HookBuilder<TInput, TOutput>
         };
     }
 
-    public static IPipelineStartBuilder<TInput, TOutput> HookAsync( 
-        IPipelineStartBuilder<TInput, TOutput> parent, 
-        IEnumerable<MiddlewareAsync<object, object>> functionMiddleware 
+    public static IPipelineStartBuilder<TInput, TOutput> HookAsync(
+        IPipelineStartBuilder<TInput, TOutput> parent,
+        IEnumerable<MiddlewareAsync<object, object>> functionMiddleware
     )
     {
         if ( functionMiddleware == null )
