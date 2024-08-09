@@ -32,7 +32,7 @@ public class PipelineFactory
         };
     }
 
-    internal static IPipelineStartBuilder<TInput, TInput> Start<TInput>( Expression<MiddlewareAsync<object, object>> functionMiddleware )
+    internal static IPipelineStartBuilder<TInput, TInput> Start<TInput>( MiddlewareAsync<object, object> functionMiddleware )
     {
         // IPipelineContext context, TInput argument, FunctionAsync<TInput, TOutput> next
         return new PipelineBuilder<TInput, TInput>

@@ -12,5 +12,5 @@ public interface IPipelineFunctionProvider<TInput, TOutput>
 public interface IPipelineFunction<TInput, TOutput>
 {
     Expression<FunctionAsync<TInput, TOutput>> Function { get; }
-    Expression<MiddlewareAsync<object, object>> Middleware { get; }
+    MiddlewareAsync<object, object> Middleware { get; }
 }

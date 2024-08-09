@@ -21,7 +21,7 @@ public partial class PipelineBuilder<TInput, TOutput>
         ArgumentNullException.ThrowIfNull( reducer );
 
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? Middleware : null );
-        var function = ((PipelineBuilder<TElement, TNext>) builder( block )).Function;
+        var function = ((PipelineBuilder<TInput, TNext>) builder( block )).Function;
 
         return new PipelineBuilder<TInput, TNext>
         {

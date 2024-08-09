@@ -6,9 +6,9 @@ namespace Hyperbee.Pipeline.Binders.Abstractions;
 
 internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 {
-    protected Expression<Function<TOutput, bool>> Condition { get; }
+    protected Function<TOutput, bool> Condition { get; }
 
-    protected ConditionalBlockBinder( Expression<Function<TOutput, bool>> condition, Expression<FunctionAsync<TInput, TOutput>> function, Expression<Action<IPipelineContext>> configure )
+    protected ConditionalBlockBinder( Function<TOutput, bool> condition, Expression<FunctionAsync<TInput, TOutput>> function, Action<IPipelineContext> configure )
         : base( function, configure )
     {
         Condition = condition;

@@ -8,50 +8,54 @@ namespace Hyperbee.Pipeline.Binders;
 internal class WrapBinder<TInput, TOutput>
 {
     private Expression<MiddlewareAsync<TInput, TOutput>> Middleware { get; }
-    private Expression<Action<IPipelineContext>> Configure { get; }
+    private Action<IPipelineContext> Configure { get; }
 
-    public WrapBinder( Expression<MiddlewareAsync<TInput, TOutput>> middleware, Expression<Action<IPipelineContext>> configure )
+    public WrapBinder( Expression<MiddlewareAsync<TInput, TOutput>> middleware, Action<IPipelineContext> configure )
     {
         Middleware = middleware;
         Configure = configure;
     }
 
-    public Expression<FunctionAsync<TInput, TOutput>> Bind( FunctionAsync<TInput, TOutput> next )
+    public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TInput, TOutput>> next )
     {
-        // Get the MethodInfo for the BindImpl method
-        var bindImplMethodInfo = typeof( WrapBinder<TInput, TOutput> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic | BindingFlags.Static )!
-            .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
+        // Get the MethodInfo for the helper method
+        var bindImplAsyncMethodInfo = typeof( WrapBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!;
 
-        // Create the call expression to BindImpl
-        var callBind = Expression.Call(
-            bindImplMethodInfo,
-            ExpressionBinder.ToExpression( next ),
+        // Create parameters for the lambda expression
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
+
+        // Create a call expression to the helper method
+        var callBindImplAsync = Expression.Call(
+            Expression.Constant( this ),
+            bindImplAsyncMethodInfo,
+            next,
             Middleware,
-            Configure
+            paramContext,
+            paramArgument
         );
 
         // Create and return the final expression
-        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
-        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
-        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
+        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBindImplAsync, paramContext, paramArgument );
     }
 
-    private static FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TInput, TOutput> next, MiddlewareAsync<TInput,TOutput> middleware, Action<IPipelineContext> configure )
+    private async Task<TOutput> BindImplAsync(
+        FunctionAsync<TInput, TOutput> next,
+        MiddlewareAsync<TInput, TOutput> middleware,
+        IPipelineContext context,
+        TInput argument )
     {
         var defaultName = next.Method.Name;
 
-        return async ( context, argument ) =>
-        {
-            var contextControl = (IPipelineContextControl) context;
+        var contextControl = (IPipelineContextControl) context;
 
-            using var _ = contextControl.CreateFrame( context, configure, defaultName );
+        using var _ = contextControl.CreateFrame( context, Configure, defaultName );
 
-            return await middleware(
-                context,
-                argument,
-                async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
-            ).ConfigureAwait( false );
-        };
+        return await middleware(
+            context,
+            argument,
+            async ( context1, argument1 ) => await next( context1, argument1 ).ConfigureAwait( false )
+        ).ConfigureAwait( false );
     }
 }

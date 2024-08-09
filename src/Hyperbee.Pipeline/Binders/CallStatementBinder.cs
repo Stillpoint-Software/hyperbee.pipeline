@@ -7,56 +7,58 @@ namespace Hyperbee.Pipeline.Binders;
 
 internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TOutput>
 {
-    public CallStatementBinder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<MiddlewareAsync<object, object>> middleware, Expression<Action<IPipelineContext>> configure )
+    public CallStatementBinder( Expression<FunctionAsync<TInput, TOutput>> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : base( function, middleware, configure )
     {
     }
 
     public Expression<FunctionAsync<TInput, TOutput>> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
     {
-        // Get the MethodInfo for the BindImpl method
-        var bindImplMethodInfo = typeof( CallStatementBinder<TInput, TOutput> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic )!
-            .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
+        var defaultName = (method ?? next.Method).Name;
 
-        // Create the call expression to BindImpl
-        var callBind = Expression.Call(
-            bindImplMethodInfo,
+        // Get the MethodInfo for the helper method
+        var bindImplAsyncMethodInfo = typeof( CallStatementBinder<TInput, TOutput>)
+            .GetMethod( nameof(BindImplAsync), BindingFlags.NonPublic | BindingFlags.Instance )!;
+
+        // Create parameters for the lambda expression
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
+
+        // Create a call expression to the helper method
+        var callBindImplAsync = Expression.Call(
+            Expression.Constant( this ),
+            bindImplAsyncMethodInfo,
             ExpressionBinder.ToExpression( next ),
             Pipeline,
-            Configure,
-            Expression.Constant( method, typeof( MethodInfo ) )
+            paramContext,
+            paramArgument,
+            Expression.Constant( defaultName )
         );
 
         // Create and return the final expression
-        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
-        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
-        return Expression.Lambda<FunctionAsync<TInput, TOutput>>(callBind, paramContext, paramArgument);
+        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBindImplAsync, paramContext, paramArgument );
     }
 
-    public FunctionAsync<TInput, TOutput> BindImpl( 
-        ProcedureAsync<TOutput> next, 
+    private async Task<TOutput> BindImplAsync(
+        ProcedureAsync<TOutput> next,
         FunctionAsync<TInput, TOutput> pipeline,
-        MiddlewareAsync<object, object> middleware,
-        Action<IPipelineContext> configure,
-        MethodInfo method = null )
+        IPipelineContext context,
+        TInput argument,
+        string defaultName )
     {
-        var defaultName = (method ?? next.Method).Name;
+        var (nextArgument, canceled) =
+            await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
 
-        return async ( context, argument ) =>
-        {
-            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
+        if ( canceled )
+            return default;
 
-            if ( canceled )
-                return default;
+        return await ProcessStatementAsync(
+            async ( ctx, arg ) =>
+            {
+                await next( ctx, arg ).ConfigureAwait( false );
+                return arg;
+            }, context, nextArgument, defaultName ).ConfigureAwait( false );
 
-            return await ProcessStatementAsync(
-                async ( ctx, arg ) =>
-                {
-                    await next( ctx, arg ).ConfigureAwait( false );
-                    return arg;
-                }, context, nextArgument, defaultName ).ConfigureAwait( false );
-        };
     }
 
     /*

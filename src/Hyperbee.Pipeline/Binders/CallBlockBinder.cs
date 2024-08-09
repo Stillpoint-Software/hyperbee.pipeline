@@ -15,35 +15,41 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 
     public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
     {
-        // Get the MethodInfo for the BindImpl method
-        var bindImplMethodInfo = typeof( CallBlockBinder<TInput, TOutput> )
-            .GetMethod( nameof( BindImpl ), BindingFlags.NonPublic )!
-            .MakeGenericMethod( typeof( TInput ), typeof( TOutput ) );
+        // Get the MethodInfo for the helper method
+        var bindImplAsyncMethodInfo = typeof(CallBlockBinder<TInput, TOutput>)
+            .GetMethod( nameof(BindImplAsync), BindingFlags.NonPublic | BindingFlags.Instance )!;
 
-        // Create the call expression to BindImpl
-        var callBind = Expression.Call(
-            bindImplMethodInfo,
+        // Create parameters for the lambda expression
+        var paramContext = Expression.Parameter( typeof(IPipelineContext), "context" );
+        var paramArgument = Expression.Parameter( typeof(TInput), "argument" );
+
+        // Create a call expression to the helper method
+        var callBindImplAsync = Expression.Call(
+            Expression.Constant( this ),
+            bindImplAsyncMethodInfo,
             next,
-            Pipeline
+            Pipeline,
+            paramContext,
+            paramArgument
         );
 
         // Create and return the final expression
-        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
-        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
-        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBind, paramContext, paramArgument );
+        return Expression.Lambda<FunctionAsync<TInput, TOutput>>( callBindImplAsync, paramContext, paramArgument );
     }
 
-    private FunctionAsync<TInput, TOutput> BindImpl( FunctionAsync<TOutput, object> next, FunctionAsync<TInput, TOutput> pipeline )
+    private async Task<TOutput> BindImplAsync(
+        FunctionAsync<TOutput, object> next,
+        FunctionAsync<TInput, TOutput> pipeline,
+        IPipelineContext context,
+        TInput argument )
     {
-        return async ( context, argument ) =>
-        {
-            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
+        var (nextArgument, canceled) =
+            await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
 
-            if ( canceled )
-                return default;
+        if ( canceled )
+            return default;
 
-            await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
-            return nextArgument;
-        };
+        await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
+        return nextArgument;
     }
 }

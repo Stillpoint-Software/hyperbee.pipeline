@@ -21,7 +21,11 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallStatementBinder<TInput, TOutput>( Function, Middleware, config ).Bind( AsyncNext, next.Method ),
+            Function = new CallStatementBinder<TInput, TOutput>(
+                Function,
+                Middleware,
+                config
+            ).Bind( AsyncNext, next.Method ),
             Middleware = Middleware
         };
 

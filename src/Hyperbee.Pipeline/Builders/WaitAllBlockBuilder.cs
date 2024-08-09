@@ -16,8 +16,7 @@ public partial interface IPipelineBuilder<TInput, TOutput>
 public partial class PipelineBuilder<TInput, TOutput>
 {
     public IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
@@ -25,8 +24,7 @@ public partial class PipelineBuilder<TInput, TOutput>
     }
 
     public IPipelineBuilder<TInput, TOutput> WaitAll(
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>,
                 IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
@@ -47,8 +45,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
     public IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
         bool inheritMiddleware,
-        Func<Builders<TOutput, TOutput>,
-            Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
@@ -61,6 +58,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         var functions = builderInstances
             .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null ) } )
+            //.Select( x => ((PipelineBuilder<TOutput, object>) x.builder( x.block )).Function )
             .Select( x => x.builder( x.block ).CastFunction<TOutput, object>() )
             .ToArray();
 

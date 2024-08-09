@@ -5,7 +5,7 @@ namespace Hyperbee.Pipeline.Binders.Abstractions;
 
 internal abstract class BlockBinder<TInput, TOutput> : Binder<TInput, TOutput>
 {
-    protected BlockBinder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<Action<IPipelineContext>> configure )
+    protected BlockBinder( Expression<FunctionAsync<TInput, TOutput>> function, Action<IPipelineContext> configure )
         : base( function, configure )
     {
     }

@@ -21,13 +21,12 @@ public partial class PipelineBuilder<TInput, TOutput>
         ArgumentNullException.ThrowIfNull( condition );
 
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
-        var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
+        //var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
+        var function = ((PipelineBuilder<TOutput, object>) builder( block )).Function;
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallIfBlockBinder<TInput, TOutput>( 
-                ExpressionBinder.ToExpression( condition ), 
-                Function ).Bind( function ),
+            Function = new CallIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ),
             Middleware = Middleware
         };
     }

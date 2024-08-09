@@ -6,9 +6,9 @@ namespace Hyperbee.Pipeline.Binders.Abstractions;
 internal abstract class Binder<TInput, TOutput>
 {
     protected Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }
-    protected Expression<Action<IPipelineContext>> Configure { get; }
+    protected Action<IPipelineContext> Configure { get; }
 
-    protected Binder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<Action<IPipelineContext>> configure )
+    protected Binder( Expression<FunctionAsync<TInput, TOutput>> function, Action<IPipelineContext> configure )
     {
         Pipeline = function;
         Configure = configure;

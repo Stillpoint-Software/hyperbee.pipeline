@@ -1,5 +1,4 @@
-﻿using Hyperbee.Pipeline.Extensions.Implementation;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,9 +15,9 @@ public static class PipelineMemoryCacheExtensions
         ArgumentNullException.ThrowIfNull( nestedBuilder );
 
         var block = PipelineFactory.Start<TOutput>();
-        var function = nestedBuilder( block ).GetPipelineFunction();
+        var function = nestedBuilder( block ).CastFunction<TOutput, TNext>();
 
-        return builder.PipeCacheAsync( function.Function, optionsFunc );
+        return builder.PipeCacheAsync( function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeCacheAsync<TInput, TOutput, TNext>(
@@ -29,9 +28,9 @@ public static class PipelineMemoryCacheExtensions
         ArgumentNullException.ThrowIfNull( nestedBuilder );
 
         var block = PipelineFactory.Start<TOutput>();
-        var function = nestedBuilder( block ).GetPipelineFunction();
+        var function = nestedBuilder( block ).CastFunction<TOutput, TNext>();
 
-        return builder.PipeCacheAsync( function.Function, optionsFunc );
+        return builder.PipeCacheAsync( function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeCache<TInput, TOutput, TNext>(

@@ -6,7 +6,7 @@ namespace Hyperbee.Pipeline;
 public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
 {
     internal Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
-    internal Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
+    internal MiddlewareAsync<object, object> Middleware { get; init; }
 
     internal PipelineBuilder()
     {
@@ -84,9 +84,9 @@ public partial class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipeli
     public record PipelineFunction : IPipelineFunction<TInput, TOutput>
     {
         public Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
-        public Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
+        public MiddlewareAsync<object, object> Middleware { get; init; }
 
-        public void Deconstruct( out Expression<FunctionAsync<TInput, TOutput>> function, out Expression<MiddlewareAsync<object, object>> middleware )
+        public void Deconstruct( out Expression<FunctionAsync<TInput, TOutput>> function, out MiddlewareAsync<object, object> middleware )
         {
             function = Function;
             middleware = Middleware;

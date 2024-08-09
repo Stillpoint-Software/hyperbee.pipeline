@@ -6,9 +6,9 @@ namespace Hyperbee.Pipeline.Binders.Abstractions;
 
 internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutput>
 {
-    protected Expression<MiddlewareAsync<object, object>> Middleware { get; }
+    protected MiddlewareAsync<object, object> Middleware { get; }
 
-    protected StatementBinder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<MiddlewareAsync<object, object>> middleware, Expression<Action<IPipelineContext>> configure )
+    protected StatementBinder( Expression<FunctionAsync<TInput, TOutput>> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : base( function, configure )
     {
         Middleware = middleware;

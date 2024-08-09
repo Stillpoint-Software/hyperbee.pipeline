@@ -10,12 +10,14 @@ public partial interface IPipelineBuilder<TInput, TOutput>
 
 public partial class PipelineBuilder<TInput, TOutput>
 {
-    public IPipelineBuilder<TInput, TOutput> ForEach<TElement>( Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder )
+    public IPipelineBuilder<TInput, TOutput> ForEach<TElement>(
+        Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder )
     {
         return ForEachAsync( true, builder );
     }
 
-    public IPipelineBuilder<TInput, TOutput> ForEachAsync<TElement>( bool inheritMiddleware, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder )
+    public IPipelineBuilder<TInput, TOutput> ForEachAsync<TElement>( bool inheritMiddleware,
+        Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder )
     {
         ArgumentNullException.ThrowIfNull( builder );
 
@@ -24,7 +26,8 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( Function ).Bind( function ),
+            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( Function ).Bind(
+                    ExpressionBinder.ToExpression( function ) ),
             Middleware = Middleware
         };
     }

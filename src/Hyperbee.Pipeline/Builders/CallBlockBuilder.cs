@@ -1,6 +1,4 @@
-using System;
-using Hyperbee.Pipeline.Binders;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Hyperbee.Pipeline.Binders;
 
 namespace Hyperbee.Pipeline;
 
@@ -14,21 +12,24 @@ public partial class PipelineBuilder<TInput, TOutput>
 {
     // Call an inner builder discarding the final result. Acts like an Action.
 
-    public IPipelineBuilder<TInput, TOutput> Call( Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
+    public IPipelineBuilder<TInput, TOutput> Call(
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
     {
         return Call( true, builder );
     }
 
-    public IPipelineBuilder<TInput, TOutput> Call( bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
+    public IPipelineBuilder<TInput, TOutput> Call( bool inheritMiddleware,
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
     {
         ArgumentNullException.ThrowIfNull( builder );
 
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
-        var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
+        var function =  builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallBlockBinder<TInput, TOutput>( Function ).Bind( function ),
+            Function =
+                new CallBlockBinder<TInput, TOutput>( Function ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = Middleware
         };
     }
