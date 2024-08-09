@@ -24,7 +24,7 @@ public static class ForEachBlockBuilder
     }
 }
 
-public static class ForEachBlockBuilder<TInput, TOutput, TElement>
+internal static class ForEachBlockBuilder<TInput, TOutput, TElement>
 {
     public static IPipelineBuilder<TInput, TOutput> ForEach(
         IPipelineBuilder<TInput, TOutput> parent,
