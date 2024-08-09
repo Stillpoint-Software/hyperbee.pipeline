@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -12,19 +12,26 @@ public static class ReduceBlockBuilder
 
     public class ReduceBlockBuilderWrapper<TInput, TOutput>( IPipelineBuilder<TInput, TOutput> parent )
     {
-        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>( Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder )
+        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>( 
+            Func<TNext, TNext, TNext> reducer, 
+            Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder 
+        )
         {
             return ReduceBlockBuilder<TInput, TOutput, TElement, TNext>.ReduceAsync( parent, true, reducer, builder );
         }
 
-        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>( bool inheritMiddleware, Func<TNext, TNext, TNext> reducer, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder )
+        public IPipelineBuilder<TInput, TNext> Type<TElement, TNext>( 
+            bool inheritMiddleware, 
+            Func<TNext, TNext, TNext> reducer, 
+            Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder<TElement, TNext>> builder 
+        )
         {
             return ReduceBlockBuilder<TInput, TOutput, TElement, TNext>.ReduceAsync( parent, inheritMiddleware, reducer, builder );
         }
     }
 }
 
-public static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
+internal static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
 {
     public static IPipelineBuilder<TInput, TNext> ReduceAsync(
         IPipelineBuilder<TInput, TOutput> parent,
@@ -39,10 +46,10 @@ public static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TElement, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext>
-        {
-            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, parentFunction ).Bind( function ),
-            Middleware = parentMiddleware
+        return new PipelineBuilder<TInput, TNext> 
+        { 
+            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, parentFunction ).Bind( function ), 
+            Middleware = parentMiddleware 
         };
     }
 }

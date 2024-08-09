@@ -1,24 +1,35 @@
-﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
 public static class PipeBlockBuilderExtensions
 {
-    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( this IPipelineBuilder<TInput, TOutput> parent, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder 
+    )
     {
         return PipeBlockBuilder<TInput, TOutput, TNext>.Pipe( parent, true, builder );
     }
 
-    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( this IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        bool inheritMiddleware, 
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder 
+    )
     {
         return PipeBlockBuilder<TInput, TOutput, TNext>.Pipe( parent, inheritMiddleware, builder );
     }
 }
 
-public static class PipeBlockBuilder<TInput, TOutput, TNext>
+internal static class PipeBlockBuilder<TInput, TOutput, TNext> 
 {
-    public static IPipelineBuilder<TInput, TNext> Pipe( IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> Pipe( 
+        IPipelineBuilder<TInput, TOutput> parent, 
+        bool inheritMiddleware, 
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder 
+    )
     {
         ArgumentNullException.ThrowIfNull( builder );
 

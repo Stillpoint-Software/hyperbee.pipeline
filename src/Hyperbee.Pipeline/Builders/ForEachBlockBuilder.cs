@@ -26,7 +26,11 @@ public static class ForEachBlockBuilder
 
 public static class ForEachBlockBuilder<TInput, TOutput, TElement>
 {
-    public static IPipelineBuilder<TInput, TOutput> ForEach( IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder )
+    public static IPipelineBuilder<TInput, TOutput> ForEach( 
+        IPipelineBuilder<TInput, TOutput> parent, 
+        bool inheritMiddleware, 
+        Func<IPipelineStartBuilder<TElement, TElement>, IPipelineBuilder> builder 
+    )
     {
         ArgumentNullException.ThrowIfNull( builder );
 
@@ -35,7 +39,11 @@ public static class ForEachBlockBuilder<TInput, TOutput, TElement>
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
         var function = builder( block ).CastFunction<TElement, object>(); // cast because we don't know the final Pipe output value
 
-        return new PipelineBuilder<TInput, TOutput> { Function = new ForEachBlockBinder<TInput, TOutput, TElement>( parentFunction ).Bind( function ), Middleware = parentMiddleware };
+        return new PipelineBuilder<TInput, TOutput> 
+        { 
+            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( parentFunction ).Bind( function ), 
+            Middleware = parentMiddleware 
+        };
     }
 }
 

@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -45,7 +45,7 @@ public static class WaitAllBlockBuilder
     }
 }
 
-public static class WaitAllBlockBuilder<TInput, TOutput>
+internal static class WaitAllBlockBuilder<TInput, TOutput> 
 {
     public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
         IPipelineBuilder<TInput, TOutput> parent,
@@ -70,7 +70,7 @@ public static class WaitAllBlockBuilder<TInput, TOutput>
         Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
-        return WaitAll( parent, true, builders, DefaultReducer, config );
+        return WaitAll( parent, inheritMiddleware, builders, DefaultReducer, config );
 
         // create a default reducer that returns the arg from the previous step
         static TOutput DefaultReducer( IPipelineContext ctx, TOutput arg, WaitAllResult[] results ) => arg;

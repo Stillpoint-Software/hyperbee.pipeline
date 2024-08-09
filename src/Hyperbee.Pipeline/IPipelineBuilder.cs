@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline;
 
@@ -18,14 +18,6 @@ public struct Arg
     // example PipelineBuilder.Start<Arg.Empty>();
 
     public struct Empty;
-}
-
-public struct TypeArg<TArg>
-{
-}
-
-public struct TypeArg<TArg1, TArg2>
-{
 }
 
 // pipeline builders have constraints about where they can be applied when creating a pipeline.

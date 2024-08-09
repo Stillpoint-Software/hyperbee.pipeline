@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
@@ -7,32 +7,49 @@ namespace Hyperbee.Pipeline;
 
 public static class CallStatementBuilder
 {
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, string name )
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        Procedure<TOutput> next, string name 
+    )
     {
-        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, name );
+        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        Procedure<TOutput> next, 
+        Action<IPipelineContext> config = null 
+    )
     {
         return CallStatementBuilder<TInput, TOutput>.Call( parent, next, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, string name )
+    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        ProcedureAsync<TOutput> next, 
+        string name 
+    )
     {
-        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, name );
+        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>( 
+        this IPipelineBuilder<TInput, TOutput> parent, 
+        ProcedureAsync<TOutput> next, 
+        Action<IPipelineContext> config = null 
+    )
     {
         return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, config );
     }
 }
 
-public static class CallStatementBuilder<TInput, TOutput>
+internal static class CallStatementBuilder<TInput, TOutput> 
 {
-    public static IPipelineBuilder<TInput, TOutput> Call( IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, string name ) => Call( parent, next, config => config.Name = name );
-
-    public static IPipelineBuilder<TInput, TOutput> Call( IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> Call( 
+        IPipelineBuilder<TInput, TOutput> parent, 
+        Procedure<TOutput> next, 
+        Action<IPipelineContext> config = null 
+    )
     {
         ArgumentNullException.ThrowIfNull( next );
 
@@ -53,9 +70,11 @@ public static class CallStatementBuilder<TInput, TOutput>
         }
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync( IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, string name ) => CallAsync( parent, next, config => config.Name = name );
-
-    public static IPipelineBuilder<TInput, TOutput> CallAsync( IPipelineBuilder<TInput, TOutput> parent, ProcedureAsync<TOutput> next, Action<IPipelineContext> config = null )
+    public static IPipelineBuilder<TInput, TOutput> CallAsync( 
+        IPipelineBuilder<TInput, TOutput> parent, 
+        ProcedureAsync<TOutput> next, 
+        Action<IPipelineContext> config = null 
+    )
     {
         ArgumentNullException.ThrowIfNull( next );
 
