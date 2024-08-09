@@ -28,7 +28,7 @@ public static class PipeStatementBuilder
 
 }
 
-public static class PipeStatementBuilder<TInput, TOutput> 
+public static class PipeStatementBuilder<TInput, TOutput>
 {
     public static IPipelineBuilder<TInput, TNext> Pipe<TNext>( IPipelineBuilder<TInput, TOutput> parent, Function<TOutput, TNext> next, Action<IPipelineContext> config = null )
     {

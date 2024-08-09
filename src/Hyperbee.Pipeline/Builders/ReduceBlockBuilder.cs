@@ -39,10 +39,10 @@ public static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TElement, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext> 
-        { 
-            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer,parentFunction ).Bind( function ), 
-            Middleware = parentMiddleware 
+        return new PipelineBuilder<TInput, TNext>
+        {
+            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
         };
     }
 }

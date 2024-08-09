@@ -7,7 +7,7 @@ public interface IPipelineFunctionProvider<TInput, TOutput>
     IPipelineFunction<TInput, TOutput> GetPipelineFunction();
 }
 
-public interface IPipelineFunction< TInput, TOutput>
+public interface IPipelineFunction<TInput, TOutput>
 {
     FunctionAsync<TInput, TOutput> Function { get; }
     MiddlewareAsync<object, object> Middleware { get; }

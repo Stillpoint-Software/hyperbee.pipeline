@@ -24,7 +24,7 @@ public struct TypeArg<TArg>
 {
 }
 
-public struct TypeArg<TArg1,TArg2>
+public struct TypeArg<TArg1, TArg2>
 {
 }
 

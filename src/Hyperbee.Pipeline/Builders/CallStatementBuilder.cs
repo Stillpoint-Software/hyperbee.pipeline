@@ -28,7 +28,7 @@ public static class CallStatementBuilder
     }
 }
 
-public static class CallStatementBuilder<TInput, TOutput> 
+public static class CallStatementBuilder<TInput, TOutput>
 {
     public static IPipelineBuilder<TInput, TOutput> Call( IPipelineBuilder<TInput, TOutput> parent, Procedure<TOutput> next, string name ) => Call( parent, next, config => config.Name = name );
 

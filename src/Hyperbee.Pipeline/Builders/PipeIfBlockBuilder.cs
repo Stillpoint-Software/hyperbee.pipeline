@@ -5,7 +5,7 @@ namespace Hyperbee.Pipeline;
 
 public static class PipeIfBlockBuilder
 {
-    public static IPipelineBuilder<TInput, TNext> PipeIf<TInput,TOutput,TNext>( this IPipelineBuilder<TInput, TOutput> parent, Function<TOutput, bool> condition, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
+    public static IPipelineBuilder<TInput, TNext> PipeIf<TInput, TOutput, TNext>( this IPipelineBuilder<TInput, TOutput> parent, Function<TOutput, bool> condition, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
         return PipeIfBlockBuilder<TInput, TOutput>.PipeIf( parent, condition, true, builder );
     }
@@ -16,7 +16,7 @@ public static class PipeIfBlockBuilder
     }
 }
 
-public static class PipeIfBlockBuilder<TInput, TOutput> 
+public static class PipeIfBlockBuilder<TInput, TOutput>
 {
     public static IPipelineBuilder<TInput, TNext> PipeIf<TNext>( IPipelineBuilder<TInput, TOutput> parent, Function<TOutput, bool> condition, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
@@ -28,10 +28,10 @@ public static class PipeIfBlockBuilder<TInput, TOutput>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext> 
-        { 
-            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, parentFunction ).Bind( function ), 
-            Middleware = parentMiddleware 
+        return new PipelineBuilder<TInput, TNext>
+        {
+            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
         };
     }
 }

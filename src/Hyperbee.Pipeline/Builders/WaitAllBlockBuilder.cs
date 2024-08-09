@@ -8,46 +8,46 @@ public delegate TOutput WaitAllReducer<in TInput, out TOutput>( IPipelineContext
 
 public static class WaitAllBlockBuilder
 {
-    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>( 
-        this IPipelineBuilder<TInput, TOutput> parent, 
-        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
-        WaitAllReducer<TOutput, TNext> reducer, 
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
-        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, true, builders, reducer, config );
+        return WaitAllBlockBuilder<TInput, TOutput>.WaitAll( parent, true, builders, reducer, config );
     }
 
-    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>( 
-        this IPipelineBuilder<TInput, TOutput> parent, 
-        bool inheritMiddleware, 
-        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
-        WaitAllReducer<TOutput, TNext> reducer, 
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TInput, TOutput, TNext>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        bool inheritMiddleware,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
+        WaitAllReducer<TOutput, TNext> reducer,
         Action<IPipelineContext> config = null )
     {
-        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, inheritMiddleware, builders, reducer, config );
+        return WaitAllBlockBuilder<TInput, TOutput>.WaitAll( parent, inheritMiddleware, builders, reducer, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>( 
-        this IPipelineBuilder<TInput, TOutput> parent, 
-        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
-        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, true, builders, config );
+        return WaitAllBlockBuilder<TInput, TOutput>.WaitAll( parent, true, builders, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>( 
-        this IPipelineBuilder<TInput, TOutput> parent, 
-        bool inheritMiddleware, 
-        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders, 
+    public static IPipelineBuilder<TInput, TOutput> WaitAll<TInput, TOutput>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        bool inheritMiddleware,
+        Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
     {
-        return WaitAllBlockBuilder<TInput,TOutput>.WaitAll( parent, inheritMiddleware, builders, config );
+        return WaitAllBlockBuilder<TInput, TOutput>.WaitAll( parent, inheritMiddleware, builders, config );
     }
 }
 
-public static class WaitAllBlockBuilder<TInput, TOutput> 
+public static class WaitAllBlockBuilder<TInput, TOutput>
 {
-    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>( 
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
         IPipelineBuilder<TInput, TOutput> parent,
         Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         WaitAllReducer<TOutput, TNext> reducer,
@@ -56,7 +56,7 @@ public static class WaitAllBlockBuilder<TInput, TOutput>
         return WaitAll( parent, true, builders, reducer, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WaitAll( 
+    public static IPipelineBuilder<TInput, TOutput> WaitAll(
         IPipelineBuilder<TInput, TOutput> parent,
         Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
         Action<IPipelineContext> config = null )
@@ -64,7 +64,7 @@ public static class WaitAllBlockBuilder<TInput, TOutput>
         return WaitAll( parent, true, builders, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WaitAll( 
+    public static IPipelineBuilder<TInput, TOutput> WaitAll(
         IPipelineBuilder<TInput, TOutput> parent,
         bool inheritMiddleware,
         Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,
@@ -76,7 +76,7 @@ public static class WaitAllBlockBuilder<TInput, TOutput>
         static TOutput DefaultReducer( IPipelineContext ctx, TOutput arg, WaitAllResult[] results ) => arg;
     }
 
-    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>( 
+    public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
         IPipelineBuilder<TInput, TOutput> parent,
         bool inheritMiddleware,
         Func<Builders<TOutput, TOutput>, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>[]> builders,

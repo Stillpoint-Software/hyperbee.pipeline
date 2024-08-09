@@ -16,7 +16,7 @@ public static class PipeBlockBuilderExtensions
     }
 }
 
-public static class PipeBlockBuilder<TInput, TOutput, TNext> 
+public static class PipeBlockBuilder<TInput, TOutput, TNext>
 {
     public static IPipelineBuilder<TInput, TNext> Pipe( IPipelineBuilder<TInput, TOutput> parent, bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
@@ -27,10 +27,10 @@ public static class PipeBlockBuilder<TInput, TOutput, TNext>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
-        return new PipelineBuilder<TInput, TNext> 
-        { 
-            Function = new PipeBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ), 
-            Middleware = parentMiddleware 
+        return new PipelineBuilder<TInput, TNext>
+        {
+            Function = new PipeBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
         };
     }
 }

@@ -21,7 +21,7 @@ public static class WrapBuilder
     }
 }
 
-public static class WrapBuilder<TInput, TOutput> 
+public static class WrapBuilder<TInput, TOutput>
 {
     public static IPipelineBuilder<TInput, TOutput> WrapAsync( IPipelineBuilder<TInput, TOutput> parent, MiddlewareAsync<TInput, TOutput> pipelineMiddleware, string name ) => WrapAsync( parent, pipelineMiddleware, config => config.Name = name );
 
@@ -32,10 +32,10 @@ public static class WrapBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TOutput> 
-        { 
-            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ), 
-            Middleware = parentMiddleware 
+        return new PipelineBuilder<TInput, TOutput>
+        {
+            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ),
+            Middleware = parentMiddleware
         };
     }
 

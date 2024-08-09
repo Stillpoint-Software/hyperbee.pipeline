@@ -16,7 +16,7 @@ public static class HookBuilder
     }
 }
 
-public static class HookBuilder<TInput, TOutput> 
+public static class HookBuilder<TInput, TOutput>
 {
     public static IPipelineStartBuilder<TInput, TOutput> HookAsync( IPipelineStartBuilder<TInput, TOutput> parent, MiddlewareAsync<object, object> functionMiddleware )
     {
@@ -25,10 +25,10 @@ public static class HookBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TOutput> 
-        { 
-            Function = parentFunction, 
-            Middleware = new HookBinder<object, object>( parentMiddleware ).Bind( functionMiddleware ) 
+        return new PipelineBuilder<TInput, TOutput>
+        {
+            Function = parentFunction,
+            Middleware = new HookBinder<object, object>( parentMiddleware ).Bind( functionMiddleware )
         };
     }
 

@@ -23,7 +23,7 @@ static class CallBlockBuilder<TInput, TOutput>
     {
         ArgumentNullException.ThrowIfNull( builder );
 
-        var (parentFunction,parentMiddleware) = parent.GetPipelineFunction();
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
