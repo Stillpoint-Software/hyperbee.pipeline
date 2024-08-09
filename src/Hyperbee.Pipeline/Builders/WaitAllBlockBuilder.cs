@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Binders;
+﻿using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -45,7 +45,7 @@ public static class WaitAllBlockBuilder
     }
 }
 
-internal static class WaitAllBlockBuilder<TInput, TOutput> 
+internal static class WaitAllBlockBuilder<TInput, TOutput>
 {
     public static IPipelineBuilder<TInput, TNext> WaitAll<TNext>(
         IPipelineBuilder<TInput, TOutput> parent,
