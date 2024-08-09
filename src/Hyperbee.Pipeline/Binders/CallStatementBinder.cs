@@ -1,20 +1,14 @@
 ﻿using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallStatementBinder<TInput, TOutput>
+internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TOutput>
 {
-    private FunctionAsync<TInput, TOutput> Pipeline { get; }
-    private MiddlewareAsync<object, object> Middleware { get; }
-    private Action<IPipelineContext> Configure { get; }
-
     public CallStatementBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+        : base( function, middleware, configure )
     {
-        Pipeline = function;
-        Middleware = middleware;
-        Configure = configure;
     }
 
     public FunctionAsync<TInput, TOutput> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
@@ -23,38 +17,18 @@ internal class CallStatementBinder<TInput, TOutput>
 
         return async ( context, argument ) =>
         {
-            var nextArgument = await Pipeline( context, argument ).ConfigureAwait( false );
+            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
 
-            var contextControl = (IPipelineContextControl) context;
-
-            if ( contextControl.HandleCancellationRequested( nextArgument ) )
+            if ( canceled )
                 return default;
 
-            using ( contextControl.CreateFrame( context, Configure, defaultName ) )
-            {
-                return await Next( next, context, nextArgument ).ConfigureAwait( false );
-            }
+            return await ProcessStatementAsync(
+                async ( ctx, arg ) =>
+                {
+                    await next( ctx, arg ).ConfigureAwait( false );
+                    return arg;
+                }, context, nextArgument, defaultName ).ConfigureAwait( false );
         };
     }
-
-    private async Task<TOutput> Next( ProcedureAsync<TOutput> next, IPipelineContext context, TOutput nextArgument )
-    {
-        if ( Middleware == null )
-        {
-            await next( context, nextArgument ).ConfigureAwait( false );
-            return nextArgument;
-        }
-
-        await Middleware(
-            context,
-            nextArgument,
-            async ( context1, argument1 ) =>
-            {
-                await next( context1, (TOutput) argument1 ).ConfigureAwait( false );
-                return nextArgument;
-            }
-        ).ConfigureAwait( false );
-
-        return nextArgument;
-    }
 }
+

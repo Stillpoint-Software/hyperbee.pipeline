@@ -2,10 +2,10 @@
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
+internal class PipeIfBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
 {
-    public PipeBlockBinder( FunctionAsync<TInput, TOutput> function )
-        : base( function, default )
+    public PipeIfBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function )
+        : base( condition, function, default )
     {
     }
 

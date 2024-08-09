@@ -101,7 +101,7 @@ var count = 0;
 var command = PipelineFactory
     .Start<string>()
     .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-    .ForEach<string>( builder => builder
+    .ForEach().Type<string>( builder => builder
         .Pipe( ( ctx, arg ) => count += 10 )
     )
     .Pipe( ( ctx, arg ) => count += 5 )
@@ -116,6 +116,21 @@ Assert.AreEqual( count, 25 );
 
 `Reduce` and `ReduceAync` allow you to transform an enumerable pipeline input to a single value. You can specify a reducer function
 that defines how the elements should be combined, and a builder function that creates the pipeline for processing the elements.### Cancel
+
+```csharp
+var command = PipelineFactory
+     .Start<string>()
+     .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
+     .Reduce().Type<string, int>( ( aggregate, value ) => aggregate + value, builder => builder
+         .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )
+     )
+     .Pipe( ( ctx, arg ) => arg + 5 )
+     .Build();
+
+var result = await command( new PipelineContext(), "1 2 3 4 5" );
+
+Assert.AreEqual( result, 70 );
+```
 
 ### WaitAll
 

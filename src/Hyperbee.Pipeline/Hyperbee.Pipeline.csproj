@@ -25,10 +25,7 @@
   </ItemGroup>
   <ItemGroup>
 	<None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
-	<None Include="README.md">
-	  <Pack>True</Pack>
-	  <PackagePath>\</PackagePath>
-	</None>
+	<None Include="..\..\README.md" Link="README.md" />
 	<PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
     <PrivateAssets>all</PrivateAssets>
     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
