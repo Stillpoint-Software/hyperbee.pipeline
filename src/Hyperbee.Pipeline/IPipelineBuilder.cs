@@ -33,12 +33,12 @@ public struct Arg
 // 
 // we solve for this using interfaces.
 
-public partial interface IPipelineStartBuilder<TInput, TOutput> : IPipelineBuilder<TInput, TOutput>
+public interface IPipelineStartBuilder<in TInput, TOutput> : IPipelineBuilder<TInput, TOutput>
 {
     // head actions: (e.g. Hook) that are only valid at the start of the pipeline 
 }
 
-public partial interface IPipelineBuilder<TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
+public interface IPipelineBuilder<in TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
 {
     // normal actions
 }

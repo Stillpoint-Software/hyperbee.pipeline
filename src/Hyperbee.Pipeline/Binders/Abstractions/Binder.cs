@@ -2,6 +2,7 @@
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
+
 internal abstract class Binder<TInput, TOutput>
 {
     protected FunctionAsync<TInput, TOutput> Pipeline { get; }

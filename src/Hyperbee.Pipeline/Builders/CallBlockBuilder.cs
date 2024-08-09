@@ -1,33 +1,47 @@
 ﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
 
-public partial interface IPipelineBuilder<TInput, TOutput>
+public static class CallBlockBuilder
 {
-    IPipelineBuilder<TInput, TOutput> Call( Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder );
-    IPipelineBuilder<TInput, TOutput> Call( bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder );
-}
-
-public partial class PipelineBuilder<TInput, TOutput>
-{
-    // Call an inner builder discarding the final result. Acts like an Action.
-
-    public IPipelineBuilder<TInput, TOutput> Call( Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
+    )
     {
-        return Call( true, builder );
+        return CallBlockBuilder<TInput, TOutput>.Call( parent, true, builder );
     }
 
-    public IPipelineBuilder<TInput, TOutput> Call( bool inheritMiddleware, Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder )
+    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
+        this IPipelineBuilder<TInput, TOutput> parent,
+        bool inheritMiddleware,
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
+    )
+    {
+        return CallBlockBuilder<TInput, TOutput>.Call( parent, inheritMiddleware, builder );
+    }
+}
+
+internal static class CallBlockBuilder<TInput, TOutput>
+{
+    public static IPipelineBuilder<TInput, TOutput> Call(
+        IPipelineBuilder<TInput, TOutput> parent,
+        bool inheritMiddleware,
+        Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
+    )
     {
         ArgumentNullException.ThrowIfNull( builder );
 
-        var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null );
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallBlockBinder<TInput, TOutput>( Function ).Bind( function ),
-            Middleware = Middleware
+            Function = new CallBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
         };
     }
 }

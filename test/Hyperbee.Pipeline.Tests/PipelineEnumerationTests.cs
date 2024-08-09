@@ -44,7 +44,7 @@ public class PipelineEnumerationTests
         var command = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-            .ForEach<string>( builder => builder
+            .ForEach().Type<string>( builder => builder
                 .Pipe( ( ctx, arg ) => arg + "!" )
                 .Pipe( ( ctx, arg ) => count += 10 )
             )
@@ -62,7 +62,7 @@ public class PipelineEnumerationTests
         var command = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-            .Reduce<string, int>( ( a, v ) => a + v, builder => builder
+            .Reduce().Type<string, int>( ( a, v ) => a + v, builder => builder
                 .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )
             )
             .Pipe( ( ctx, arg ) => arg + 5 )
