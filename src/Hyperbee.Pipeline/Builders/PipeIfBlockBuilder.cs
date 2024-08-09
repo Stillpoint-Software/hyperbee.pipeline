@@ -25,9 +25,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeIfBlockBinder<TInput, TOutput>(
-                condition,
-                Function ).Bind( function ),
+            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, Function ).Bind( function ),
             Middleware = Middleware
         };
     }

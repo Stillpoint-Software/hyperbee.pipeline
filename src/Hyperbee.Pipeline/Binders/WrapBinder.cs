@@ -7,10 +7,10 @@ namespace Hyperbee.Pipeline.Binders;
 
 internal class WrapBinder<TInput, TOutput>
 {
-    private Expression<MiddlewareAsync<TInput, TOutput>> Middleware { get; }
+    private MiddlewareAsync<TInput, TOutput> Middleware { get; }
     private Action<IPipelineContext> Configure { get; }
 
-    public WrapBinder( Expression<MiddlewareAsync<TInput, TOutput>> middleware, Action<IPipelineContext> configure )
+    public WrapBinder( MiddlewareAsync<TInput, TOutput> middleware, Action<IPipelineContext> configure )
     {
         Middleware = middleware;
         Configure = configure;
@@ -31,7 +31,7 @@ internal class WrapBinder<TInput, TOutput>
             Expression.Constant( this ),
             bindImplAsyncMethodInfo,
             next,
-            Middleware,
+            ExpressionBinder.ToExpression( Middleware ),
             paramContext,
             paramArgument
         );

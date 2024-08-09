@@ -1,6 +1,4 @@
-﻿using static System.Net.Mime.MediaTypeNames;
-
-namespace Hyperbee.Pipeline.Binders;
+﻿namespace Hyperbee.Pipeline.Binders;
 
 internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,object> usage
 {

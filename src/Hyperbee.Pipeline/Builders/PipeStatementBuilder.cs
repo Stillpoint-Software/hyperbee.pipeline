@@ -21,10 +21,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>(
-                Function,
-                Middleware,
-                config ).Bind( AsyncNext, next.Method ),
+            Function = new PipeStatementBinder<TInput, TOutput>( Function, Middleware, config ).Bind( AsyncNext, next.Method ),
             Middleware = Middleware
         };
 
@@ -44,10 +41,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>(
-                Function,
-                Middleware,
-                config ).Bind( next ),
+            Function = new PipeStatementBinder<TInput, TOutput>( Function, Middleware, config ).Bind( next ),
             Middleware = Middleware
         };
     }

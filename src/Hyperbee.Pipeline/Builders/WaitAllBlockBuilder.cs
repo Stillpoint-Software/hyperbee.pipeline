@@ -58,7 +58,6 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         var functions = builderInstances
             .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? Middleware : null ) } )
-            //.Select( x => ((PipelineBuilder<TOutput, object>) x.builder( x.block )).Function )
             .Select( x => x.builder( x.block ).CastFunction<TOutput, object>() )
             .ToArray();
 

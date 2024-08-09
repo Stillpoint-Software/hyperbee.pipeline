@@ -26,8 +26,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( Function ).Bind(
-                    ExpressionBinder.ToExpression( function ) ),
+            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( Function ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = Middleware
         };
     }

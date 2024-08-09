@@ -28,8 +28,7 @@ public partial class PipelineBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function =
-                new CallBlockBinder<TInput, TOutput>( Function ).Bind( ExpressionBinder.ToExpression( function ) ),
+            Function = new CallBlockBinder<TInput, TOutput>( Function ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = Middleware
         };
     }
