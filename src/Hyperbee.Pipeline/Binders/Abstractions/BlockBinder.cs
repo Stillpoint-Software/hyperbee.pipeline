@@ -1,10 +1,11 @@
-﻿using Hyperbee.Pipeline.Context;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
 internal abstract class BlockBinder<TInput, TOutput> : Binder<TInput, TOutput>
 {
-    protected BlockBinder( FunctionAsync<TInput, TOutput> function, Action<IPipelineContext> configure )
+    protected BlockBinder( Expression<FunctionAsync<TInput, TOutput>> function, Action<IPipelineContext> configure )
         : base( function, configure )
     {
     }
