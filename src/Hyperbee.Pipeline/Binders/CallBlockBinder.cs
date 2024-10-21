@@ -43,7 +43,7 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
                 [awaitedResult],
                 Assign( awaitedResult, Await( Invoke( ProcessPipelineAsync( context, argument ) ) ) ),
                 IfThen( canceledField,
-                    Return( returnLabel, Default( typeof(TOutput) ) )
+                    Return( returnLabel, Default( typeof( TOutput ) ) )
                 ),
                 Await( Invoke( ProcessBlockAsync( next, context, nextArgumentField ) ), configureAwait: false ),
                 Label( returnLabel, nextArgumentField )

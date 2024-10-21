@@ -53,7 +53,7 @@ internal static class PipeStatementBuilder<TInput, TOutput>
     )
     {
         ArgumentNullException.ThrowIfNull( next );
-    
+
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
         Expression<FunctionAsync<TOutput, TNext>> nextExpression = ( ctx, arg ) => Task.FromResult( next( ctx, arg ) );

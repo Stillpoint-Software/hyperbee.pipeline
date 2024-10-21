@@ -28,18 +28,18 @@ internal abstract class Binder<TInput, TOutput>
     //     return (canceled ? default : result, canceled);
     // }
 
-    protected virtual Expression ProcessPipelineAsync( ParameterExpression context, ParameterExpression argument ) 
+    protected virtual Expression ProcessPipelineAsync( ParameterExpression context, ParameterExpression argument )
     {
-        var tupleCtor = typeof(ValueTuple<TOutput, bool>).GetConstructor( [typeof(TOutput), typeof(bool)] )!;
+        var tupleCtor = typeof( ValueTuple<TOutput, bool> ).GetConstructor( [typeof( TOutput ), typeof( bool )] )!;
 
         var resultVariable = Variable( typeof( TOutput ), "result" );
         var canceledVariable = Variable( typeof( bool ), "canceled" );
 
-        var contextControl = Convert( context , typeof( IPipelineContextControl ) );
+        var contextControl = Convert( context, typeof( IPipelineContextControl ) );
 
         var body = BlockAsync(
             [resultVariable, canceledVariable],
-            Assign( resultVariable, Await( Invoke( Pipeline, context,  argument ), configureAwait: false ) ),
+            Assign( resultVariable, Await( Invoke( Pipeline, context, argument ), configureAwait: false ) ),
             Assign( canceledVariable, HandleCancellationRequested( contextControl, resultVariable ) ),
 
             Condition(

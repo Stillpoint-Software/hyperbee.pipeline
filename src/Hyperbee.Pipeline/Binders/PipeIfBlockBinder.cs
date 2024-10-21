@@ -53,7 +53,7 @@ internal class PipeIfBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInpu
                 [awaitedResult],
                 Assign( awaitedResult, Await( Invoke( ProcessPipelineAsync( context, argument ) ) ) ),
                 IfThen( canceled,
-                    Return( returnLabel, Default( typeof(TNext) ) )
+                    Return( returnLabel, Default( typeof( TNext ) ) )
                 ),
                 Label( returnLabel,
                     Await( Invoke( ProcessBlockAsync( nextExpression, context, nextArgument ) ), configureAwait: false )

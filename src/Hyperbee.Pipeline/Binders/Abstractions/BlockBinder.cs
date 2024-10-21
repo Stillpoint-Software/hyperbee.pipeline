@@ -23,7 +23,7 @@ internal abstract class BlockBinder<TInput, TOutput> : Binder<TInput, TOutput>
     // }
     protected virtual Expression<Task<TNext>> ProcessBlockAsync<TArgument, TNext>( Expression<FunctionAsync<TArgument, TNext>> blockFunction, ParameterExpression context, Expression nextArgument )
     {
-        var body = BlockAsync( 
+        var body = BlockAsync(
             Await( Invoke( blockFunction, context, nextArgument ), configureAwait: false )
         );
 

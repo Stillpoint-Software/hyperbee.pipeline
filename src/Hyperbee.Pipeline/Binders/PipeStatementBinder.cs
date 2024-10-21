@@ -45,7 +45,7 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
             [awaitedResult],
             Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
             Condition( canceled,
-                Default( typeof(TNext) ),
+                Default( typeof( TNext ) ),
                 Await( ProcessStatementAsync( next, context, nextArgument, defaultName ), configureAwait: false )
             )
         );

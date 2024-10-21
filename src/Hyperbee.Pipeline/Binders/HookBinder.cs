@@ -27,7 +27,7 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
 
     public Expression<MiddlewareAsync<TInput, TOutput>> Bind( Expression<MiddlewareAsync<TInput, TOutput>> middleware )
     {
-        if( Middleware == null )
+        if ( Middleware == null )
             return middleware;
 
         var context = Parameter( typeof( IPipelineContext ), "context" );

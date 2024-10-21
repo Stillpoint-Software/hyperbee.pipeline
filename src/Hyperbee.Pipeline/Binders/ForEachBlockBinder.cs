@@ -44,7 +44,7 @@ internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInpu
         var canceled = Field( awaitedResult, "Item2" );
 
         var nextArguments = Variable( typeof( IEnumerable<TElement> ), "nextArguments" );
-        var moveNextCall = Call( nextArguments, typeof(IEnumerator).GetMethod( "MoveNext" )! );
+        var moveNextCall = Call( nextArguments, typeof( IEnumerator ).GetMethod( "MoveNext" )! );
 
         var breakLabel = Label( "breakLoop" );
         var returnLabel = Label( "return" );

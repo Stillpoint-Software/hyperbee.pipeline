@@ -50,7 +50,7 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
         // inner function
         var ctx = Parameter( typeof( IPipelineContext ), "ctx" );
         var arg = Parameter( typeof( TInput ), "arg" );
-        var nextExpression = Lambda<FunctionAsync<TOutput, TInput>> (
+        var nextExpression = Lambda<FunctionAsync<TOutput, TInput>>(
             BlockAsync(
                 Await( Invoke( next, ctx, arg ), configureAwait: false ),
                 argument

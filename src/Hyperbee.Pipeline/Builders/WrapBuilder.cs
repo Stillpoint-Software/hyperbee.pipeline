@@ -48,8 +48,8 @@ internal static class WrapBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        Expression<MiddlewareAsync<TInput, TOutput>> middlewareExpression = 
-            (ctx, arg, function) => pipelineMiddleware( ctx, arg, function );
+        Expression<MiddlewareAsync<TInput, TOutput>> middlewareExpression =
+            ( ctx, arg, function ) => pipelineMiddleware( ctx, arg, function );
 
         Expression<Action<IPipelineContext>> configExpression = config == null
             ? null

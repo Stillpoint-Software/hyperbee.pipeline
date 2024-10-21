@@ -43,8 +43,8 @@ internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TI
         return Lambda<Task<TNext>>(
             IfThenElse(
                 Not( Invoke( Condition, Constant( context ),
-                    Convert( Convert( nextArgumentExpression, typeof(object) ), typeof(TOutput) ) ) ),
-                Convert( Convert( Constant( nextArgument ), typeof(object) ), typeof(TNext) ),
+                    Convert( Convert( nextArgumentExpression, typeof( object ) ), typeof( TOutput ) ) ) ),
+                Convert( Convert( Constant( nextArgument ), typeof( object ) ), typeof( TNext ) ),
                 base.ProcessBlockAsync( blockFunction, context, nextArgument )
             ) );
     }
