@@ -1,24 +1,54 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders.Abstractions;
+using Hyperbee.Pipeline.Context;
+using static System.Linq.Expressions.Expression;
+using static Hyperbee.Expressions.AsyncExpression;
 
 namespace Hyperbee.Pipeline.Binders;
 
 internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 {
-    public PipeBlockBinder( FunctionAsync<TInput, TOutput> function )
+    public PipeBlockBinder( Expression<FunctionAsync<TInput, TOutput>> function )
         : base( function, default )
     {
     }
 
-    public FunctionAsync<TInput, TNext> Bind<TNext>( FunctionAsync<TOutput, TNext> next )
+    // public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
+    // {
+    //     return async ( context, argument ) =>
+    //     {
+    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+    //
+    //         if ( canceled )
+    //             return default;
+    //
+    //         return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
+    //     };
+    // }
+
+    public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
     {
-        return async ( context, argument ) =>
-        {
-            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+        var context = Parameter( typeof( IPipelineContext ), "context" );
+        var argument = Parameter( typeof( TNext ), "argument" );
 
-            if ( canceled )
-                return default;
+        var awaitedResult = Variable( typeof( (TNext, bool) ), "awaitedResult" );
+        var nextArgumentField = Field( awaitedResult, "Item1" );
+        var canceledField = Field( awaitedResult, "Item2" );
 
-            return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
-        };
+        var returnLabel = Label( "return" );
+
+        return Lambda<FunctionAsync<TInput, TNext>>(
+            BlockAsync(
+                [awaitedResult],
+                Assign( awaitedResult, Await( Invoke( ProcessPipelineAsync( context, argument ) ) ) ),
+                IfThen( canceledField,
+                    Return( returnLabel, Default( typeof(TNext) ) )
+                ),
+                Label( returnLabel,
+                    Await( Invoke( ProcessBlockAsync( next, context, nextArgumentField ) ), configureAwait: false )
+                )
+            ),
+            parameters: [context, argument]
+        );
     }
 }

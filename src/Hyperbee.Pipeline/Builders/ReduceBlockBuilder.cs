@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -46,9 +47,11 @@ internal static class ReduceBlockBuilder<TInput, TOutput, TElement, TNext>
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TElement, TNext>) builder( block )).Function;
 
+        Expression<Func<TNext, TNext, TNext>> reducerExpression = ( n1, n2 ) => reducer( n1, n2 );
+
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducer, parentFunction ).Bind( function ),
+            Function = new ReduceBlockBinder<TInput, TOutput, TElement, TNext>( reducerExpression, parentFunction ).Bind( function ),
             Middleware = parentMiddleware
         };
     }

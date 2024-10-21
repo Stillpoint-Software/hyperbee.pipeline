@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -42,9 +43,11 @@ internal static class PipeIfBlockBuilder<TInput, TOutput>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
+        Expression<Function<TOutput, bool>> conditionExpression = ( ctx, arg ) => condition( ctx, arg );
+
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeIfBlockBinder<TInput, TOutput>( condition, parentFunction ).Bind( function ),
+            Function = new PipeIfBlockBinder<TInput, TOutput>( conditionExpression, parentFunction ).Bind( function ),
             Middleware = parentMiddleware
         };
     }

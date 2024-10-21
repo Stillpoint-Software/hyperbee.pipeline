@@ -18,7 +18,8 @@ public static class PipelineDistributedCacheExtensions
         var block = PipelineFactory.Start<TOutput>();
         var function = nestedBuilder( block ).GetPipelineFunction();
 
-        return builder.PipeDistributedCacheAsync( function.Function, optionsFunc );
+        // TODO: implement this
+        return null; // builder.PipeDistributedCacheAsync( function.Function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeDistributedCacheAsync<TInput, TOutput, TNext>(

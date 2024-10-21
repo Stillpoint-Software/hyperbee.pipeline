@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -34,10 +35,11 @@ internal static class HookBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
+        Expression<MiddlewareAsync<object, object>> middlewareExpression = ( ctx, arg, function ) => functionMiddleware( ctx, arg, function );
         return new PipelineBuilder<TInput, TOutput>
         {
             Function = parentFunction,
-            Middleware = new HookBinder<object, object>( parentMiddleware ).Bind( functionMiddleware )
+            Middleware = new HookBinder<object, object>( parentMiddleware ).Bind( middlewareExpression )
         };
     }
 

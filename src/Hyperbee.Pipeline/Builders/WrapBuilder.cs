@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -47,9 +48,16 @@ internal static class WrapBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
+        Expression<MiddlewareAsync<TInput, TOutput>> middlewareExpression = 
+            (ctx, arg, function) => pipelineMiddleware( ctx, arg, function );
+
+        Expression<Action<IPipelineContext>> configExpression = config == null
+            ? null
+            : ctx => config( ctx );
+
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ),
+            Function = new WrapBinder<TInput, TOutput>( middlewareExpression, configExpression ).Bind( parentFunction ),
             Middleware = parentMiddleware
         };
     }

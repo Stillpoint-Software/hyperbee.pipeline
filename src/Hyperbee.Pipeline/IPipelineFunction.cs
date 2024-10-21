@@ -1,4 +1,6 @@
-﻿namespace Hyperbee.Pipeline;
+﻿using System.Linq.Expressions;
+
+namespace Hyperbee.Pipeline;
 
 public interface IPipelineFunctionProvider<TInput, TOutput>
 {
@@ -9,10 +11,10 @@ public interface IPipelineFunctionProvider<TInput, TOutput>
 
 public interface IPipelineFunction<TInput, TOutput>
 {
-    FunctionAsync<TInput, TOutput> Function { get; }
-    MiddlewareAsync<object, object> Middleware { get; }
+    Expression<FunctionAsync<TInput, TOutput>> Function { get; }
+    Expression<MiddlewareAsync<object, object>> Middleware { get; }
 
-    void Deconstruct( out FunctionAsync<TInput, TOutput> function, out MiddlewareAsync<object, object> middleware )
+    void Deconstruct( out Expression<FunctionAsync<TInput, TOutput>> function, out Expression<MiddlewareAsync<object, object>> middleware )
     {
         function = Function;
         middleware = Middleware;

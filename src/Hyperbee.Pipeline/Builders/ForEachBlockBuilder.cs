@@ -37,7 +37,8 @@ internal static class ForEachBlockBuilder<TInput, TOutput, TElement>
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
         var block = PipelineFactory.Start<TElement>( inheritMiddleware ? parentMiddleware : null );
-        var function = builder( block ).CastFunction<TElement, object>(); // cast because we don't know the final Pipe output value
+        //var function = builder( block ).CastFunction<TElement, object>(); // cast because we don't know the final Pipe output value
+        var function = builder( block ).CastExpression<TElement, object>(); // cast because we don't know the final Pipe output value
 
         return new PipelineBuilder<TInput, TOutput>
         {

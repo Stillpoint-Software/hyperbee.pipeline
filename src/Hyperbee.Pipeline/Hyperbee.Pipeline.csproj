@@ -30,7 +30,8 @@
     <PrivateAssets>all</PrivateAssets>
     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+	<PackageReference Include="Hyperbee.Expressions" Version="1.0.0-develop.241016172242" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0-rc.2.24473.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0-rc.2.24473.5" />
   </ItemGroup>
 </Project>

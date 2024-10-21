@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Context;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline;
 
@@ -57,4 +58,5 @@ public interface IPipelineBuilder
     // used to bind the tail of an inner builder to the continuation of its parent.
     // this is necessary because you can't directly cast delegates. 
     FunctionAsync<TIn, TOut> CastFunction<TIn, TOut>();
+    Expression<FunctionAsync<TIn, TOut>> CastExpression<TIn, TOut>();
 }

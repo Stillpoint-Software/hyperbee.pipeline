@@ -1,11 +1,15 @@
-﻿using Hyperbee.Pipeline.Data;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Data;
+using static System.Linq.Expressions.Expression;
+using static Hyperbee.Expressions.AsyncExpression;
 
 namespace Hyperbee.Pipeline;
 
 public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
 {
-    internal FunctionAsync<TInput, TOutput> Function { get; init; }
-    internal MiddlewareAsync<object, object> Middleware { get; init; }
+    internal Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
+    internal Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
 
     internal PipelineBuilder()
     {
@@ -14,11 +18,14 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     public FunctionAsync<TInput, TOutput> Build()
     {
         // build and return the outermost method
+
+        var compiledFunction = Function.Compile();
+
         return async ( context, argument ) =>
         {
             try
             {
-                var result = await Function( context, argument ).ConfigureAwait( false );
+                var result = await compiledFunction( context, argument ).ConfigureAwait( false );
 
                 if ( context.CancellationToken.IsCancellationRequested )
                     return Converter.TryConvertTo<TOutput>( context.CancellationValue, out var converted ) ? converted : default;
@@ -40,11 +47,13 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     public ProcedureAsync<TInput> BuildAsProcedure()
     {
         // build and return the outermost method
+        var compiledFunction = Function.Compile();
+
         return async ( context, argument ) =>
         {
             try
             {
-                await Function( context, argument ).ConfigureAwait( false );
+                await compiledFunction( context, argument ).ConfigureAwait( false );
             }
             catch ( Exception ex )
             {
@@ -58,13 +67,29 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
 
     FunctionAsync<TIn, TOut> IPipelineBuilder.CastFunction<TIn, TOut>()
     {
+        var compiledFunction = Function.Compile();
+
         return async ( context, argument ) =>
         {
-            var result = await Function( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
+            var result = await compiledFunction( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
             return Cast<TOut>( result );
         };
 
         static TType Cast<TType>( object value ) => (TType) value;
+    }
+
+    Expression<FunctionAsync<TIn, TOut>> IPipelineBuilder.CastExpression<TIn, TOut>()
+    {
+        var context = Parameter( typeof( IPipelineContext ), "context" );
+        var argument = Parameter( typeof( TInput ), "argument" );
+
+        return Lambda<FunctionAsync<TIn, TOut>>(
+            BlockAsync(
+                [context, argument],
+                Convert( Await( Invoke( Function, context, Convert( argument, typeof( TInput ) ) ), configureAwait: false ), typeof( TOut ) )
+            ),
+            parameters: [context, argument]
+        );
     }
 
     // custom builders and binders need access to Function and Middleware
@@ -79,7 +104,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
 
     public record PipelineFunction : IPipelineFunction<TInput, TOutput>
     {
-        public FunctionAsync<TInput, TOutput> Function { get; init; }
-        public MiddlewareAsync<object, object> Middleware { get; init; }
+        public Expression<FunctionAsync<TInput, TOutput>> Function { get; init; }
+        public Expression<MiddlewareAsync<object, object>> Middleware { get; init; }
     }
 }

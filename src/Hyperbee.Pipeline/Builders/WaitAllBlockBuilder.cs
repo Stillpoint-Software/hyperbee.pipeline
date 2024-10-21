@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -97,9 +98,13 @@ internal static class WaitAllBlockBuilder<TInput, TOutput>
             .Select( x => x.builder( x.block ).CastFunction<TOutput, object>() )
             .ToArray();
 
+        Expression<Action<IPipelineContext>> configExpression = config == null
+            ? null
+            : ctx => config( ctx );
+
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new WaitAllBlockBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( functions, reducer ),
+            //Function = new WaitAllBlockBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( functions, reducer ),
             Middleware = parentMiddleware
         };
     }

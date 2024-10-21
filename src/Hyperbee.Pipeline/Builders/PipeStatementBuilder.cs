@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
@@ -12,7 +13,7 @@ public static class PipeStatementBuilder
         string name
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.Pipe( parent, next, config => config.Name = name );
+        return PipeStatementBuilder<TInput, TOutput>.Pipe( parent, next, ctx => ctx.Name = name );
     }
 
     public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>(
@@ -30,7 +31,7 @@ public static class PipeStatementBuilder
         string name
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.PipeAsync( parent, next, config => config.Name = name );
+        return PipeStatementBuilder<TInput, TOutput>.PipeAsync( parent, next, ctx => ctx.Name = name );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeAsync<TInput, TOutput, TNext>(
@@ -52,21 +53,19 @@ internal static class PipeStatementBuilder<TInput, TOutput>
     )
     {
         ArgumentNullException.ThrowIfNull( next );
-
+    
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+
+        Expression<FunctionAsync<TOutput, TNext>> nextExpression = ( ctx, arg ) => Task.FromResult( next( ctx, arg ) );
+        Expression<Action<IPipelineContext>> configExpression = config == null
+            ? null
+            : ctx => config( ctx );
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
+            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ),
             Middleware = parentMiddleware
         };
-
-        // task wrapper
-
-        Task<TNext> AsyncNext( IPipelineContext context, TOutput argument )
-        {
-            return Task.FromResult( next( context, argument ) );
-        }
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeAsync<TNext>(
@@ -79,9 +78,14 @@ internal static class PipeStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
+        Expression<FunctionAsync<TOutput, TNext>> nextExpression = ( ctx, arg ) => next( ctx, arg );
+        Expression<Action<IPipelineContext>> configExpression = config == null
+            ? null
+            : ctx => config( ctx );
+
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
+            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ),
             Middleware = parentMiddleware
         };
     }
