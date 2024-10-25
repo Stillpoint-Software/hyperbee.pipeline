@@ -1,9 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Hyperbee.Pipeline.Context;
-
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
-
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
@@ -32,24 +30,24 @@ internal abstract class Binder<TInput, TOutput>
     {
         var tupleCtor = typeof( ValueTuple<TOutput, bool> ).GetConstructor( [typeof( TOutput ), typeof( bool )] )!;
 
-        var resultVariable = Variable( typeof( TOutput ), "result" );
-        var canceledVariable = Variable( typeof( bool ), "canceled" );
+        var result = Variable( typeof( TOutput ), "result" );
+        var canceled = Variable( typeof( bool ), "canceled" );
 
         var contextControl = Convert( context, typeof( IPipelineContextControl ) );
 
-        var body = BlockAsync(
-            [resultVariable, canceledVariable],
-            Assign( resultVariable, Await( Invoke( Pipeline, context, argument ), configureAwait: false ) ),
-            Assign( canceledVariable, HandleCancellationRequested( contextControl, resultVariable ) ),
+        return BlockAsync(
+            [result, canceled],
+            Assign( result, Await( Invoke( Pipeline, context, argument ), configureAwait: false ) ),
+            Assign( canceled, HandleCancellationRequested( contextControl, result ) ),
+
+            Invoke( LoggerExpression.Log( "Binder.ProcessPipelineAsync" + Random.Shared.Next(0, 1000) ), Convert( result, typeof(object) ) ),
 
             Condition(
-                canceledVariable,
-                New( tupleCtor, Default( typeof( TOutput ) ), canceledVariable ),
-                New( tupleCtor, resultVariable, canceledVariable )
+                canceled,
+                New( tupleCtor, Default( typeof(TOutput) ), canceled ),
+                New( tupleCtor, result, canceled )
             )
         );
-
-        return body;
     }
 
 
@@ -81,7 +79,7 @@ internal abstract class Binder<TInput, TOutput>
             Block(
                 IfThen(
                     Not( hasCancellationValue ),
-                    Assign( cancellationValueProperty, resultVariable )
+                    Assign( cancellationValueProperty, Convert( resultVariable, typeof(object) ) )
                 ),
                 // After the assignment, return true
                 Constant( true )

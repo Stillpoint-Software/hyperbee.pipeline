@@ -2,7 +2,7 @@
 using Hyperbee.Pipeline.Context;
 
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders;
 

@@ -1,8 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Extensions.Implementation;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 
 namespace Hyperbee.Pipeline.Binders;

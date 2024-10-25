@@ -63,7 +63,7 @@ internal static class PipeStatementBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ),
+            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ).Reduce() as Expression<FunctionAsync<TInput, TNext>>,
             Middleware = parentMiddleware
         };
     }

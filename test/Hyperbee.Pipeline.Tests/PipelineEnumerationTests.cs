@@ -62,8 +62,9 @@ public class PipelineEnumerationTests
         var command = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-            .Reduce().Type<string, int>( ( a, v ) => a + v, builder => builder
-                .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )
+            .Reduce().Type<string, int>( ( a, v ) => a + v,
+                builder => builder
+                    .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )
             )
             .Pipe( ( ctx, arg ) => arg + 5 )
             .Build();

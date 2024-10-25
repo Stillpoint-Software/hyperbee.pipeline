@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.Binders;
+﻿using System.Linq.Expressions;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -10,7 +11,7 @@ public static class CallBlockBuilder
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     )
     {
-        return CallBlockBuilder<TInput, TOutput>.Call( parent, true, b => builder( b ) );
+        return CallBlockBuilder<TInput, TOutput>.Call( parent, true, builder );
     }
 
     public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
@@ -19,7 +20,7 @@ public static class CallBlockBuilder
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     )
     {
-        return CallBlockBuilder<TInput, TOutput>.Call( parent, inheritMiddleware, b => builder( b ) );
+        return CallBlockBuilder<TInput, TOutput>.Call( parent, inheritMiddleware, builder );
     }
 }
 
@@ -28,7 +29,7 @@ internal static class CallBlockBuilder<TInput, TOutput>
     // public static IPipelineBuilder<TInput, TOutput> Call(
     //     IPipelineBuilder<TInput, TOutput> parent,
     //     bool inheritMiddleware,
-    //     Expression<Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder>> builder
+    //     Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     // )
     // {
     //     ArgumentNullException.ThrowIfNull( builder );

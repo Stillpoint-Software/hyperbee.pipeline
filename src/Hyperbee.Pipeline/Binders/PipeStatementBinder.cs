@@ -3,7 +3,7 @@ using System.Reflection;
 using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -34,41 +34,26 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
     {
         var defaultName = method?.Name ?? "defaultName";
 
-        var context = Parameter( typeof( IPipelineContext ), "context" );
-        var argument = Parameter( typeof( TInput ), "argument" );
+        var context = Parameter( typeof( IPipelineContext ), "context");
+        var argument = Parameter( typeof( TInput ), "argument"  );
 
         var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult" );
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
-        var body = BlockAsync(
-            [awaitedResult],
-            Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
-            Condition( canceled,
-                Default( typeof( TNext ) ),
-                Await( ProcessStatementAsync( next, context, nextArgument, defaultName ), configureAwait: false )
-            )
-        );
-
         return Lambda<FunctionAsync<TInput, TNext>>(
-            body,
+            BlockAsync(
+                [awaitedResult],
+                Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
+
+                Invoke( LoggerExpression.Log( "PipeStatementBinder.Bind" + Random.Shared.Next( 0, 1000 ) ), Convert( nextArgument, typeof( object ) ) ),
+
+                Condition( canceled,
+                    Default( typeof( TNext ) ),
+                    Await( ProcessStatementAsync( next, context, nextArgument, defaultName ), configureAwait: false )
+                )
+            ),
             parameters: [context, argument]
         );
-
-        //
-        // var body = BlockAsync(
-        //     [awaitedResult],
-        //     Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
-        //     IfThen( canceled,
-        //         Return( returnLabel, Default( typeof(TNext) ) )
-        //     ),
-        //     Label( returnLabel,
-        //         Await( ProcessStatementAsync( next, context, nextArgument, defaultName ), configureAwait: false ) )
-        // );
-        //
-        // return Lambda<FunctionAsync<TInput, TNext>>(
-        //     body,
-        //     parameters: [context, argument]
-        // );
     }
 }

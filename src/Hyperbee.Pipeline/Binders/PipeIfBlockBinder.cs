@@ -2,7 +2,7 @@
 using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -35,28 +35,13 @@ internal class PipeIfBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInpu
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
-        var returnLabel = Label( "return" );
-
-        // inner function
-        var ctx = Parameter( typeof( IPipelineContext ), "ctx" );
-        var arg = Parameter( typeof( TInput ), "arg" );
-        var nextExpression = Lambda<FunctionAsync<TOutput, TInput>>(
-            BlockAsync(
-                Await( Invoke( next, ctx, arg ), configureAwait: false ),
-                argument
-            ),
-            parameters: [ctx, arg]
-        );
-
         return Lambda<FunctionAsync<TInput, TNext>>(
             BlockAsync(
                 [awaitedResult],
-                Assign( awaitedResult, Await( Invoke( ProcessPipelineAsync( context, argument ) ) ) ),
-                IfThen( canceled,
-                    Return( returnLabel, Default( typeof( TNext ) ) )
-                ),
-                Label( returnLabel,
-                    Await( Invoke( ProcessBlockAsync( nextExpression, context, nextArgument ) ), configureAwait: false )
+                Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
+                Condition( canceled,
+                    Default( typeof( TNext ) ),
+                    ProcessBlockAsync( next, context, nextArgument )
                 )
             ),
             parameters: [context, argument]

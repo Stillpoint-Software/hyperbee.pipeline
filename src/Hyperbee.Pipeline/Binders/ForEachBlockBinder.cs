@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -44,29 +45,41 @@ internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInpu
         var canceled = Field( awaitedResult, "Item2" );
 
         var nextArguments = Variable( typeof( IEnumerable<TElement> ), "nextArguments" );
-        var moveNextCall = Call( nextArguments, typeof( IEnumerator ).GetMethod( "MoveNext" )! );
+
+        var result = Variable( typeof( TOutput ), "blockResult" );
+        var element = Variable( typeof( TElement ), "element" );
+        var enumerator = Variable( typeof( IEnumerator ), "enumerator" );
+
+        var getEnumeratorMethod = Call( nextArguments, typeof( IEnumerable ).GetMethod( "GetEnumerator" )! );
+        var moveNextCall = Call( enumerator, typeof( IEnumerator ).GetMethod( "MoveNext" )! );
+        var getCurrentMethod = Call( enumerator, typeof( IEnumerator ).GetProperty( "Current" )!.GetMethod! );
 
         var breakLabel = Label( "breakLoop" );
-        var returnLabel = Label( "return" );
 
         return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
-                [awaitedResult],
-                Assign( awaitedResult, Await( Invoke( ProcessPipelineAsync( context, argument ) ) ) ),
-                IfThen( canceled,
-                    Return( returnLabel, Default( typeof( TOutput ) ) )
-                ),
-                Assign( nextArguments, Convert( nextArgument, typeof( IEnumerable<TElement> ) ) ),
-
-                Loop(
-                    IfThenElse( IsTrue( moveNextCall ),
-                        Await( Invoke( ProcessBlockAsync( next, context, nextArgument ) ), configureAwait: false ),
-                        Label( breakLabel )
-                    ),
-                    breakLabel
-                ),
-
-                Label( returnLabel, nextArgument )
+                [awaitedResult, nextArguments, enumerator, element, result],
+                Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
+                Condition( canceled,
+                    Default( typeof(TOutput) ),
+                    Block(
+                        Assign( result, nextArgument ),
+                        Assign( nextArguments, Convert( nextArgument, typeof(IEnumerable<TElement>) ) ),
+                        Assign( enumerator, getEnumeratorMethod ),
+                        Loop(
+                            IfThenElse( moveNextCall,
+                                Block(
+                                    Assign( element, Convert( getCurrentMethod, typeof(TElement) ) ),
+                                    Await( ProcessBlockAsync( next, context, element ), configureAwait: false ),
+                                    Empty()
+                                ),
+                                Break( breakLabel )
+                            ),
+                            breakLabel
+                        ),
+                        result
+                    )
+                )
             ),
             parameters: [context, argument]
         );

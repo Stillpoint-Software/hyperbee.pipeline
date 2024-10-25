@@ -1,10 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Extensions;
-using Hyperbee.Pipeline.Extensions.Implementation;
 using static System.Linq.Expressions.Expression;
-using static Hyperbee.Expressions.AsyncExpression;
+using static Hyperbee.Expressions.ExpressionExtensions;
 
 namespace Hyperbee.Pipeline.Binders;
 
@@ -44,6 +42,7 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         //     return await WaitAllAsync( context, nextArgument, nexts, reducer ).ConfigureAwait( false );
         // };
     }
+
     //
     // private async Task<TNext> WaitAllAsync<TNext>( IPipelineContext context, TOutput nextArgument, FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
     // {
