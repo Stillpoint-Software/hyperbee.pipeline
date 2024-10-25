@@ -38,10 +38,10 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
     {
         var defaultName = method?.Name ?? "defaultName";
 
-        var context = Parameter( typeof( IPipelineContext ), "context");
+        var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TInput ), "argument" );
 
-        var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult"  );
+        var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult" );
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
@@ -61,21 +61,21 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
                 Condition( canceled,
-                    Default( typeof(TOutput) ),
+                    Default( typeof( TOutput ) ),
                     // TODO: Think there is a bug here, we shouldn't need a child state machine.
                     // Await(
                     //     BlockAsync(
                     //         [awaitedResult],
-                    Block( 
-                        // [awaitedResult],
+                    Block(
+                            // [awaitedResult],
                             Await(
                                 ProcessStatementAsync( nextExpression, context, nextArgument, defaultName ),
                                 configureAwait: false
                             ),
                             nextArgument
                             )
-                    //     )
-                    // )
+                //     )
+                // )
                 )
             ),
             parameters: [context, argument]

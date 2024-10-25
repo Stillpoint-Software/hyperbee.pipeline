@@ -34,8 +34,8 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
     {
         var defaultName = method?.Name ?? "defaultName";
 
-        var context = Parameter( typeof( IPipelineContext ), "context");
-        var argument = Parameter( typeof( TInput ), "argument"  );
+        var context = Parameter( typeof( IPipelineContext ), "context" );
+        var argument = Parameter( typeof( TInput ), "argument" );
 
         var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult" );
         var nextArgument = Field( awaitedResult, "Item1" );

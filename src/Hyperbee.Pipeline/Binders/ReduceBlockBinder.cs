@@ -67,14 +67,14 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
                 [awaitedResult, nextArguments, enumerator, element, accumulator, blockResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
                 Condition( canceled,
-                    Default( typeof(TNext) ),
+                    Default( typeof( TNext ) ),
                     Block(
-                        Assign( nextArguments, Convert( nextArgument, typeof(IEnumerable<TElement>) ) ),
+                        Assign( nextArguments, Convert( nextArgument, typeof( IEnumerable<TElement> ) ) ),
                         Assign( enumerator, getEnumeratorMethod ),
                         Loop(
                             IfThenElse( moveNextCall,
                                 Block(
-                                    Assign( element, Convert( getCurrentMethod, typeof(TElement) ) ),
+                                    Assign( element, Convert( getCurrentMethod, typeof( TElement ) ) ),
                                     Assign( blockResult,
                                         Await( ProcessBlockAsync( next, context, element ), configureAwait: false ) ),
                                     Assign( accumulator, Invoke( Reducer, accumulator, blockResult ) )

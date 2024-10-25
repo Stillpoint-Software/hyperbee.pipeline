@@ -61,15 +61,15 @@ internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInpu
                 [awaitedResult, nextArguments, enumerator, element, result],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
                 Condition( canceled,
-                    Default( typeof(TOutput) ),
+                    Default( typeof( TOutput ) ),
                     Block(
                         Assign( result, nextArgument ),
-                        Assign( nextArguments, Convert( nextArgument, typeof(IEnumerable<TElement>) ) ),
+                        Assign( nextArguments, Convert( nextArgument, typeof( IEnumerable<TElement> ) ) ),
                         Assign( enumerator, getEnumeratorMethod ),
                         Loop(
                             IfThenElse( moveNextCall,
                                 Block(
-                                    Assign( element, Convert( getCurrentMethod, typeof(TElement) ) ),
+                                    Assign( element, Convert( getCurrentMethod, typeof( TElement ) ) ),
                                     Await( ProcessBlockAsync( next, context, element ), configureAwait: false ),
                                     Empty()
                                 ),

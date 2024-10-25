@@ -44,9 +44,9 @@ internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TI
             Not( Invoke(
                 Condition,
                 context,
-                Convert( Convert( nextArgument, typeof(object) ), typeof(TOutput) )
+                Convert( Convert( nextArgument, typeof( object ) ), typeof( TOutput ) )
             ) ),
-            Convert( Convert( nextArgument, typeof(object) ), typeof(TNext) ),
+            Convert( Convert( nextArgument, typeof( object ) ), typeof( TNext ) ),
             Await( base.ProcessBlockAsync( blockFunction, context, nextArgument ) )
         );
     }

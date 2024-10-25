@@ -19,9 +19,9 @@ internal abstract class BlockBinder<TInput, TOutput> : Binder<TInput, TOutput>
     // {
     //     return await blockFunction( context, nextArgument ).ConfigureAwait( false );
     // }
-    protected virtual Expression ProcessBlockAsync<TArgument, TNext>( 
-        Expression<FunctionAsync<TArgument, TNext>> blockFunction, 
-        ParameterExpression context, 
+    protected virtual Expression ProcessBlockAsync<TArgument, TNext>(
+        Expression<FunctionAsync<TArgument, TNext>> blockFunction,
+        ParameterExpression context,
         Expression nextArgument )
     {
         return Invoke( blockFunction, context, nextArgument );

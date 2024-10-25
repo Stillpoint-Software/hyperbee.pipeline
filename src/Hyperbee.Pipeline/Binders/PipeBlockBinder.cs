@@ -39,7 +39,7 @@ internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
             BlockAsync(
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
-                Condition( canceled, 
+                Condition( canceled,
                     Default( typeof( TNext ) ),
                     Await( ProcessBlockAsync( next, context, nextArgument ), configureAwait: false )
                 )

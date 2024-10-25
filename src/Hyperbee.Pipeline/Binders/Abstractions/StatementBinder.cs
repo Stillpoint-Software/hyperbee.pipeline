@@ -51,15 +51,15 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
         }
 
         // async ( context1, argument1 ) => await nextFunction( context1, (TOutput) argument1 ).ConfigureAwait( false )
-        var context1 = Parameter( typeof(IPipelineContext), "context1" );
-        var argument1 = Parameter( typeof(object), "argument1" );
+        var context1 = Parameter( typeof( IPipelineContext ), "context1" );
+        var argument1 = Parameter( typeof( object ), "argument1" );
 
         var middlewareNext = Lambda<FunctionAsync<object, object>>(
             BlockAsync(
                 Convert( Await(
-                        Invoke( nextFunction, context1, Convert( argument1, typeof(TOutput) ) ),
+                        Invoke( nextFunction, context1, Convert( argument1, typeof( TOutput ) ) ),
                         configureAwait: false ),
-                    typeof(object) )
+                    typeof( object ) )
             ),
             parameters: [context1, argument1]
         );
@@ -84,7 +84,7 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
                             middlewareNext
                         ),
                         configureAwait: false ),
-                    typeof(TNext) ) ); //,
+                    typeof( TNext ) ) ); //,
         // frameName ); //);
     }
 

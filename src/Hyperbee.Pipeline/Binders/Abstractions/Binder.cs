@@ -40,11 +40,11 @@ internal abstract class Binder<TInput, TOutput>
             Assign( result, Await( Invoke( Pipeline, context, argument ), configureAwait: false ) ),
             Assign( canceled, HandleCancellationRequested( contextControl, result ) ),
 
-            Invoke( LoggerExpression.Log( "Binder.ProcessPipelineAsync" + Random.Shared.Next(0, 1000) ), Convert( result, typeof(object) ) ),
+            Invoke( LoggerExpression.Log( "Binder.ProcessPipelineAsync" + Random.Shared.Next( 0, 1000 ) ), Convert( result, typeof( object ) ) ),
 
             Condition(
                 canceled,
-                New( tupleCtor, Default( typeof(TOutput) ), canceled ),
+                New( tupleCtor, Default( typeof( TOutput ) ), canceled ),
                 New( tupleCtor, result, canceled )
             )
         );
@@ -79,7 +79,7 @@ internal abstract class Binder<TInput, TOutput>
             Block(
                 IfThen(
                     Not( hasCancellationValue ),
-                    Assign( cancellationValueProperty, Convert( resultVariable, typeof(object) ) )
+                    Assign( cancellationValueProperty, Convert( resultVariable, typeof( object ) ) )
                 ),
                 // After the assignment, return true
                 Constant( true )

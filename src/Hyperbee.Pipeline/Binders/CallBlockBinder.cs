@@ -29,10 +29,10 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 
     public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
     {
-        var context = Parameter( typeof( IPipelineContext ), "context");
-        var argument = Parameter( typeof( TInput ), "argument");
+        var context = Parameter( typeof( IPipelineContext ), "context" );
+        var argument = Parameter( typeof( TInput ), "argument" );
 
-        var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult");
+        var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult" );
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
@@ -44,7 +44,7 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
                 Invoke( LoggerExpression.Log( "CallBlockBinder.Bind" + Random.Shared.Next( 0, 1000 ) ), Convert( nextArgument, typeof( object ) ) ),
 
                 Condition( canceled,
-                    Default( typeof(TOutput) ),
+                    Default( typeof( TOutput ) ),
                     // TODO: Think there is a bug here, we shouldn't need a child state machine.
 
                     Block(

@@ -9,7 +9,7 @@ public static class CallStatementBuilder
 {
     public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
         this IPipelineBuilder<TInput, TOutput> parent,
-        Procedure<TOutput> next, 
+        Procedure<TOutput> next,
         string name
     )
     {
@@ -53,7 +53,7 @@ internal static class CallStatementBuilder<TInput, TOutput>
     )
     {
         ArgumentNullException.ThrowIfNull( next );
-    
+
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
         Expression<ProcedureAsync<TOutput>> nextExpression = ( ctx, arg ) => AsyncNext( next, ctx, arg );
