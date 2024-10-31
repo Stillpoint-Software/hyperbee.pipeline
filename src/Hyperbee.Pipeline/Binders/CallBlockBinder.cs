@@ -33,29 +33,33 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
         var argument = Parameter( typeof( TInput ), "argument" );
 
         var awaitedResult = Variable( typeof( (TOutput, bool) ), "awaitedResult" );
+        var result = Variable( typeof( TOutput ), "result" );
+
+        var returnValue = Label( typeof( TOutput ) );
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
         return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
-                [awaitedResult],
-                Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
+                [awaitedResult, result],
+                Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
 
-                Invoke( LoggerExpression.Log( "CallBlockBinder.Bind" + Random.Shared.Next( 0, 1000 ) ), Convert( nextArgument, typeof( object ) ) ),
-
-                Condition( canceled,
-                    Default( typeof( TOutput ) ),
-                    // TODO: Think there is a bug here, we shouldn't need a child state machine.
-
+                IfThenElse( canceled,
+                    Block(
+                        Assign( result, Default( typeof(TOutput) ) )//,
+                        //Return( returnValue, result )
+                    ),
                     Block(
                         Await(
                             ProcessBlockAsync( next, context, nextArgument ),
                             configureAwait: false
                         ),
-                        nextArgument
+                        Assign( result, nextArgument )//,
+                        //Return( returnValue, result )
                     )
-
-                )
+                ),
+                result
+            //Label( returnValue, result )
             ),
             parameters: [context, argument]
         );

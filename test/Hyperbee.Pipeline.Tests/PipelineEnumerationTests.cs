@@ -53,7 +53,7 @@ public class PipelineEnumerationTests
 
         await command( new PipelineContext(), "e f" );
 
-        Assert.AreEqual( count, 25 );
+        Assert.AreEqual( 25, count );
     }
 
     [TestMethod]

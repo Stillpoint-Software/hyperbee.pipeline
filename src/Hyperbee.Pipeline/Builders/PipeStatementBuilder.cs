@@ -56,14 +56,14 @@ internal static class PipeStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        Expression<FunctionAsync<TOutput, TNext>> nextExpression = ( ctx, arg ) => Task.FromResult( next( ctx, arg ) );
+        Expression<FunctionAsync<TOutput, TNext>> nextExpression = ( ctx, arg ) => AsyncNext( next, ctx, arg );
         Expression<Action<IPipelineContext>> configExpression = config == null
             ? null
             : ctx => config( ctx );
 
         return new PipelineBuilder<TInput, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ).Reduce() as Expression<FunctionAsync<TInput, TNext>>,
+            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( nextExpression ),
             Middleware = parentMiddleware
         };
     }
@@ -89,4 +89,13 @@ internal static class PipeStatementBuilder<TInput, TOutput>
             Middleware = parentMiddleware
         };
     }
+
+    private static async Task<TNext> AsyncNext<TNext>( Function<TOutput, TNext> next, IPipelineContext ctx, TOutput arg )
+    {
+        var result = next( ctx, arg );
+        await Task.CompletedTask.ConfigureAwait( false );
+
+        return result;
+    }
+
 }

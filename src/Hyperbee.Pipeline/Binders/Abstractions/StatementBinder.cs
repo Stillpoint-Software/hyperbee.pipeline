@@ -39,7 +39,7 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
         //     return await nextFunction( context, nextArgument ).ConfigureAwait( false );
         if ( Middleware == null )
         {
-            return Invoke( nextFunction, context, nextArgument ); //, configureAwait: false );
+            return Invoke( nextFunction, context, nextArgument );
 
             //using var _ = contextControl.CreateFrame( context, Configure, frameName );
             // return CreateFrameExpression(
@@ -69,23 +69,38 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
         //     nextArgument,
         //     middlewareNext
         // ).ConfigureAwait( false );
-        return
-            //using var _ = contextControl.CreateFrame( context, Configure, frameName );
-            // CreateFrameExpression(
-            //     Convert( Constant( context ), typeof(IPipelineContextControl) ),
-            //     context,
-            //     Configure,
-            BlockAsync(
-                Convert(
+        //return
+        //using var _ = contextControl.CreateFrame( context, Configure, frameName );
+        // CreateFrameExpression(
+        //     Convert( Constant( context ), typeof(IPipelineContextControl) ),
+        //     context,
+        //     Configure,
+
+        var returnResult = Variable( typeof( TNext ), "returnResult" );
+
+        var b = BlockAsync(
+                [returnResult],
+                //Invoke( LoggerExpression.Log( "StatementBinder.ProcessStatementAsync" + Random.Shared.Next( 0, 1000 ) ), Convert( nextArgument, typeof( object ) ) ),
+
+                Assign( returnResult, Convert(
                     Await(
                         Invoke( Middleware,
                             context,
-                            nextArgument,
+                            Convert( nextArgument, typeof(object)),
                             middlewareNext
                         ),
                         configureAwait: false ),
-                    typeof( TNext ) ) ); //,
+                    typeof( TNext ) ) )
+
+                //Invoke( LoggerExpression.Log( "StatementBinder.ProcessStatementAsync-" + Random.Shared.Next( 0, 1000 ) ), Convert( returnResult, typeof( object ) ) )
+
+                , returnResult
+                ); //,
+
+
         // frameName ); //);
+
+        return b;
     }
 
     public static Expression CreateFrameExpression(

@@ -85,7 +85,6 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
 
         return Lambda<FunctionAsync<TIn, TOut>>(
             BlockAsync(
-                [context, argument],
                 Convert( Await( Invoke( Function, context, Convert( argument, typeof( TInput ) ) ), configureAwait: false ), typeof( TOut ) )
             ),
             parameters: [context, argument]

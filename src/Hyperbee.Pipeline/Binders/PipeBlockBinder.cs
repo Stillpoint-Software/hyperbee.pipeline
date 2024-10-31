@@ -39,6 +39,10 @@ internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
             BlockAsync(
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
+
+                Invoke( LoggerExpression.Log( "PipeBlockBinder.Bind" + Random.Shared.Next( 0, 1000 ) ),
+                    Convert( nextArgument, typeof( object ) ) ),
+
                 Condition( canceled,
                     Default( typeof( TNext ) ),
                     Await( ProcessBlockAsync( next, context, nextArgument ), configureAwait: false )

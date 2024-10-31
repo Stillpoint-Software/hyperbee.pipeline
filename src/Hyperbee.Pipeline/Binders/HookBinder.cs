@@ -38,9 +38,9 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
         var ctx = Parameter( typeof( IPipelineContext ), "ctx" );
         var arg = Parameter( typeof( TInput ), "arg" );
         var nextExpression = Lambda<FunctionAsync<TOutput, TInput>>(
-        BlockAsync(
-                Await( Invoke( Middleware, ctx, arg, function ), configureAwait: false ),
-                argument
+            BlockAsync(
+                [function],
+                Await( Invoke( Middleware, ctx, arg, function ), configureAwait: false )
             ),
             parameters: [ctx, arg]
         );

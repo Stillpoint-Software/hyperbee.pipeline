@@ -16,8 +16,6 @@ public class PipelineExecutionTests
         var command = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => int.Parse( arg ) )
-            .Pipe( ( ctx, arg ) => arg )
-            //.Pipe( ( ctx, arg ) => arg )
             .Build();
 
         var result = await command( new PipelineContext(), "5" );

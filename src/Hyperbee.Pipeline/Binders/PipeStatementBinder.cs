@@ -46,8 +46,6 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
 
-                Invoke( LoggerExpression.Log( "PipeStatementBinder.Bind" + Random.Shared.Next( 0, 1000 ) ), Convert( nextArgument, typeof( object ) ) ),
-
                 Condition( canceled,
                     Default( typeof( TNext ) ),
                     Await( ProcessStatementAsync( next, context, nextArgument, defaultName ), configureAwait: false )
