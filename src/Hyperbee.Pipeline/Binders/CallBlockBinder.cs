@@ -46,8 +46,8 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
 
                 IfThenElse( canceled,
                     Block(
-                        Assign( result, Default( typeof(TOutput) ) )//,
-                        //Return( returnValue, result )
+                        Assign( result, Default( typeof( TOutput ) ) )//,
+                                                                      //Return( returnValue, result )
                     ),
                     Block(
                         Await(
@@ -55,7 +55,7 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
                             configureAwait: false
                         ),
                         Assign( result, nextArgument )//,
-                        //Return( returnValue, result )
+                                                      //Return( returnValue, result )
                     )
                 ),
                 result

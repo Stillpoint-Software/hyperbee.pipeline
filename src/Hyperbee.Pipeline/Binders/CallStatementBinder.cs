@@ -63,7 +63,7 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
 
                 Condition( canceled,
-                    Default( typeof(TOutput) ),
+                    Default( typeof( TOutput ) ),
                     Await(
                         ProcessStatementAsync( nextExpression, context, nextArgument, defaultName ),
                         configureAwait: false

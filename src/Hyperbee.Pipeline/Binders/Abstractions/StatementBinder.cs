@@ -86,7 +86,7 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
                     Await(
                         Invoke( Middleware,
                             context,
-                            Convert( nextArgument, typeof(object)),
+                            Convert( nextArgument, typeof( object ) ),
                             middlewareNext
                         ),
                         configureAwait: false ),
