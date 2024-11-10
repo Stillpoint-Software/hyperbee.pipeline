@@ -1,5 +1,4 @@
-﻿using Hyperbee.Pipeline.Extensions.Implementation;
-using Microsoft.Extensions.Caching.Distributed;
+﻿using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,9 +15,9 @@ public static class PipelineDistributedCacheExtensions
         ArgumentNullException.ThrowIfNull( nestedBuilder );
 
         var block = PipelineFactory.Start<TOutput>();
-        var function = nestedBuilder( block ).GetPipelineFunction();
+        var function = nestedBuilder( block ).CastFunction<TOutput, TNext>();
 
-        return builder.PipeDistributedCacheAsync( function.Function, optionsFunc );
+        return builder.PipeDistributedCacheAsync( function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeDistributedCacheAsync<TInput, TOutput, TNext>(

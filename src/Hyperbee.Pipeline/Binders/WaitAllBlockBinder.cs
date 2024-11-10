@@ -1,44 +1,79 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders;
 
-
 internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
 {
     private MiddlewareAsync<object, object> Middleware { get; }
 
-    public WaitAllBlockBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
-        : this( null, function, middleware, configure )
+    public WaitAllBlockBinder(
+        Expression<FunctionAsync<TInput, TOutput>> function,
+        MiddlewareAsync<object, object> middleware,
+        Action<IPipelineContext> configure )
+        : base( null, function, configure )
     {
+        Middleware = middleware;
     }
 
-    public WaitAllBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public WaitAllBlockBinder(
+        Function<TOutput, bool> condition,
+        Expression<FunctionAsync<TInput, TOutput>> function,
+        MiddlewareAsync<object, object> middleware,
+        Action<IPipelineContext> configure )
         : base( condition, function, configure )
     {
         Middleware = middleware;
     }
 
-    public FunctionAsync<TInput, TNext> Bind<TNext>( FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
+    public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
     {
-        ArgumentNullException.ThrowIfNull( reducer );
+        // Get the MethodInfo for the helper method
+        var bindImplAsyncMethodInfo = typeof( WaitAllBlockBinder<TInput, TOutput> )
+            .GetMethod( nameof( BindImplAsync ), BindingFlags.NonPublic | BindingFlags.Instance )!
+            .MakeGenericMethod( typeof( TNext ) );
 
-        return async ( context, argument ) =>
-        {
-            var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+        // Create parameters for the lambda expression
+        var paramContext = Expression.Parameter( typeof( IPipelineContext ), "context" );
+        var paramArgument = Expression.Parameter( typeof( TInput ), "argument" );
 
-            if ( canceled )
-                return default;
+        // Create a call expression to the helper method
+        var callBindImplAsync = Expression.Call(
+            Expression.Constant( this ),
+            bindImplAsyncMethodInfo,
+            Expression.Constant( nexts ),
+            Expression.Constant( reducer ),
+            Pipeline,
+            paramContext,
+            paramArgument
+        );
 
-            // WaitAllBlockBinder is unique in that it is both a block configure and a step.
-            // The reducer is the step action, and because it is a step, we need to ensure
-            // that middleware is called. Middleware requires us to pass in the execution
-            // function that it wraps. This requires an additional level of wrapping.
+        // Create and return the final expression
+        return Expression.Lambda<FunctionAsync<TInput, TNext>>( callBindImplAsync, paramContext, paramArgument );
+    }
 
-            return await WaitAllAsync( context, nextArgument, nexts, reducer ).ConfigureAwait( false );
-        };
+    private async Task<TNext> BindImplAsync<TNext>(
+        FunctionAsync<TOutput, object>[] nexts,
+        WaitAllReducer<TOutput, TNext> reducer,
+        FunctionAsync<TInput, TOutput> pipeline,
+        IPipelineContext context,
+        TInput argument )
+    {
+        var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument, pipeline ).ConfigureAwait( false );
+
+        if ( canceled )
+            return default;
+
+        // WaitAllBlockBinder is unique in that it is both a block configure and a step.
+        // The reducer is the step action, and because it is a step, we need to ensure
+        // that middleware is called. Middleware requires us to pass in the execution
+        // function that it wraps. This requires an additional level of wrapping.
+
+        return await WaitAllAsync( context, nextArgument, nexts, reducer ).ConfigureAwait( false );
     }
 
     private async Task<TNext> WaitAllAsync<TNext>( IPipelineContext context, TOutput nextArgument, FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )

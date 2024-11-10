@@ -41,7 +41,7 @@ internal static class ForEachBlockBuilder<TInput, TOutput, TElement>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( parentFunction ).Bind( function ),
+            Function = new ForEachBlockBinder<TInput, TOutput, TElement>( parentFunction ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = parentMiddleware
         };
     }
