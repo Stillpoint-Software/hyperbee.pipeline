@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using Hyperbee.Pipeline.Context;
 using static System.Linq.Expressions.Expression;
 using static Hyperbee.Expressions.ExpressionExtensions;
@@ -10,25 +11,26 @@ internal abstract class Binder<TInput, TOutput>
     protected Expression<FunctionAsync<TInput, TOutput>> Pipeline { get; }
     protected Expression<Action<IPipelineContext>> Configure { get; }
 
+    private static ConstructorInfo _tupleConstructor = typeof( ValueTuple<TOutput, bool> ).GetConstructor( [typeof( TOutput ), typeof( bool )] )!;
+
     protected Binder( Expression<FunctionAsync<TInput, TOutput>> function, Expression<Action<IPipelineContext>> configure )
     {
         Pipeline = function;
         Configure = configure;
     }
 
-    // protected virtual Task<(TOutput Result, bool Canceled)> ProcessPipelineAsync( IPipelineContext context, TInput argument )
-    // {
-    //     var result = await Pipeline( context, argument ).ConfigureAwait( false );
-    //     
-    //     var contextControl = (IPipelineContextControl) context;
-    //     var canceled = contextControl.HandleCancellationRequested( result );
-    //     
-    //     return (canceled ? default : result, canceled);
-    // }
-
     protected virtual Expression ProcessPipelineAsync( ParameterExpression context, ParameterExpression argument )
     {
-        var tupleCtor = typeof( ValueTuple<TOutput, bool> ).GetConstructor( [typeof( TOutput ), typeof( bool )] )!;
+        /*
+        {
+            var result = await Pipeline( context, argument ).ConfigureAwait( false );
+
+            var contextControl = (IPipelineContextControl) context;
+            var canceled = contextControl.HandleCancellationRequested( result );
+
+            return (canceled ? default : result, canceled);
+        }
+        */
 
         var result = Variable( typeof( TOutput ), "result" );
         var canceled = Variable( typeof( bool ), "canceled" );
@@ -42,30 +44,25 @@ internal abstract class Binder<TInput, TOutput>
 
             Condition(
                 canceled,
-                New( tupleCtor, Default( typeof( TOutput ) ), canceled ),
-                New( tupleCtor, result, canceled )
+                New( _tupleConstructor, Default( typeof( TOutput ) ), canceled ),
+                New( _tupleConstructor, result, canceled )
             )
         );
     }
 
-
-
-    /*
-    public static bool HandleCancellationRequested<TOutput>( this IPipelineContextControl control, TOutput value )
-       {
-           if ( !control.CancellationToken.IsCancellationRequested )
-               return false;
-
-           if ( !control.HasCancellationValue )
-               control.CancellationValue = value;
-
-           return true;
-       }
-     */
-
-
     private Expression HandleCancellationRequested( Expression contextControl, Expression resultVariable )
     {
+        /*
+        {
+            if ( !control.CancellationToken.IsCancellationRequested )
+                return false;
+
+            if ( !control.HasCancellationValue )
+                control.CancellationValue = value;
+
+            return true;
+        }
+        */
         var hasCancellationValue = Property( contextControl, "HasCancellationValue" );
         var cancellationTokenProperty = Property( contextControl, "CancellationToken" );
         var cancellationValueProperty = Property( contextControl, "CancellationValue" );

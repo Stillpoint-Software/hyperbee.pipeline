@@ -13,21 +13,22 @@ internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
     {
     }
 
-    // public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
-    // {
-    //     return async ( context, argument ) =>
-    //     {
-    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-    //
-    //         if ( canceled )
-    //             return default;
-    //
-    //         return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
-    //     };
-    // }
-
     public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
     {
+        /*
+        {
+            return async ( context, argument ) =>
+            {
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+        
+                if ( canceled )
+                    return default;
+        
+                return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
+            };
+        }
+        */
+
         var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TNext ), "argument" );
 
@@ -40,9 +41,6 @@ internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ) ) ),
 
-                Invoke( LoggerExpression.Log( "PipeBlockBinder.Bind" + Random.Shared.Next( 0, 1000 ) ),
-                    Convert( nextArgument, typeof( object ) ) ),
-
                 Condition( canceled,
                     Default( typeof( TNext ) ),
                     Await( ProcessBlockAsync( next, context, nextArgument ), configureAwait: false )
@@ -52,23 +50,4 @@ internal class PipeBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
         );
     }
 
-}
-
-
-
-
-
-
-
-public static class LoggerExpression
-{
-    public static Expression<Action<object>> Log( string message )
-    {
-        return arg1 => Log( message, arg1 );
-    }
-
-    public static void Log( string message, object arg1 )
-    {
-        Console.WriteLine( $"{message} value: {arg1}" );
-    }
 }

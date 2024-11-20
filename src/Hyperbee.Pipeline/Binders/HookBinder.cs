@@ -12,21 +12,23 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
 
     public HookBinder( Expression<MiddlewareAsync<TInput, TOutput>> middleware )
     {
-        Middleware = middleware; // Note: no need to create empty middleware just don't execute it.
+        Middleware = middleware;
     }
-
-    // public MiddlewareAsync<TInput, TOutput> Bind( MiddlewareAsync<TInput, TOutput> middleware )
-    // {
-    //     return async ( context, argument, function ) =>
-    //         await middleware(
-    //             context,
-    //             argument,
-    //             async ( context1, argument1 ) => await Middleware( context1, argument1, function ).ConfigureAwait( false )
-    //         ).ConfigureAwait( false );
-    // }
 
     public Expression<MiddlewareAsync<TInput, TOutput>> Bind( Expression<MiddlewareAsync<TInput, TOutput>> middleware )
     {
+        /*
+        {
+            return async ( context, argument, function ) =>
+                await middleware(
+                    context,
+                    argument,
+                    async ( context1, argument1 ) => await Middleware( context1, argument1, function ).ConfigureAwait( false )
+                ).ConfigureAwait( false );
+        }
+        */
+
+        // If there is no middleware, return the original middleware
         if ( Middleware == null )
             return middleware;
 

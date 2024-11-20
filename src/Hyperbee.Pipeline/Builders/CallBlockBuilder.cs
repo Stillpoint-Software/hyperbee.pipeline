@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Hyperbee.Pipeline.Binders;
+﻿using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline;
@@ -26,27 +25,6 @@ public static class CallBlockBuilder
 
 internal static class CallBlockBuilder<TInput, TOutput>
 {
-    // public static IPipelineBuilder<TInput, TOutput> Call(
-    //     IPipelineBuilder<TInput, TOutput> parent,
-    //     bool inheritMiddleware,
-    //     Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
-    // )
-    // {
-    //     ArgumentNullException.ThrowIfNull( builder );
-    //
-    //     var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
-    //
-    //     var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
-    //     var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
-    //     var function = CastExpression( parent.CastExpression<TOutput, object>( builder ); // cast because we don't know the final Pipe output value
-    //     builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
-    //
-    //     return new PipelineBuilder<TInput, TOutput>
-    //     {
-    //         Function = new CallBlockBinder<TInput, TOutput>( parentFunction ).Bind( block ),
-    //         Middleware = parentMiddleware
-    //     };
-    // }
     public static IPipelineBuilder<TInput, TOutput> Call(
         IPipelineBuilder<TInput, TOutput> parent,
         bool inheritMiddleware,

@@ -89,6 +89,7 @@ internal static class CallStatementBuilder<TInput, TOutput>
             Middleware = parentMiddleware
         };
     }
+
     internal static Task AsyncNext( Procedure<TOutput> next, IPipelineContext context, TOutput argument )
     {
         next( context, argument );

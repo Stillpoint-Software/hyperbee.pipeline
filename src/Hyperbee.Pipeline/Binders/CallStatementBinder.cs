@@ -14,29 +14,31 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
     {
     }
 
-    // public FunctionAsync<TInput, TOutput> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
-    // {
-    //     var defaultName = (method ?? next.Method).Name;
-    //
-    //     return async ( context, argument ) =>
-    //     {
-    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-    //
-    //         if ( canceled )
-    //             return default;
-    //
-    //         return await ProcessStatementAsync(
-    //             async ( ctx, arg ) =>
-    //             {
-    //                 await next( ctx, arg ).ConfigureAwait( false );
-    //                 return arg;
-    //             }, context, nextArgument, defaultName ).ConfigureAwait( false );
-    //     };
-    // }
-
     public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<ProcedureAsync<TOutput>> next, MethodInfo method = null )
     {
-        var defaultName = method?.Name ?? "defaultName";
+        /*
+        {
+            var defaultName = (method ?? next.Method).Name;
+
+            return async ( context, argument ) =>
+            {
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+
+                if ( canceled )
+                    return default;
+
+                return await ProcessStatementAsync(
+                    async ( ctx, arg ) =>
+                    {
+                        await next( ctx, arg ).ConfigureAwait( false );
+                        return arg;
+                    }, context, nextArgument, defaultName ).ConfigureAwait( false );
+            };
+        }
+        */
+
+        // TODO: Better way to get Name
+        var defaultName = method?.Name ?? next.Name ?? "name";
 
         var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TInput ), "argument" );
@@ -57,7 +59,7 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
             parameters: [ctx, arg]
         );
 
-        var l = Lambda<FunctionAsync<TInput, TOutput>>(
+        return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
                 [awaitedResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
@@ -72,8 +74,6 @@ internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
             ),
             parameters: [context, argument]
         );
-
-        return l;
     }
 }
 

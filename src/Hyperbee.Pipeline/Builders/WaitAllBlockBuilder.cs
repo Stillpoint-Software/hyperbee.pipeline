@@ -93,18 +93,20 @@ internal static class WaitAllBlockBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        var functions = builderInstances
+        var functions = Expression.Constant( builderInstances
             .Select( builder => new { builder, block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null ) } )
             .Select( x => x.builder( x.block ).CastFunction<TOutput, object>() )
-            .ToArray();
+            .ToArray() );
 
         Expression<Action<IPipelineContext>> configExpression = config == null
             ? null
             : ctx => config( ctx );
 
+        Expression<WaitAllReducer<TOutput, TNext>> reducerExpression = ( ctx, arg, results ) => reducer( ctx, arg, results );
+
         return new PipelineBuilder<TInput, TNext>
         {
-            //Function = new WaitAllBlockBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( functions, reducer ),
+            Function = new WaitAllBlockBinder<TInput, TOutput>( parentFunction, parentMiddleware, configExpression ).Bind( functions, reducerExpression ),
             Middleware = parentMiddleware
         };
     }
@@ -122,12 +124,12 @@ public class Builders<TInput, TOutput>
     public Func<IPipelineStartBuilder<TInput, TOutput>, IPipelineBuilder>[] Create( params Func<IPipelineStartBuilder<TInput, TOutput>, IPipelineBuilder>[] builders ) => builders;
 }
 
-public sealed record WaitAllResult
-{
-    internal WaitAllResult()
-    {
-    }
+public sealed record WaitAllResult( IPipelineContext Context, object Result );
+//{
+//    public WaitAllResult()
+//    {
+//    }
 
-    public object Result { get; init; }
-    public IPipelineContext Context { get; init; }
-}
+//    public object Result { get; init; }
+//    public IPipelineContext Context { get; init; }
+//}

@@ -14,25 +14,26 @@ internal class PipeStatementBinder<TInput, TOutput> : StatementBinder<TInput, TO
     {
     }
 
-    // public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next, MethodInfo method = null )
-    // {
-    //     var defaultName = method?.Name ?? "name";
-    //
-    //     return async ( context, argument ) =>
-    //     {
-    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-    //
-    //         if ( canceled )
-    //             return default;
-    //
-    //         return await ProcessStatementAsync( next, context, nextArgument, defaultName ).ConfigureAwait( false );
-    //     };
-    // }
-
-
     public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next, MethodInfo method = null )
     {
-        var defaultName = method?.Name ?? "defaultName";
+        /*
+        {
+            var defaultName = method?.Name ?? "name";
+    
+            return async ( context, argument ) =>
+            {
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+    
+                if ( canceled )
+                    return default;
+    
+                return await ProcessStatementAsync( next, context, nextArgument, defaultName ).ConfigureAwait( false );
+            };
+        }
+        */
+
+        // TODO: Better way to get Name
+        var defaultName = method?.Name ?? next.Name ?? "name";
 
         var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TInput ), "argument" );

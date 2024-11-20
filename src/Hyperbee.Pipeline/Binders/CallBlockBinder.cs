@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Hyperbee.Pipeline.Binders.Abstractions;
 using Hyperbee.Pipeline.Context;
 using static System.Linq.Expressions.Expression;
@@ -13,22 +13,23 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
     {
     }
 
-    // public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TOutput, object> next )
-    // {
-    //     return async ( context, argument ) =>
-    //     {
-    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-    //
-    //         if ( canceled )
-    //             return default;
-    //
-    //         await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
-    //         return nextArgument;
-    //     };
-    // }
-
     public Expression<FunctionAsync<TInput, TOutput>> Bind( Expression<FunctionAsync<TOutput, object>> next )
     {
+        /*
+        {
+            return async ( context, argument ) =>
+            {
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+    
+                if ( canceled )
+                    return default;
+    
+                await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
+                return nextArgument;
+            };
+        }
+        */
+
         var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TInput ), "argument" );
 
@@ -39,27 +40,23 @@ internal class CallBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
         var nextArgument = Field( awaitedResult, "Item1" );
         var canceled = Field( awaitedResult, "Item2" );
 
+        // TODO: IfThenElse should be switched Condition (bug in expressions)
         return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
                 [awaitedResult, result],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
 
                 IfThenElse( canceled,
-                    Block(
-                        Assign( result, Default( typeof( TOutput ) ) )//,
-                                                                      //Return( returnValue, result )
-                    ),
+                    Assign( result, Default( typeof( TOutput ) ) ),
                     Block(
                         Await(
                             ProcessBlockAsync( next, context, nextArgument ),
                             configureAwait: false
                         ),
-                        Assign( result, nextArgument )//,
-                                                      //Return( returnValue, result )
+                        Assign( result, nextArgument )
                     )
                 ),
                 result
-            //Label( returnValue, result )
             ),
             parameters: [context, argument]
         );

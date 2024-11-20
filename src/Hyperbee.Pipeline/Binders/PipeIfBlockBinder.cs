@@ -13,21 +13,22 @@ internal class PipeIfBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInpu
     {
     }
 
-    // public FunctionAsync<TInput, TNext> Bind<TNext>( FunctionAsync<TOutput, TNext> next )
-    // {
-    //     return async ( context, argument ) =>
-    //     {
-    //         var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
-    //
-    //         if ( canceled )
-    //             return default;
-    //
-    //         return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
-    //     };
-    // }
-
     public Expression<FunctionAsync<TInput, TNext>> Bind<TNext>( Expression<FunctionAsync<TOutput, TNext>> next )
     {
+        /*
+        {
+            return async ( context, argument ) =>
+            {
+                var (nextArgument, canceled) = await ProcessPipelineAsync( context, argument ).ConfigureAwait( false );
+    
+                if ( canceled )
+                    return default;
+    
+                return await ProcessBlockAsync( next, context, nextArgument ).ConfigureAwait( false );
+            };
+        }
+        */
+
         var context = Parameter( typeof( IPipelineContext ), "context" );
         var argument = Parameter( typeof( TInput ), "argument" );
 
