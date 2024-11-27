@@ -290,16 +290,16 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
                     [enumerator],
                     Assign( enumerator, partitionAccess ),  // var enumerator = partitionList[temp]
 
-                    //Invoke( LoggerExpression.Log( "taskRun.enumerator" ), Convert( enumerator, typeof( object ) ) ),
-                    //Invoke( LoggerExpression.Log( "taskRun.counter" ), Convert( counter, typeof( object ) ) ),
-                    //Invoke( LoggerExpression.Log( "taskRun.temp" ), Convert( temp, typeof( object ) ) ),
+                        //Invoke( LoggerExpression.Log( "taskRun.enumerator" ), Convert( enumerator, typeof( object ) ) ),
+                        //Invoke( LoggerExpression.Log( "taskRun.counter" ), Convert( counter, typeof( object ) ) ),
+                        //Invoke( LoggerExpression.Log( "taskRun.temp" ), Convert( temp, typeof( object ) ) ),
 
-                    //Using( Convert( enumerator, typeof( IDisposable ) ),  // TODO: Shouldn't need to convert
+                        //Using( Convert( enumerator, typeof( IDisposable ) ),  // TODO: Shouldn't need to convert
                         While(
                             moveNext,
                             Await( Invoke( function, current ), configureAwait: false )
                         )
-                    //)
+                //)
                 )
             )
         );
