@@ -99,7 +99,7 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         */
 
         var results = Variable( typeof( WaitAllResult[] ), "results" );
-        var result = Variable( typeof( object ), "result" );
+        var result = Variable( typeof( TNext ), "result" );
         var innerContext = Variable( typeof( IPipelineContext ), "innerContext" );
 
         var indexedItem = Parameter( typeof( (FunctionAsync<TOutput, object>, int) ), "indexedItem" );
@@ -115,36 +115,38 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
                 Assign( innerContext, Call( context, methodInfo, [Constant( false )] ) ),
 
                 Assign( result, Await( ProcessStatementAsync<TNext>( item, innerContext, nextArgument, "NAME" ), configureAwait: false ) ),
+                Assign( ArrayAccess( results, index ), New( typeof( WaitAllResult ).GetConstructors()[0], innerContext, Convert( result, typeof( object ) ) ) )
 
-                Invoke( LoggerExpression.Log( "forEachBody.result" ), Convert( result, typeof( object ) ) ),
-                Invoke( LoggerExpression.Log( "forEachBody.index" ), Convert( index, typeof( object ) ) ),
-
-                Assign( ArrayAccess( results, index ), New( typeof( WaitAllResult ).GetConstructors()[0], innerContext, result ) ),
-
-                Invoke( LoggerExpression.Log( "forEachBody.results" ), Convert( results, typeof( object ) ) )
             ),
             parameters: [indexedItem]
         );
 
+        var items = Variable( typeof( IEnumerable<(FunctionAsync<TOutput, object>, int)> ), "items" );
         var innerForEach = ForEachAsync(
-            SelectIndexItem<FunctionAsync<TOutput, object>>( nexts ),
+            items,
             forEachBody,
-            Constant( Environment.ProcessorCount ) );
+            Constant( Environment.ProcessorCount ) ); //Constant( 1 )
 
-        var b = BlockAsync(
-            [results],
+        var reducerResult = Variable( typeof( TNext ), "reducerResult" );
+
+        // TODO: reducerResult shouldn't be required, using/block should return last expression
+        return BlockAsync(
+            [results, reducerResult],
             Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
                 ContextImplExtensions.CreateFrameExpression( context, Configure, nameof( WaitAllAsync ) ),
                 Block(
+                    [items],
                     Assign( results, NewArrayBounds( typeof( WaitAllResult ), ArrayLength( nexts ) ) ),
+                    Assign( items, SelectIndexItem<FunctionAsync<TOutput, object>>( nexts ) ),
+
+                    //Invoke( LoggerExpression.Log( "forEachBody.items" ), Convert( items, typeof( object ) ) ),
+
                     Await( innerForEach, configureAwait: false ),
-                    Invoke( reducer, context, nextArgument, results )
+                    Assign( reducerResult, Invoke( reducer, context, nextArgument, results ) )
                 )
-            )
+            ),
+            reducerResult
         );
-
-        return b;
-
     }
 
     private Expression SelectIndexItem<T>( Expression nexts )
@@ -199,7 +201,11 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         */
 
         if ( Middleware == null )
-            return Invoke( nextFunction, context, nextArgument );
+            return BlockAsync(
+                Convert(
+                    Await( Invoke( nextFunction, context, nextArgument ), configureAwait: false ),
+                    typeof( TNext ) )
+                );
 
         // async ( ctx, arg ) => await nextFunction( ctx, (TOutput) arg ).ConfigureAwait( false )
         var ctx = Parameter( typeof( IPipelineContext ), "ctx" );
@@ -261,25 +267,39 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         var getPartitionsCall = Call(
             createPartitionerCall,
             getPartitionsMethod,
-            partitionCount );
+            partitionCount );  // returns IList<IEnumerator<(TSource, int)>>
 
-        var partition = Variable( typeof( IEnumerator<(TSource, int)> ), "partition" );
+        //var partition = Variable( typeof( IEnumerator<(TSource, int)> ), "partition" );
+        var temp = Variable( typeof( int ), "_nh_temp" );
+        var counter = Variable( typeof( int ), "counter" );
+
+        var partitionList = Variable( typeof( IList<IEnumerator<(TSource, int)>> ), "partitionList" );
+        var partitionAccess = MakeIndex( partitionList, typeof( IList<IEnumerator<(TSource, int)>> ).GetProperty( "Item" ), [temp] );
+        var enumerator = Variable( typeof( IEnumerator<(TSource, int)> ), "enumerator" );
 
         // Task.Run( async () => {
-        //      while ( partition.MoveNext() ) await function( partition.Current ) 
+        //      using var enumerator = partition;
+        //      while ( enumerator.MoveNext() ) await function( enumerator.Current ) 
         // }
-        var moveNext = Call( partition, typeof( IEnumerator ).GetMethod( nameof( IEnumerator.MoveNext ) ) );
-        var current = Property( partition, nameof( IEnumerator<TSource>.Current ) );
+        var moveNext = Call( enumerator, typeof( IEnumerator ).GetMethod( nameof( IEnumerator.MoveNext ) ) );
+        var current = Property( enumerator, nameof( IEnumerator<TSource>.Current ) );
         var taskRun = Call(
             typeof( Task ).GetMethod( nameof( Task.Run ), [typeof( Func<Task> )] )!,
             Lambda<Func<Task>>(
-                BlockAsync(
-                        // Using( partition,
+                BlockAsync(  // SM<11>
+                    [enumerator],
+                    Assign( enumerator, partitionAccess ),  // var enumerator = partitionList[temp]
+
+                    //Invoke( LoggerExpression.Log( "taskRun.enumerator" ), Convert( enumerator, typeof( object ) ) ),
+                    //Invoke( LoggerExpression.Log( "taskRun.counter" ), Convert( counter, typeof( object ) ) ),
+                    //Invoke( LoggerExpression.Log( "taskRun.temp" ), Convert( temp, typeof( object ) ) ),
+
+                    //Using( Convert( enumerator, typeof( IDisposable ) ),  // TODO: Shouldn't need to convert
                         While(
                             moveNext,
                             Await( Invoke( function, current ), configureAwait: false )
                         )
-                //  )
+                    //)
                 )
             )
         );
@@ -290,11 +310,35 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
          * {
          *      tasks.Add( Task.Run( async () => { ... } ) ) );
          * }
+         * for( int counter = 0; counter < 2: counter++ )
+         * {
+         *      
+         *      await..  
+         *      
+         *      var temp = counter; ---
+         *      tasks.Add( Task.Run( async () => { temp ... } ) ) );
+         * }
          */
         var tasks = Variable( typeof( List<Task> ), "tasks" );
         var initalizeTasks = Assign( tasks, New( typeof( List<Task> ).GetConstructors()[0] ) );
-        var addTask = Call( tasks, typeof( List<Task> ).GetMethod( nameof( List<Task>.Add ) )!, taskRun );
-        var foreachPartition = ForEach( getPartitionsCall, partition, addTask );
+        var addTask = Block(
+            [temp],
+            Assign( temp, counter ),
+            //Invoke( LoggerExpression.Log( "addtask.temp" ), Convert( temp, typeof( object ) ) ),
+            //Invoke( LoggerExpression.Log( "addtask.counter" ), Convert( counter, typeof( object ) ) ),
+            Call( tasks, typeof( List<Task> ).GetMethod( nameof( List<Task>.Add ) )!, taskRun )
+        );
+
+
+        var counterInit = Assign( counter, Constant( 0 ) );
+
+        var condition = LessThan( counter, Constant( 2 ) );  // TODO: partitionList.Count
+        var iteration = PostIncrementAssign( counter );
+
+        var forExpr = For( counterInit, condition, iteration, addTask );
+
+
+        //var foreachPartition = ForEach( getPartitionsCall, partition, addTask );
 
         // await Task.WhenAll( tasks );
         var taskWhenAll = Await( Call(
@@ -302,10 +346,12 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
             tasks )
         );
 
-        return BlockAsync(
-            [tasks],
+        return BlockAsync(  // SM<10>  // temp, counter, partitionList, enumerator, tasks
+            [tasks, counter, partitionList],
             initalizeTasks,
-            foreachPartition,
+            Assign( partitionList, getPartitionsCall ),
+            //Invoke( LoggerExpression.Log( "forEachAsync.partitionList" ), Convert( partitionList, typeof( object ) ) ),
+            forExpr,  //foreachPartition,
             taskWhenAll
         );
     }

@@ -18,9 +18,10 @@ public static class PipelineMemoryCacheExtensions
 
         var block = PipelineFactory.Start<TOutput>();
 
-        //var (parentFunction, parentMiddleware) = nestedBuilder( block ).GetPipelineFunction();
+        // TODO: should not need to call 
+        var function = nestedBuilder( block ).Build();
 
-        return null; // builder.PipeCacheAsync( nestedBuilder( block ), optionsFunc );
+        return builder.PipeCacheAsync( function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeCacheAsync<TInput, TOutput, TNext>(
@@ -31,9 +32,9 @@ public static class PipelineMemoryCacheExtensions
         ArgumentNullException.ThrowIfNull( nestedBuilder );
 
         var block = PipelineFactory.Start<TOutput>();
-        //var (parentFunction, parentMiddleware) = nestedBuilder( block ).GetPipelineFunction();
+        var function = nestedBuilder( block ).Build();
 
-        return null; //builder.PipeCacheAsync( nestedBuilder( block ), optionsFunc );
+        return builder.PipeCacheAsync( function, optionsFunc );
     }
 
     public static IPipelineBuilder<TInput, TNext> PipeCache<TInput, TOutput, TNext>(

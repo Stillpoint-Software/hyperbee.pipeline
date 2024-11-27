@@ -93,34 +93,6 @@ public static class ContextImplExtensions
         );
     }
 
-    /*
-    public static IDisposable CreateFrame( this IPipelineContextControl control, IPipelineContext context, Action<IPipelineContext> configure, string defaultName = null )
-    {
-        var name = context.Name;
-        var id = context.Id;
-
-        try
-        {
-            control.Id = control.GetNextId();
-            control.Name = defaultName;
-
-            configure?.Invoke( context ); // invoke user configure
-
-            return new Disposable( () =>
-            {
-                control.Id = id;
-                control.Name = name;
-            } );
-        }
-        catch
-        {
-            control.Id = id;
-            control.Name = name;
-            throw;
-        }
-    }
-    */
-
     private sealed class Disposable( Action dispose ) : IDisposable
     {
         public static readonly ConstructorInfo ConstructorInfo = typeof( Disposable ).GetConstructors()[0];

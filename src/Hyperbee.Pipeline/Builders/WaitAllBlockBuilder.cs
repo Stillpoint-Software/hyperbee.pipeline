@@ -125,11 +125,4 @@ public class Builders<TInput, TOutput>
 }
 
 public sealed record WaitAllResult( IPipelineContext Context, object Result );
-//{
-//    public WaitAllResult()
-//    {
-//    }
 
-//    public object Result { get; init; }
-//    public IPipelineContext Context { get; init; }
-//}

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using FastExpressionCompiler;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Data;
 using static System.Linq.Expressions.Expression;
@@ -19,6 +20,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     {
         // build and return the outermost method
 
+        //var code = Function.ToCSharpString();
         var compiledFunction = Function.Compile();
 
         return async ( context, argument ) =>

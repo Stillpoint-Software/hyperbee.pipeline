@@ -2,7 +2,7 @@
 
 namespace Hyperbee.Pipeline.Extensions;
 
-internal static class EnumerableExtensions
+public static class EnumerableExtensions
 {
     public static Task ForEachAsync<T>( this IEnumerable<T> source, Func<T, Task> function, int maxDegreeOfParallelism = 0 )
     {
@@ -11,7 +11,7 @@ internal static class EnumerableExtensions
 
         return Task.WhenAll( Partitioner
             .Create( source )
-            .GetPartitions( maxDegreeOfParallelism )
+            .GetPartitions( maxDegreeOfParallelism )  /// List 12 Partitions <Enumertor> 
             .Select( partition => Task.Run( async () =>
             {
                 using var enumerator = partition;
