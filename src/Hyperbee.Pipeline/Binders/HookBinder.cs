@@ -41,7 +41,6 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
         var arg = Parameter( typeof( TInput ), "arg" );
         var nextExpression = Lambda<FunctionAsync<TOutput, TInput>>(
             BlockAsync(
-                [function],
                 Await( Invoke( Middleware, ctx, arg, function ), configureAwait: false )
             ),
             parameters: [ctx, arg]
@@ -49,7 +48,6 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
 
         return Lambda<MiddlewareAsync<TInput, TOutput>>(
             BlockAsync(
-                [context, argument],
                 Await( Invoke( middleware, context, argument, nextExpression ), configureAwait: false )
             ),
             parameters: [context, argument, function] );

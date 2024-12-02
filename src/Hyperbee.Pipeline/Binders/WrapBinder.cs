@@ -49,7 +49,8 @@ internal class WrapBinder<TInput, TOutput>
                 Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
                     ContextImplExtensions.CreateFrameExpression( context, Configure, frameName ),
                     Invoke( next, context, argument )
-                ) );
+                ),
+                parameters: [context, argument] );
         }
 
         var ctx = Parameter( typeof( IPipelineContext ), "ctx" );
