@@ -40,7 +40,7 @@ internal static class CallBlockBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ),
+            Function = new CallBlockBinder<TInput, TOutput>( parentFunction ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = parentMiddleware
         };
     }
