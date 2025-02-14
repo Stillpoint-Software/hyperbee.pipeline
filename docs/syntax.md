@@ -160,4 +160,4 @@ Assert.AreEqual( 3, result );
 
 `Cancel` method allows you to cancel the pipeline after the current step.
 
-`CancelWith` method allows you to cancel the pipeline with a value after the current step.## Parallel Flow
+`CancelWith` method allows you to cancel the pipeline with a value after the current step.
