@@ -24,8 +24,8 @@ public static class ContextImplExtensions
         string defaultName = null
     )
     {
-        if( config == null )
-            return Call( ConfigureMethodInfo, arguments: [context, Constant( null, typeof( Action<IPipelineContext> ) ), Constant( defaultName )]);
+        if ( config == null )
+            return Call( ConfigureMethodInfo, arguments: [context, Constant( null, typeof( Action<IPipelineContext> ) ), Constant( defaultName )] );
 
         return Call( ConfigureMethodInfo, arguments: [context, config, Constant( defaultName )] );
     }

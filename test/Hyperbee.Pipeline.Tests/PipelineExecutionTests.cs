@@ -27,12 +27,12 @@ public class PipelineExecutionTests
         var myVar = Variable( typeof( Box<int> ), "myVar" );
         Expression<Action<Action>> invokeLambda = ( lambda ) => lambda();
 
-        var nestedLambda = Lambda<Func<Box<int>>>( 
-            Block( 
+        var nestedLambda = Lambda<Func<Box<int>>>(
+            Block(
                 [myVar],
                 Assign( myVar, MemberInit( New( typeof( Box<int> ) ), Bind( valueField, Constant( 5 ) ) ) ),
-                Invoke( invokeLambda, 
-                    Lambda<Action>( Assign( Field( myVar, valueField ), Constant( 3 ) ) ) 
+                Invoke( invokeLambda,
+                    Lambda<Action>( Assign( Field( myVar, valueField ), Constant( 3 ) ) )
                 ),
                 myVar
             )
@@ -42,7 +42,7 @@ public class PipelineExecutionTests
 
         var fastCompile = nestedLambda.CompileFast();
         var fastResult = fastCompile();
-        
+
         Assert.AreEqual( result.Value, fastResult.Value );
     }
 
