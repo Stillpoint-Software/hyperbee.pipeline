@@ -1,9 +1,15 @@
-﻿using System.Linq.Expressions;
-using FastExpressionCompiler;
+﻿//#define FastExpressionCompiler
+using System.Linq.Expressions;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Data;
 using static System.Linq.Expressions.Expression;
+
 using static Hyperbee.Expressions.ExpressionExtensions;
+
+#if FastExpressionCompiler
+using FastExpressionCompiler;
+using static FastExpressionCompiler.ExpressionCompiler;
+#endif
 
 namespace Hyperbee.Pipeline;
 
@@ -19,9 +25,13 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     public FunctionAsync<TInput, TOutput> Build()
     {
         // build and return the outermost method
-
+#if FastExpressionCompiler
         //var code = Function.ToCSharpString();
+        var compiledFunction = Function.CompileFast( false, CompilerFlags.EnableDelegateDebugInfo | CompilerFlags.ThrowOnNotSupportedExpression );
+        var di = compiledFunction.Target as IDelegateDebugInfo;
+#else
         var compiledFunction = Function.Compile();
+#endif
 
         return async ( context, argument ) =>
         {
@@ -49,7 +59,12 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     public ProcedureAsync<TInput> BuildAsProcedure()
     {
         // build and return the outermost method
+#if FastExpressionCompiler
+        //var code = Function.ToCSharpString();
+        var compiledFunction = Function.CompileFast( false, CompilerFlags.EnableDelegateDebugInfo | CompilerFlags.ThrowOnNotSupportedExpression );
+#else
         var compiledFunction = Function.Compile();
+#endif
 
         return async ( context, argument ) =>
         {

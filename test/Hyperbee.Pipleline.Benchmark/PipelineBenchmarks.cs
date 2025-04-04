@@ -12,9 +12,28 @@ namespace Hyperbee.Pipeline.Benchmark;
 
 public class PipelineBenchmarks
 {
+    private FunctionAsync<string, int> _command = null!;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _command = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) => int.Parse( arg ) )
+            .Build();
+
+        // Only makes a difference with fast compile and first run.
+        _command( new PipelineContext(), "5" );
+    }
 
     [Benchmark]
     public void PipelineExecution()
+    {
+        _command( new PipelineContext(), "5" );
+    }
+
+    [Benchmark]
+    public void PipelineBuildAndExecution()
     {
         var command = PipelineFactory
             .Start<string>()
@@ -27,7 +46,6 @@ public class PipelineBenchmarks
     [Benchmark]
     public void PipelineMiddleware()
     {
-
         var command = PipelineFactory
             .Start<string>()
             .HookAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" )

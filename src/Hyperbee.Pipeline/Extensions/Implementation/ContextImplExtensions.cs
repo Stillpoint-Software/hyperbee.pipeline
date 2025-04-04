@@ -24,73 +24,39 @@ public static class ContextImplExtensions
         string defaultName = null
     )
     {
-        /*
+        if( config == null )
+            return Call( ConfigureMethodInfo, arguments: [context, Constant( null, typeof( Action<IPipelineContext> ) ), Constant( defaultName )]);
+
+        return Call( ConfigureMethodInfo, arguments: [context, config, Constant( defaultName )] );
+    }
+
+    private static MethodInfo ConfigureMethodInfo => typeof( ContextImplExtensions ).GetMethod( nameof( Configure ), BindingFlags.NonPublic | BindingFlags.Static );
+    private static IDisposable Configure( IPipelineContext context, Action<IPipelineContext> configure, string defaultName )
+    {
+        var name = context.Name;
+        var id = context.Id;
+
+        var control = context as IPipelineContextControl;
+
+        try
         {
-            var name = context.Name;
-            var id = context.Id;
+            control.Id = control.GetNextId();
+            control.Name = defaultName;
 
-            try
-            {
-                control.Id = control.GetNextId();
-                control.Name = defaultName;
+            configure?.Invoke( context ); // invoke user configure
 
-                configure?.Invoke( context ); // invoke user configure
-
-                return new Disposable( () =>
-                {
-                    control.Id = id;
-                    control.Name = name;
-                } );
-            }
-            catch
+            return new Disposable( () =>
             {
                 control.Id = id;
                 control.Name = name;
-                throw;
-            }
+            } );
         }
-        */
-
-        var control = Convert( context, typeof( IPipelineContextControl ) );
-
-        var idVariable = Variable( typeof( int ), "originalId" );
-        var nameVariable = Variable( typeof( string ), "originalName" );
-
-        var idProperty = Property( control, "Id" );
-        var nameProperty = Property( control, "Name" );
-
-        var exception = Variable( typeof( Exception ), "exception" );
-
-        return Block(
-            [idVariable, nameVariable],
-            Assign( idVariable, idProperty ),
-            Assign( nameVariable, nameProperty ),
-            TryCatch(
-                Block(
-                    Assign( idProperty, Call( control, "GetNextId", Type.EmptyTypes ) ),
-                    Assign( nameProperty, Constant( defaultName ) ),
-                    config != null
-                        ? Invoke( config, context )
-                        : Empty(),
-                    New( Disposable.ConstructorInfo,
-                        Lambda<Action>(
-                            Block(
-                                Assign( idProperty, idVariable ),
-                                Assign( nameProperty, Constant( "lambdaName" ) )
-                            )
-                        ) )
-                ),
-                Catch(
-                    exception,
-                    Block(
-                        [exception],
-                        Assign( idProperty, idVariable ),
-                        Assign( nameProperty, nameVariable ),
-                        Throw( exception, typeof( Disposable ) )
-                    )
-                )
-            )
-        );
+        catch
+        {
+            control.Id = id;
+            control.Name = name;
+            throw;
+        }
     }
 
     private sealed class Disposable( Action dispose ) : IDisposable

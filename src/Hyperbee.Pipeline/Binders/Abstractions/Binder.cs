@@ -67,7 +67,7 @@ internal abstract class Binder<TInput, TOutput>
         var cancellationTokenProperty = Property( contextControl, "CancellationToken" );
         var cancellationValueProperty = Property( contextControl, "CancellationValue" );
 
-        var conditionalExpression = Condition(
+        return Condition(
             Not( Property( cancellationTokenProperty, "IsCancellationRequested" ) ),
             Constant( false ),
 
@@ -80,8 +80,6 @@ internal abstract class Binder<TInput, TOutput>
                 Constant( true )
             )
         );
-
-        return conditionalExpression;
     }
 
 }

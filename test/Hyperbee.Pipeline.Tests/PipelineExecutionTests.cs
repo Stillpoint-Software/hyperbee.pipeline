@@ -1,28 +1,62 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using FastExpressionCompiler;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Extensions;
 using Hyperbee.Pipeline.Tests.TestSupport;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using static System.Linq.Expressions.Expression;
 
 namespace Hyperbee.Pipeline.Tests;
 
 [TestClass]
 public class PipelineExecutionTests
 {
+    public class Box<T>
+    {
+        public T Value;
+    }
+
+    [TestMethod]
+    public void Nested_lambda_with_shared_variable()
+    {
+        var valueField = typeof( Box<int> ).GetField( "Value" );
+        var myVar = Variable( typeof( Box<int> ), "myVar" );
+        Expression<Action<Action>> invokeLambda = ( lambda ) => lambda();
+
+        var nestedLambda = Lambda<Func<Box<int>>>( 
+            Block( 
+                [myVar],
+                Assign( myVar, MemberInit( New( typeof( Box<int> ) ), Bind( valueField, Constant( 5 ) ) ) ),
+                Invoke( invokeLambda, 
+                    Lambda<Action>( Assign( Field( myVar, valueField ), Constant( 3 ) ) ) 
+                ),
+                myVar
+            )
+        );
+        var compile = nestedLambda.Compile();
+        var result = compile();
+
+        var fastCompile = nestedLambda.CompileFast();
+        var fastResult = fastCompile();
+        
+        Assert.AreEqual( result.Value, fastResult.Value );
+    }
+
     [TestMethod]
     public async Task Pipeline_should_execute_function()
     {
         var command = PipelineFactory
-            .Start<string>()
-            .Pipe( ( ctx, arg ) => int.Parse( arg ) )
+            .Start<Box<string>>()
+            .Pipe( ( ctx, arg ) => new Box<int> { Value = int.Parse( arg.Value ) } )
             .Build();
 
-        var result = await command( new PipelineContext(), "5" );
+        var result = await command( new PipelineContext(), new Box<string> { Value = "5" } );
 
-        Assert.AreEqual( 5, result );
+        Assert.AreEqual( 5, result.Value );
     }
 
     [TestMethod]
