@@ -68,7 +68,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
                         Assign( accumulator, Default( typeof( TNext ) ) ),
                         ForEach( nextArguments, element,
                             Block(
-                                [blockResult],   
+                                [blockResult],
                                 Assign( blockResult, Await( ProcessBlockAsync( next, context, element ), configureAwait: false ) ),
                                 Assign( accumulator, Invoke( Reducer, accumulator, blockResult ) )
                             )

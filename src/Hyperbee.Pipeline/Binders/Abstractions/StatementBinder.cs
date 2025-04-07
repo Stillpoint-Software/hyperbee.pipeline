@@ -38,7 +38,7 @@ internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutpu
 
         if ( Middleware == null )
         {
-            var disposableVar1 = Parameter( typeof(IDisposable), Guid.NewGuid().ToString( "N" ) );
+            var disposableVar1 = Parameter( typeof( IDisposable ), Guid.NewGuid().ToString( "N" ) );
             return BlockAsync(
                 Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
                     disposableVar1,
