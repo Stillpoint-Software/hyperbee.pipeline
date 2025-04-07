@@ -48,7 +48,7 @@ internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInpu
 
         return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
-                [awaitedResult, nextArguments, element],
+                [awaitedResult, nextArguments],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
                 Condition( canceled,
                     Default( typeof( TOutput ) ),

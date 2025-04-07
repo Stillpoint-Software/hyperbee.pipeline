@@ -127,10 +127,11 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
             Constant( Environment.ProcessorCount ) );
 
         var reducerResult = Variable( typeof( TNext ), "reducerResult" );
-
+        var disposableVar = Parameter( typeof( IDisposable ), Guid.NewGuid().ToString( "N" ) );
         return BlockAsync(
             [results, reducerResult],
             Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
+                disposableVar,
                 ContextImplExtensions.CreateFrameExpression( context, Configure, nameof( WaitAllAsync ) ),
                 Block(
                     [items],
@@ -281,6 +282,8 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
         // }
         var moveNext = Call( enumerator, typeof( IEnumerator ).GetMethod( nameof( IEnumerator.MoveNext ) ) );
         var current = Property( enumerator, nameof( IEnumerator<TSource>.Current ) );
+        var disposableVar = Parameter( typeof( IDisposable ), Guid.NewGuid().ToString( "N" ) );
+
         var taskRun = Call(
             typeof( Task ).GetMethod( nameof( Task.Run ), [typeof( Func<Task> )] )!,
             Lambda<Func<Task>>(
@@ -288,7 +291,9 @@ internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInp
                     [enumerator],
                     Assign( enumerator, partitionAccess ),
 
-                    Using( Convert( enumerator, typeof( IDisposable ) ),
+                    Using(
+                        disposableVar,
+                        Convert( enumerator, typeof( IDisposable ) ),
                         While(
                             moveNext,
                             Await( Invoke( function, current ), configureAwait: false )

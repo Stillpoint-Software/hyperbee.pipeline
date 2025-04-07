@@ -26,7 +26,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     {
         // build and return the outermost method
 #if FastExpressionCompiler
-        //var code = Function.ToCSharpString();
+        var code = Function.ToCSharpString();
         var compiledFunction = Function.CompileFast( false, CompilerFlags.EnableDelegateDebugInfo | CompilerFlags.ThrowOnNotSupportedExpression );
         var di = compiledFunction.Target as IDelegateDebugInfo;
 #else

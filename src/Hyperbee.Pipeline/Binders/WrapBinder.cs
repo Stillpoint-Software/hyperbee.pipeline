@@ -45,8 +45,10 @@ internal class WrapBinder<TInput, TOutput>
         // If there is no middleware, there is no need to wrap the next function
         if ( Middleware == null )
         {
+            var disposableVar1 = Parameter( typeof( IDisposable ), Guid.NewGuid().ToString( "N" ) );
             return Lambda<FunctionAsync<TInput, TOutput>>(
                 Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
+                    disposableVar1,
                     ContextImplExtensions.CreateFrameExpression( context, Configure, frameName ),
                     Invoke( next, context, argument )
                 ),
@@ -65,9 +67,11 @@ internal class WrapBinder<TInput, TOutput>
             parameters: [ctx, arg]
         );
 
+        var disposableVar2 = Parameter( typeof( IDisposable ), Guid.NewGuid().ToString( "N" ) );
         return Lambda<FunctionAsync<TInput, TOutput>>(
             BlockAsync(
                 Using( //using var _ = contextControl.CreateFrame( context, Configure, frameName );
+                    disposableVar2,
                     ContextImplExtensions.CreateFrameExpression( context, Configure, frameName ),
                     Await(
                         Invoke( Middleware,

@@ -59,7 +59,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
         // TODO: IfThenElse should be switched Condition, and we should be able to remove finalResult (bug in expressions)
         return Lambda<FunctionAsync<TInput, TNext>>(
             BlockAsync(
-                [awaitedResult, nextArguments, /*enumerator,*/ element, accumulator, finalResult, blockResult],
+                [awaitedResult, nextArguments, accumulator, finalResult],
                 Assign( awaitedResult, Await( ProcessPipelineAsync( context, argument ), configureAwait: false ) ),
                 IfThenElse( canceled,
                     Default( typeof( TNext ) ),
@@ -68,6 +68,7 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
                         Assign( accumulator, Default( typeof( TNext ) ) ),
                         ForEach( nextArguments, element,
                             Block(
+                                [blockResult],   
                                 Assign( blockResult, Await( ProcessBlockAsync( next, context, element ), configureAwait: false ) ),
                                 Assign( accumulator, Invoke( Reducer, accumulator, blockResult ) )
                             )

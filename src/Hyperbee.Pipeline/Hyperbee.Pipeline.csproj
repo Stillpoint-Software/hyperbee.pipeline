@@ -30,8 +30,8 @@
     <PrivateAssets>all</PrivateAssets>
     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-	<PackageReference Include="FastExpressionCompiler" Version="5.0.0" />
-	<PackageReference Include="Hyperbee.Expressions" Version="1.0.0-develop.241127193648" />
+	<PackageReference Include="FastExpressionCompiler" Version="5.1.1" />
+	<PackageReference Include="Hyperbee.Expressions" Version="1.1.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.3" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.3" />
   </ItemGroup>
