@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
@@ -7,7 +8,7 @@ internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TI
 {
     protected Function<TOutput, bool> Condition { get; }
 
-    protected ConditionalBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function, Action<IPipelineContext> configure )
+    protected ConditionalBlockBinder( Function<TOutput, bool> condition, Expression<FunctionAsync<TInput, TOutput>> function, Action<IPipelineContext> configure )
         : base( function, configure )
     {
         Condition = condition;
