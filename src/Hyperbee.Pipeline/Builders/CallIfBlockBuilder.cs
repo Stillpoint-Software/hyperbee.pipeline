@@ -43,7 +43,7 @@ internal static class CallIfBuilder<TInput, TOutput>
 
         return new PipelineBuilder<TInput, TOutput>
         {
-            Function = new CallIfBlockBinder<TInput, TOutput>( condition, parentFunction ).Bind( function ),
+            Function = new CallIfBlockBinder<TInput, TOutput>( condition, parentFunction ).Bind( ExpressionBinder.ToExpression( function ) ),
             Middleware = parentMiddleware
         };
     }
