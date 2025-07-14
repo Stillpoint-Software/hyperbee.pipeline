@@ -6,7 +6,8 @@ internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,
 
     public HookBinder( MiddlewareAsync<TInput, TOutput> middleware )
     {
-        Middleware = middleware ?? (async ( context, argument, next ) => await next( context, argument ).ConfigureAwait( false ));
+        Middleware = middleware ?? (async ( context, argument, next ) =>
+            await next( context, argument ).ConfigureAwait( false ));
     }
 
     public MiddlewareAsync<TInput, TOutput> Bind( MiddlewareAsync<TInput, TOutput> middleware )
