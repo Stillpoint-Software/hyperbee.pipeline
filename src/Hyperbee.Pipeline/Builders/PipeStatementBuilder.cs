@@ -6,47 +6,47 @@ namespace Hyperbee.Pipeline;
 
 public static class PipeStatementBuilder
 {
-    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> Pipe<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         Function<TOutput, TNext> next,
         string name
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.Pipe( parent, next, config => config.Name = name );
+        return PipeStatementBuilder<TStart, TOutput>.Pipe( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TNext> Pipe<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> Pipe<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         Function<TOutput, TNext> next,
         Action<IPipelineContext> config = null
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.Pipe( parent, next, config );
+        return PipeStatementBuilder<TStart, TOutput>.Pipe( parent, next, config );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> PipeAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         FunctionAsync<TOutput, TNext> next,
         string name
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.PipeAsync( parent, next, config => config.Name = name );
+        return PipeStatementBuilder<TStart, TOutput>.PipeAsync( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> PipeAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         FunctionAsync<TOutput, TNext> next,
         Action<IPipelineContext> config = null
     )
     {
-        return PipeStatementBuilder<TInput, TOutput>.PipeAsync( parent, next, config );
+        return PipeStatementBuilder<TStart, TOutput>.PipeAsync( parent, next, config );
     }
 }
 
-internal static class PipeStatementBuilder<TInput, TOutput>
+internal static class PipeStatementBuilder<TStart, TOutput>
 {
-    public static IPipelineBuilder<TInput, TNext> Pipe<TNext>(
-        IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> Pipe<TNext>(
+        IPipelineBuilder<TStart, TOutput> parent,
         Function<TOutput, TNext> next,
         Action<IPipelineContext> config = null
     )
@@ -55,9 +55,9 @@ internal static class PipeStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TNext>
+        return new PipelineBuilder<TStart, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
+            Function = new PipeStatementBinder<TStart, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
             Middleware = parentMiddleware
         };
 
@@ -69,8 +69,8 @@ internal static class PipeStatementBuilder<TInput, TOutput>
         }
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeAsync<TNext>(
-        IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TNext> PipeAsync<TNext>(
+        IPipelineBuilder<TStart, TOutput> parent,
         FunctionAsync<TOutput, TNext> next,
         Action<IPipelineContext> config = null
     )
@@ -79,9 +79,9 @@ internal static class PipeStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TNext>
+        return new PipelineBuilder<TStart, TNext>
         {
-            Function = new PipeStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
+            Function = new PipeStatementBinder<TStart, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
             Middleware = parentMiddleware
         };
     }

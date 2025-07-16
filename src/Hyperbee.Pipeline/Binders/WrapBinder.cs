@@ -3,18 +3,18 @@ using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class WrapBinder<TInput, TOutput>
+internal class WrapBinder<TStart, TOutput>
 {
-    private MiddlewareAsync<TInput, TOutput> Middleware { get; }
+    private MiddlewareAsync<TStart, TOutput> Middleware { get; }
     private Action<IPipelineContext> Configure { get; }
 
-    public WrapBinder( MiddlewareAsync<TInput, TOutput> middleware, Action<IPipelineContext> configure )
+    public WrapBinder( MiddlewareAsync<TStart, TOutput> middleware, Action<IPipelineContext> configure )
     {
         Middleware = middleware;
         Configure = configure;
     }
 
-    public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TInput, TOutput> next )
+    public FunctionAsync<TStart, TOutput> Bind( FunctionAsync<TStart, TOutput> next )
     {
         var defaultName = next.Method.Name;
 

@@ -4,14 +4,14 @@ using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class CallStatementBinder<TInput, TOutput> : StatementBinder<TInput, TOutput>
+internal class CallStatementBinder<TStart, TOutput> : StatementBinder<TStart, TOutput>
 {
-    public CallStatementBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public CallStatementBinder( FunctionAsync<TStart, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : base( function, middleware, configure )
     {
     }
 
-    public FunctionAsync<TInput, TOutput> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
+    public FunctionAsync<TStart, TOutput> Bind( ProcedureAsync<TOutput> next, MethodInfo method = null )
     {
         var defaultName = (method ?? next.Method).Name;
 

@@ -1,18 +1,20 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Hyperbee.Pipeline.Binders.Abstractions;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder<TInput, TOutput>
+internal class ReduceBlockBinder<TStart, TOutput, TElement, TNext> : BlockBinder<TStart, TOutput>
 {
     private Func<TNext, TNext, TNext> Reducer { get; }
 
-    public ReduceBlockBinder( Func<TNext, TNext, TNext> reducer, FunctionAsync<TInput, TOutput> function )
+    public ReduceBlockBinder( Func<TNext, TNext, TNext> reducer, FunctionAsync<TStart, TOutput> function )
         : base( function, default )
     {
         Reducer = reducer;
     }
 
-    public FunctionAsync<TInput, TNext> Bind( FunctionAsync<TElement, TNext> next )
+    public FunctionAsync<TStart, TNext> Bind( FunctionAsync<TElement, TNext> next )
     {
         return async ( context, argument ) =>
         {
@@ -21,14 +23,37 @@ internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder
             if ( canceled )
                 return default;
 
-            var nextArguments = (IEnumerable<TElement>) nextArgument;
-            var accumulator = default( TNext );
-
-            // Process each element and apply the reducer
-            foreach ( var elementArgument in nextArguments )
+            TNext accumulator = default;
+            if ( nextArgument is IList<TElement> list )
             {
-                var result = await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
-                accumulator = Reducer( accumulator, result );
+                for ( int i = 0; i < list.Count; i++ )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+                    var result = await ProcessBlockAsync( next, context, list[i] ).ConfigureAwait( false );
+                    accumulator = Reducer( accumulator, result );
+                }
+            }
+            else if ( nextArgument is TElement[] array )
+            {
+                for ( int i = 0; i < array.Length; i++ )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+                    var result = await ProcessBlockAsync( next, context, array[i] ).ConfigureAwait( false );
+                    accumulator = Reducer( accumulator, result );
+                }
+            }
+            else if ( nextArgument is IEnumerable<TElement> enumerable )
+            {
+                foreach ( var elementArgument in enumerable )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+
+                    var result = await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
+                    accumulator = Reducer( accumulator, result );
+                }
             }
 
             return accumulator;

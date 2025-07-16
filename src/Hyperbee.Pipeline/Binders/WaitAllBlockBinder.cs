@@ -6,22 +6,22 @@ using Hyperbee.Pipeline.Extensions.Implementation;
 namespace Hyperbee.Pipeline.Binders;
 
 
-internal class WaitAllBlockBinder<TInput, TOutput> : ConditionalBlockBinder<TInput, TOutput>
+internal class WaitAllBlockBinder<TStart, TOutput> : ConditionalBlockBinder<TStart, TOutput>
 {
     private MiddlewareAsync<object, object> Middleware { get; }
 
-    public WaitAllBlockBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public WaitAllBlockBinder( FunctionAsync<TStart, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : this( null, function, middleware, configure )
     {
     }
 
-    public WaitAllBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    public WaitAllBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TStart, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : base( condition, function, configure )
     {
         Middleware = middleware;
     }
 
-    public FunctionAsync<TInput, TNext> Bind<TNext>( FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
+    public FunctionAsync<TStart, TNext> Bind<TNext>( FunctionAsync<TOutput, object>[] nexts, WaitAllReducer<TOutput, TNext> reducer )
     {
         ArgumentNullException.ThrowIfNull( reducer );
 

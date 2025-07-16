@@ -3,24 +3,24 @@ using Microsoft.Extensions.Logging;
 
 namespace Hyperbee.Pipeline.Commands;
 
-public abstract class CommandFunction<TInput, TOutput> : ICommandFunction<TInput, TOutput>
+public abstract class CommandFunction<TStart, TOutput> : ICommandFunction<TStart, TOutput>
 {
     private IPipelineContextFactory ContextFactory { get; }
-    protected Lazy<FunctionAsync<TInput, TOutput>> Pipeline { get; }
+    protected Lazy<FunctionAsync<TStart, TOutput>> Pipeline { get; }
     protected ILogger Logger { get; }
 
     protected CommandFunction( IPipelineContextFactory pipelineContextFactory, ILogger logger )
     {
         ContextFactory = pipelineContextFactory;
-        Pipeline = new Lazy<FunctionAsync<TInput, TOutput>>( CreatePipeline );
+        Pipeline = new Lazy<FunctionAsync<TStart, TOutput>>( CreatePipeline );
         Logger = logger;
     }
 
-    protected abstract FunctionAsync<TInput, TOutput> CreatePipeline();
+    protected abstract FunctionAsync<TStart, TOutput> CreatePipeline();
 
     public virtual Task<CommandResult<TOutput>> ExecuteAsync( CancellationToken cancellation = default ) => ExecuteAsync( default, cancellation );
 
-    public virtual async Task<CommandResult<TOutput>> ExecuteAsync( TInput argument, CancellationToken cancellation = default )
+    public virtual async Task<CommandResult<TOutput>> ExecuteAsync( TStart argument, CancellationToken cancellation = default )
     {
         var context = ContextFactory.Create( Logger );
 

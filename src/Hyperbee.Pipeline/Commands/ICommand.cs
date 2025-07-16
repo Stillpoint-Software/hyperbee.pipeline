@@ -2,16 +2,16 @@
 
 public interface ICommand;
 
-public interface ICommandProcedure<in TInput> : ICommand
+public interface ICommandProcedure<in TStart> : ICommand
 {
     Task<CommandResult> ExecuteAsync( CancellationToken cancellation = default );
-    Task<CommandResult> ExecuteAsync( TInput argument, CancellationToken cancellation = default );
+    Task<CommandResult> ExecuteAsync( TStart argument, CancellationToken cancellation = default );
 }
 
-public interface ICommandFunction<in TInput, TOutput> : ICommand
+public interface ICommandFunction<in TStart, TOutput> : ICommand
 {
     Task<CommandResult<TOutput>> ExecuteAsync( CancellationToken cancellation = default );
-    Task<CommandResult<TOutput>> ExecuteAsync( TInput argument, CancellationToken cancellation = default );
+    Task<CommandResult<TOutput>> ExecuteAsync( TStart argument, CancellationToken cancellation = default );
 }
 
 public interface ICommandFunction<TOutput> : ICommand

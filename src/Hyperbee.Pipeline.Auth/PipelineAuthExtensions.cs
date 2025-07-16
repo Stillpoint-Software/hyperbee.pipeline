@@ -8,12 +8,12 @@ public static class PipelineAuthExtensions
 {
     private const string ClaimsPrincipalKey = nameof( ClaimsPrincipalKey );
 
-    public static IPipelineBuilder<TInput, TNext> PipeIfClaim<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeIfClaim<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         Claim claim,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> childBuilder )
     {
-        return (IPipelineBuilder<TInput, TNext>) builder
+        return (IPipelineBuilder<TStart, TNext>) builder
             .PipeIf( ( context, arg ) =>
                 {
                     var claimsPrincipal = context.GetClaimsPrincipal();
@@ -24,8 +24,8 @@ public static class PipelineAuthExtensions
 
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WithAuth<TInput, TOutput>(
-        this IPipelineStartBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TOutput> WithAuth<TStart, TOutput>(
+        this IPipelineStartBuilder<TStart, TOutput> builder,
         Func<IPipelineContext, TOutput, ClaimsPrincipal, bool> validateClaims )
     {
         return builder
@@ -40,8 +40,8 @@ public static class PipelineAuthExtensions
             } );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WithAuth<TInput, TOutput>(
-        this IPipelineStartBuilder<TInput, TOutput> builder )
+    public static IPipelineBuilder<TStart, TOutput> WithAuth<TStart, TOutput>(
+        this IPipelineStartBuilder<TStart, TOutput> builder )
     {
         return builder.HookAsync( async ( context, argument, next ) =>
         {
