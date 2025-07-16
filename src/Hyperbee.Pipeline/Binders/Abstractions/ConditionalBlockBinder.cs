@@ -13,7 +13,7 @@ internal abstract class ConditionalBlockBinder<TStart, TOutput> : BlockBinder<TS
         Condition = condition;
     }
 
-    protected override async Task<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
+    protected override async ValueTask<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
     {
         if ( Condition != null && !Condition( context, CastTypeArg<TArgument, TOutput>( nextArgument ) ) )
         {

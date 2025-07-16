@@ -1,4 +1,5 @@
 ﻿using Hyperbee.Pipeline.Context;
+using System.Threading.Tasks;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
@@ -13,8 +14,14 @@ internal abstract class BlockBinder<TStart, TOutput> : Binder<TStart, TOutput>
     // use cases where the next argument is not the same as the output type
     // like ReduceBlockBinder and ForEachBlockBinder
 
-    protected virtual async Task<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
+    protected virtual ValueTask<TNext> ProcessBlockAsync<TArgument, TNext>( FunctionAsync<TArgument, TNext> blockFunction, IPipelineContext context, TArgument nextArgument )
     {
-        return await blockFunction( context, nextArgument ).ConfigureAwait( false );
+        // If the function completes synchronously, avoid async state machine
+        var task = blockFunction( context, nextArgument );
+        
+        if (task.IsCompletedSuccessfully)
+            return new ValueTask<TNext>(task.Result);
+
+        return new ValueTask<TNext>(task);
     }
 }

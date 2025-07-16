@@ -24,8 +24,8 @@ Some key features are:
 Pipelines provide a structured approach to managing complex processes, promoting [SOLID](https://en.wikipedia.org/wiki/SOLID)
 principles, including Inversion of Control (IoC) and Separation of Concerns (SoC). They enable composability, making it easier
 to build, test, and maintain your code. By extending the benefits of middleware and request-response pipelines throughout your 
-application, you achieve greater modularity, scalability, and flexibility. This is especially critical in domains such as 
-healthcare, compliance auditing, identity and roles, and high-security environments where clear boundaries and responsibilities
+application, you achieve greater modularity, scalability, and flexibility. This is particularly important in domains that demand
+compliance, auditing, strong identity and role management, or high-security standards—where clear boundaries and responsibilities
 are essential. Hyperbee.Pipeline ensures that the advantages of pipelines and middleware are not abandoned at the controller
 implementation, addressing a common gap in many frameworks. By using a functional approach, Hyperbee.Pipeline ensures that your
 pipelines are not only robust and maintainable but also highly adaptable to changing requirements.
