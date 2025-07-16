@@ -1,5 +1,5 @@
-﻿using Hyperbee.Pipeline.Context;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
@@ -18,10 +18,10 @@ internal abstract class BlockBinder<TStart, TOutput> : Binder<TStart, TOutput>
     {
         // If the function completes synchronously, avoid async state machine
         var task = blockFunction( context, nextArgument );
-        
-        if (task.IsCompletedSuccessfully)
-            return new ValueTask<TNext>(task.Result);
 
-        return new ValueTask<TNext>(task);
+        if ( task.IsCompletedSuccessfully )
+            return new ValueTask<TNext>( task.Result );
+
+        return new ValueTask<TNext>( task );
     }
 }
