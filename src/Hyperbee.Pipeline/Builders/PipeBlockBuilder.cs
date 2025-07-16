@@ -17,17 +17,17 @@ public static class PipeBlockBuilder
         bool inheritMiddleware,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> builder )
     {
-            ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull( builder );
 
-            var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
-            var block = PipelineFactory.Start<TOutput>(inheritMiddleware ? parentMiddleware : null);
-            var function = ((PipelineBuilder<TOutput, TNext>)builder(block)).Function;
+        var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
+        var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
+        var function = ((PipelineBuilder<TOutput, TNext>) builder( block )).Function;
 
-            return new PipelineBuilder<TStart, TNext>
-            {
-                Function = new PipeBlockBinder<TStart, TOutput>(parentFunction).Bind(function),
-                Middleware = parentMiddleware
-            };
+        return new PipelineBuilder<TStart, TNext>
+        {
+            Function = new PipeBlockBinder<TStart, TOutput>( parentFunction ).Bind( function ),
+            Middleware = parentMiddleware
+        };
     }
 }
 
