@@ -6,40 +6,46 @@ nav_order: 1
 
 # Hyperbee Pipeline
 
-`Hyperbee.Pipeline` allows you to construct asynchronous fluent pipelines in .NET. A pipeline, in this context, refers to a 
-sequence of data processing elements arranged in series, where the output of one element serves as the input for the subsequent 
+## Documentation Structure
+
+- [Conventions](conventions.md): Guidelines for creating builders, binders, and middleware.
+- [Middleware](middleware.md): How to use and implement middleware in pipelines.
+- [Extending Pipelines](extending.md): How to add new steps, middleware, or binders.
+- [Advanced Patterns](advanced-patterns.md): Real-world examples combining extension methods, custom binders, and middleware.
+
+`Hyperbee.Pipeline` allows you to construct asynchronous fluent pipelines in .NET. A pipeline, in this context, refers to a
+sequence of data processing elements arranged in series, where the output of one element serves as the input for the subsequent
 element.
 
-Hyperbee pipelines are composable, reusable, and easy to test. They are designed to be used in a variety of scenarios, such 
+Hyperbee pipelines are composable, reusable, and easy to test. They are designed to be used in a variety of scenarios, such
 as data processing, message handling, and workflow automation.
 
 Some key features are:
 
-* Middleware
-* Hooks
-* Wraps
-* Conditional flows
-* Loops
-* Parallel processing
-* Dependency injection
-* Early returns and cancellation
-* Child pipelines
+- Middleware
+- Hooks
+- Wraps
+- Conditional flows
+- Loops
+- Parallel processing
+- Dependency injection
+- Early returns and cancellation
+- Child pipelines
 
 ## Why Use Pipelines
 
 Pipelines provide a structured approach to managing complex processes, promoting [SOLID](https://en.wikipedia.org/wiki/SOLID)
 principles, including Inversion of Control (IoC) and Separation of Concerns (SoC). They enable composability, making it easier
-to build, test, and maintain your code. By extending the benefits of middleware and request-response pipelines throughout your 
-application, you achieve greater modularity, scalability, and flexibility. This is especially critical in domains such as 
+to build, test, and maintain your code. By extending the benefits of middleware and request-response pipelines throughout your
+application, you achieve greater modularity, scalability, and flexibility. This is especially critical in domains such as
 healthcare, compliance auditing, identity and roles, and high-security environments where clear boundaries and responsibilities
 are essential. Hyperbee.Pipeline ensures that the advantages of pipelines and middleware are not abandoned at the controller
 implementation, addressing a common gap in many frameworks. By using a functional approach, Hyperbee.Pipeline ensures that your
 pipelines are not only robust and maintainable but also highly adaptable to changing requirements.
 
-
 ## Getting Started
 
-To get started with Hyperbee.Pipeline, refer to the documentation for detailed instructions and examples. 
+To get started with Hyperbee.Pipeline, refer to the documentation for detailed instructions and examples.
 
 Install via NuGet:
 
@@ -49,8 +55,8 @@ dotnet add package Hyperbee.Pipeline
 
 ## Building and Executing Pipelines
 
-Pipelines are built using `PipelineFactory`. Once built, a pipeline is just an async function that takes a `PipelineContext` and 
-an optional input value as parameters, and returns a result. 
+Pipelines are built using `PipelineFactory`. Once built, a pipeline is just an async function that takes a `PipelineContext` and
+an optional input value as parameters, and returns a result.
 
 ```csharp
 var command = PipelineFactory
@@ -71,7 +77,7 @@ DI configuration, or manually through the `PipelineContextFactoryProvider` if yo
 
 Pipelines manage dependencies with a specialized container. This allows the implementor to control
 the services that are exposed through the pipeline. If you want to expose all application
-services then you can call `AddPipeline` and pass `includeAllServices: true`. 
+services then you can call `AddPipeline` and pass `includeAllServices: true`.
 
 Register pipelines with DI and provide Pipeline dependencies using the application container.
 
@@ -91,7 +97,7 @@ services.AddPipeline( (factoryServices, rootProvider) =>
 
 ## Pipeline of Pipelines
 
-The `PipelineFactory` library allows you to use pipelines together. Since pipelines are just functions, they can be used 
+The `PipelineFactory` library allows you to use pipelines together. Since pipelines are just functions, they can be used
 as input to other pipelines. This allows you to create complex data processing flows by reusing and chaining together
 multiple pipelines.
 
@@ -116,7 +122,7 @@ Assert.AreEqual( "hello you again!", result );
 
 ## Conditional Flow and Advanced Features
 
-The `PipelineFactory` library provides a variety of builders that allow you to customize the behavior of your pipelines. 
+The `PipelineFactory` library provides a variety of builders that allow you to customize the behavior of your pipelines.
 These methods provide powerful functionality for manipulating data as it passes through the pipeline.
 
 - Functions
@@ -134,5 +140,5 @@ Hyperbee.Pipeline is built upon the great work of several open-source projects. 
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](https://github.com/Stillpoint-Software/.github/blob/main/.github/CONTRIBUTING.md) 
+We welcome contributions! Please see our [Contributing Guide](https://github.com/Stillpoint-Software/.github/blob/main/.github/CONTRIBUTING.md)
 for more details.

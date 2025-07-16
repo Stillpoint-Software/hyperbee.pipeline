@@ -6,39 +6,39 @@ namespace Hyperbee.Pipeline;
 
 public static class WrapBuilder
 {
-    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
-        MiddlewareAsync<TInput, TOutput> pipelineMiddleware,
+    public static IPipelineBuilder<TStart, TOutput> WrapAsync<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
+        MiddlewareAsync<TStart, TOutput> pipelineMiddleware,
         string name
     )
     {
-        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config => config.Name = name );
+        return WrapBuilder<TStart, TOutput>.WrapAsync( parent, pipelineMiddleware, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
-        MiddlewareAsync<TInput, TOutput> pipelineMiddleware,
+    public static IPipelineBuilder<TStart, TOutput> WrapAsync<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
+        MiddlewareAsync<TStart, TOutput> pipelineMiddleware,
         Action<IPipelineContext> config = null
     )
     {
-        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
+        return WrapBuilder<TStart, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WrapAsync<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
-        IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware,
+    public static IPipelineBuilder<TStart, TOutput> WrapAsync<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
+        IEnumerable<MiddlewareAsync<TStart, TOutput>> pipelineMiddleware,
         Action<IPipelineContext> config = null
     )
     {
-        return WrapBuilder<TInput, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
+        return WrapBuilder<TStart, TOutput>.WrapAsync( parent, pipelineMiddleware, config );
     }
 }
 
-internal static class WrapBuilder<TInput, TOutput>
+internal static class WrapBuilder<TStart, TOutput>
 {
-    public static IPipelineBuilder<TInput, TOutput> WrapAsync(
-        IPipelineBuilder<TInput, TOutput> parent,
-        MiddlewareAsync<TInput, TOutput> pipelineMiddleware,
+    public static IPipelineBuilder<TStart, TOutput> WrapAsync(
+        IPipelineBuilder<TStart, TOutput> parent,
+        MiddlewareAsync<TStart, TOutput> pipelineMiddleware,
         Action<IPipelineContext> config = null
     )
     {
@@ -47,16 +47,16 @@ internal static class WrapBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TOutput>
+        return new PipelineBuilder<TStart, TOutput>
         {
-            Function = new WrapBinder<TInput, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ),
+            Function = new WrapBinder<TStart, TOutput>( pipelineMiddleware, config ).Bind( parentFunction ),
             Middleware = parentMiddleware
         };
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WrapAsync(
-        IPipelineBuilder<TInput, TOutput> parent,
-        IEnumerable<MiddlewareAsync<TInput, TOutput>> pipelineMiddleware,
+    public static IPipelineBuilder<TStart, TOutput> WrapAsync(
+        IPipelineBuilder<TStart, TOutput> parent,
+        IEnumerable<MiddlewareAsync<TStart, TOutput>> pipelineMiddleware,
         Action<IPipelineContext> config = null
     )
     {

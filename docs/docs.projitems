@@ -10,12 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)child-pipeline.md" />
+    <None Include="$(MSBuildThisFileDirectory)conventions.md" />
     <None Include="$(MSBuildThisFileDirectory)dependency-injection.md" />
     <None Include="$(MSBuildThisFileDirectory)command-pattern.md" />
     <None Include="$(MSBuildThisFileDirectory)syntax.md" />
     <None Include="$(MSBuildThisFileDirectory)index.md" />
     <None Include="$(MSBuildThisFileDirectory)middleware.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
+    <None Include="$(MSBuildThisFileDirectory)advanced-patterns.md" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)_includes\nav_footer_custom.html" />

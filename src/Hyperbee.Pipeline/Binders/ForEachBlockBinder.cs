@@ -1,16 +1,17 @@
-﻿using Hyperbee.Pipeline.Binders.Abstractions;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Hyperbee.Pipeline.Binders.Abstractions;
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInput, TOutput>
+internal class ForEachBlockBinder<TStart, TOutput, TElement> : BlockBinder<TStart, TOutput>
 {
-    public ForEachBlockBinder( FunctionAsync<TInput, TOutput> function )
+    public ForEachBlockBinder( FunctionAsync<TStart, TOutput> function )
         : base( function, default )
     {
     }
 
-    public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TElement, object> next )
-
+    public FunctionAsync<TStart, TOutput> Bind( FunctionAsync<TElement, object> next )
     {
         return async ( context, argument ) =>
         {
@@ -19,11 +20,33 @@ internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInpu
             if ( canceled )
                 return default;
 
-            var nextArguments = (IEnumerable<TElement>) nextArgument;
-
-            foreach ( var elementArgument in nextArguments )
+            if ( nextArgument is IList<TElement> list )
             {
-                await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
+                for ( int i = 0; i < list.Count; i++ )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+                    await ProcessBlockAsync( next, context, list[i] ).ConfigureAwait( false );
+                }
+            }
+            else if ( nextArgument is TElement[] array )
+            {
+                for ( int i = 0; i < array.Length; i++ )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+                    await ProcessBlockAsync( next, context, array[i] ).ConfigureAwait( false );
+                }
+            }
+            else if ( nextArgument is IEnumerable<TElement> enumerable )
+            {
+                foreach ( var elementArgument in enumerable )
+                {
+                    if ( context.CancellationToken.IsCancellationRequested )
+                        break;
+
+                    await ProcessBlockAsync( next, context, elementArgument ).ConfigureAwait( false );
+                }
             }
 
             return nextArgument;

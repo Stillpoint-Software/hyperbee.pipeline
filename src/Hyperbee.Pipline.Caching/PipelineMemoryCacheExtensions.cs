@@ -8,8 +8,8 @@ namespace Hyperbee.Pipeline.Caching;
 
 public static class PipelineMemoryCacheExtensions
 {
-    public static IPipelineBuilder<TInput, TNext> PipeCache<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeCache<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> nestedBuilder,
         Func<TOutput, PipelineMemoryCacheOptions, PipelineMemoryCacheOptions> optionsFunc = null )
     {
@@ -21,8 +21,8 @@ public static class PipelineMemoryCacheExtensions
         return builder.PipeCacheAsync( function.Function, optionsFunc );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeCacheAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeCacheAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> nestedBuilder,
         Func<TOutput, PipelineMemoryCacheOptions, PipelineMemoryCacheOptions> optionsFunc = null )
     {
@@ -34,8 +34,8 @@ public static class PipelineMemoryCacheExtensions
         return builder.PipeCacheAsync( function.Function, optionsFunc );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeCache<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeCache<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         Function<TOutput, TNext> next,
         Func<TOutput, PipelineMemoryCacheOptions, PipelineMemoryCacheOptions> optionsFunc = null )
     {
@@ -84,8 +84,8 @@ public static class PipelineMemoryCacheExtensions
         } );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeCacheAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeCacheAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         FunctionAsync<TOutput, TNext> next,
         Func<TOutput, PipelineMemoryCacheOptions, PipelineMemoryCacheOptions> optionsFunc = null )
     {

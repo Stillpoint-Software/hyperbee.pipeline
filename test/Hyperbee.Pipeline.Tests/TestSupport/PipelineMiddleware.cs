@@ -5,7 +5,7 @@ namespace Hyperbee.Pipeline.Tests.TestSupport;
 
 public static class PipelineMiddleware
 {
-    public static IPipelineStartBuilder<TInput, TOutput> WithTiming<TInput, TOutput>( this IPipelineStartBuilder<TInput, TOutput> builder )
+    public static IPipelineStartBuilder<TStart, TOutput> WithTiming<TStart, TOutput>( this IPipelineStartBuilder<TStart, TOutput> builder )
     {
         var timer = Stopwatch.StartNew();
 
@@ -22,7 +22,7 @@ public static class PipelineMiddleware
         } );
     }
 
-    public static IPipelineStartBuilder<TInput, TOutput> WithLogging<TInput, TOutput>( this IPipelineStartBuilder<TInput, TOutput> builder )
+    public static IPipelineStartBuilder<TStart, TOutput> WithLogging<TStart, TOutput>( this IPipelineStartBuilder<TStart, TOutput> builder )
     {
         return builder.HookAsync( async ( context, argument, next ) =>
         {
@@ -36,7 +36,7 @@ public static class PipelineMiddleware
         } );
     }
 
-    public static IPipelineStartBuilder<TInput, TOutput> WithUser<TInput, TOutput>( this IPipelineStartBuilder<TInput, TOutput> builder, string user )
+    public static IPipelineStartBuilder<TStart, TOutput> WithUser<TStart, TOutput>( this IPipelineStartBuilder<TStart, TOutput> builder, string user )
     {
         return builder.HookAsync( async ( context, argument, next ) =>
         {
@@ -50,7 +50,7 @@ public static class PipelineMiddleware
         } );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> WithTransaction<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> builder )
+    public static IPipelineBuilder<TStart, TOutput> WithTransaction<TStart, TOutput>( this IPipelineBuilder<TStart, TOutput> builder )
     {
         return builder.WrapAsync( async ( context, argument, next ) =>
         {

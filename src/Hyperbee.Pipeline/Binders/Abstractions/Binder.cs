@@ -3,18 +3,18 @@ using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
-internal abstract class Binder<TInput, TOutput>
+internal abstract class Binder<TStart, TOutput>
 {
-    protected FunctionAsync<TInput, TOutput> Pipeline { get; }
+    protected FunctionAsync<TStart, TOutput> Pipeline { get; }
     protected Action<IPipelineContext> Configure { get; }
 
-    protected Binder( FunctionAsync<TInput, TOutput> function, Action<IPipelineContext> configure )
+    protected Binder( FunctionAsync<TStart, TOutput> function, Action<IPipelineContext> configure )
     {
         Pipeline = function;
         Configure = configure;
     }
 
-    protected virtual async Task<(TOutput Result, bool Canceled)> ProcessPipelineAsync( IPipelineContext context, TInput argument )
+    protected virtual async Task<(TOutput Result, bool Canceled)> ProcessPipelineAsync( IPipelineContext context, TStart argument )
     {
         var result = await Pipeline( context, argument ).ConfigureAwait( false );
 

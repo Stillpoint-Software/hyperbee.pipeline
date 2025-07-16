@@ -5,28 +5,28 @@ namespace Hyperbee.Pipeline;
 
 public static class CallBlockBuilder
 {
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     )
     {
-        return CallBlockBuilder<TInput, TOutput>.Call( parent, true, builder );
+        return CallBlockBuilder<TStart, TOutput>.Call( parent, true, builder );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         bool inheritMiddleware,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     )
     {
-        return CallBlockBuilder<TInput, TOutput>.Call( parent, inheritMiddleware, builder );
+        return CallBlockBuilder<TStart, TOutput>.Call( parent, inheritMiddleware, builder );
     }
 }
 
-internal static class CallBlockBuilder<TInput, TOutput>
+internal static class CallBlockBuilder<TStart, TOutput>
 {
-    public static IPipelineBuilder<TInput, TOutput> Call(
-        IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call(
+        IPipelineBuilder<TStart, TOutput> parent,
         bool inheritMiddleware,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder> builder
     )
@@ -38,9 +38,9 @@ internal static class CallBlockBuilder<TInput, TOutput>
         var block = PipelineFactory.Start<TOutput>( inheritMiddleware ? parentMiddleware : null );
         var function = builder( block ).CastFunction<TOutput, object>(); // cast because we don't know the final Pipe output value
 
-        return new PipelineBuilder<TInput, TOutput>
+        return new PipelineBuilder<TStart, TOutput>
         {
-            Function = new CallBlockBinder<TInput, TOutput>( parentFunction ).Bind( function ),
+            Function = new CallBlockBinder<TStart, TOutput>( parentFunction ).Bind( function ),
             Middleware = parentMiddleware
         };
     }

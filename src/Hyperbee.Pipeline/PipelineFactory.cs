@@ -6,7 +6,7 @@
 // The PipelineBuilder<>'s Function property is the current pipeline function.
 // The function is a composition function representing all the previous steps
 // where:
-//      TInput  is the input type to the first step
+//      TStart  is the input type to the first step
 //      TOutput is the output type of the last step
 //      TNext   is the output type of the next step (the builder is building)
 //
@@ -14,9 +14,9 @@
 //
 public class PipelineFactory
 {
-    public static IPipelineStartBuilder<TInput, TInput> Start<TInput>()
+    public static IPipelineStartBuilder<TStart, TStart> Start<TStart>()
     {
-        return new PipelineBuilder<TInput, TInput>
+        return new PipelineBuilder<TStart, TStart>
         {
             Function = ( context, argument ) => Task.FromResult( argument )
         };
@@ -30,9 +30,9 @@ public class PipelineFactory
         };
     }
 
-    internal static IPipelineStartBuilder<TInput, TInput> Start<TInput>( MiddlewareAsync<object, object> functionMiddleware )
+    internal static IPipelineStartBuilder<TStart, TStart> Start<TStart>( MiddlewareAsync<object, object> functionMiddleware )
     {
-        return new PipelineBuilder<TInput, TInput>
+        return new PipelineBuilder<TStart, TStart>
         {
             Function = ( context, argument ) => Task.FromResult( argument ),
             Middleware = functionMiddleware
