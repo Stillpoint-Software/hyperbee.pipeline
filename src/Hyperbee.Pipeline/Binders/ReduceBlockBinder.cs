@@ -2,17 +2,17 @@
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class ReduceBlockBinder<TInput, TOutput, TElement, TNext> : BlockBinder<TInput, TOutput>
+internal class ReduceBlockBinder<TStart, TOutput, TElement, TNext> : BlockBinder<TStart, TOutput>
 {
     private Func<TNext, TNext, TNext> Reducer { get; }
 
-    public ReduceBlockBinder( Func<TNext, TNext, TNext> reducer, FunctionAsync<TInput, TOutput> function )
+    public ReduceBlockBinder( Func<TNext, TNext, TNext> reducer, FunctionAsync<TStart, TOutput> function )
         : base( function, default )
     {
         Reducer = reducer;
     }
 
-    public FunctionAsync<TInput, TNext> Bind( FunctionAsync<TElement, TNext> next )
+    public FunctionAsync<TStart, TNext> Bind( FunctionAsync<TElement, TNext> next )
     {
         return async ( context, argument ) =>
         {

@@ -1,15 +1,15 @@
 ﻿namespace Hyperbee.Pipeline.Binders;
 
-internal class HookBinder<TInput, TOutput> // explicit Type Args due to <object,object> usage
+internal class HookBinder<TStart, TOutput> // explicit Type Args due to <object,object> usage
 {
-    private MiddlewareAsync<TInput, TOutput> Middleware { get; }
+    private MiddlewareAsync<TStart, TOutput> Middleware { get; }
 
-    public HookBinder( MiddlewareAsync<TInput, TOutput> middleware )
+    public HookBinder( MiddlewareAsync<TStart, TOutput> middleware )
     {
         Middleware = middleware ?? (async ( context, argument, next ) => await next( context, argument ).ConfigureAwait( false ));
     }
 
-    public MiddlewareAsync<TInput, TOutput> Bind( MiddlewareAsync<TInput, TOutput> middleware )
+    public MiddlewareAsync<TStart, TOutput> Bind( MiddlewareAsync<TStart, TOutput> middleware )
     {
         return async ( context, argument, function ) =>
             await middleware(

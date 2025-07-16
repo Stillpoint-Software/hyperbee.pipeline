@@ -8,8 +8,8 @@ namespace Hyperbee.Pipeline.Caching;
 
 public static class PipelineDistributedCacheExtensions
 {
-    public static IPipelineBuilder<TInput, TNext> PipeDistributedCacheAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeDistributedCacheAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         Func<IPipelineStartBuilder<TOutput, TOutput>, IPipelineBuilder<TOutput, TNext>> nestedBuilder,
         Func<TOutput, PipelineDistributedCacheOptions, PipelineDistributedCacheOptions> optionsFunc = null )
     {
@@ -21,8 +21,8 @@ public static class PipelineDistributedCacheExtensions
         return builder.PipeDistributedCacheAsync( function.Function, optionsFunc );
     }
 
-    public static IPipelineBuilder<TInput, TNext> PipeDistributedCacheAsync<TInput, TOutput, TNext>(
-        this IPipelineBuilder<TInput, TOutput> builder,
+    public static IPipelineBuilder<TStart, TNext> PipeDistributedCacheAsync<TStart, TOutput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> builder,
         FunctionAsync<TOutput, TNext> next,
         Func<TOutput, PipelineDistributedCacheOptions, PipelineDistributedCacheOptions> optionsFunc = null )
     {

@@ -3,11 +3,11 @@ using Hyperbee.Pipeline.Extensions.Implementation;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
-internal abstract class StatementBinder<TInput, TOutput> : Binder<TInput, TOutput>
+internal abstract class StatementBinder<TStart, TOutput> : Binder<TStart, TOutput>
 {
     protected MiddlewareAsync<object, object> Middleware { get; }
 
-    protected StatementBinder( FunctionAsync<TInput, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
+    protected StatementBinder( FunctionAsync<TStart, TOutput> function, MiddlewareAsync<object, object> middleware, Action<IPipelineContext> configure )
         : base( function, configure )
     {
         Middleware = middleware;

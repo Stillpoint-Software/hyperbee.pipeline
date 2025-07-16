@@ -2,16 +2,16 @@
 
 namespace Hyperbee.Pipeline;
 
-public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartBuilder<TInput, TOutput>, IPipelineFunctionProvider<TInput, TOutput>
+public class PipelineBuilder<TStart, TOutput> : PipelineFactory, IPipelineStartBuilder<TStart, TOutput>, IPipelineFunctionProvider<TStart, TOutput>
 {
-    internal FunctionAsync<TInput, TOutput> Function { get; init; }
+    internal FunctionAsync<TStart, TOutput> Function { get; init; }
     internal MiddlewareAsync<object, object> Middleware { get; init; }
 
     internal PipelineBuilder()
     {
     }
 
-    public FunctionAsync<TInput, TOutput> Build()
+    public FunctionAsync<TStart, TOutput> Build()
     {
         // build and return the outermost method
         return async ( context, argument ) =>
@@ -37,7 +37,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
         };
     }
 
-    public ProcedureAsync<TInput> BuildAsProcedure()
+    public ProcedureAsync<TStart> BuildAsProcedure()
     {
         // build and return the outermost method
         return async ( context, argument ) =>
@@ -60,7 +60,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     {
         return async ( context, argument ) =>
         {
-            var result = await Function( context, Cast<TInput>( argument ) ).ConfigureAwait( false );
+            var result = await Function( context, Cast<TStart>( argument ) ).ConfigureAwait( false );
             return Cast<TOut>( result );
         };
 
@@ -68,7 +68,7 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
     }
 
     // custom builders and binders need access to Function and Middleware
-    IPipelineFunction<TInput, TOutput> IPipelineFunctionProvider<TInput, TOutput>.GetPipelineFunction()
+    IPipelineFunction<TStart, TOutput> IPipelineFunctionProvider<TStart, TOutput>.GetPipelineFunction()
     {
         return new PipelineFunction
         {
@@ -77,9 +77,9 @@ public class PipelineBuilder<TInput, TOutput> : PipelineFactory, IPipelineStartB
         };
     }
 
-    public record PipelineFunction : IPipelineFunction<TInput, TOutput>
+    public record PipelineFunction : IPipelineFunction<TStart, TOutput>
     {
-        public FunctionAsync<TInput, TOutput> Function { get; init; }
+        public FunctionAsync<TStart, TOutput> Function { get; init; }
         public MiddlewareAsync<object, object> Middleware { get; init; }
     }
 }

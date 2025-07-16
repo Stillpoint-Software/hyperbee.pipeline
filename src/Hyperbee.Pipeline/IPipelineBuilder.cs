@@ -2,15 +2,15 @@
 
 namespace Hyperbee.Pipeline;
 
-public delegate Task<TOutput> MiddlewareAsync<TInput, TOutput>( IPipelineContext context, TInput argument, FunctionAsync<TInput, TOutput> next );
+public delegate Task<TOutput> MiddlewareAsync<TStart, TOutput>( IPipelineContext context, TStart argument, FunctionAsync<TStart, TOutput> next );
 
-public delegate Task<TOutput> FunctionAsync<in TInput, TOutput>( IPipelineContext context, TInput argument = default );
+public delegate Task<TOutput> FunctionAsync<in TStart, TOutput>( IPipelineContext context, TStart argument = default );
 
-public delegate TOutput Function<in TInput, out TOutput>( IPipelineContext context, TInput argument = default );
+public delegate TOutput Function<in TStart, out TOutput>( IPipelineContext context, TStart argument = default );
 
-public delegate Task ProcedureAsync<in TInput>( IPipelineContext context, TInput argument = default );
+public delegate Task ProcedureAsync<in TStart>( IPipelineContext context, TStart argument = default );
 
-public delegate void Procedure<in TInput>( IPipelineContext context, TInput argument = default );
+public delegate void Procedure<in TStart>( IPipelineContext context, TStart argument = default );
 
 public struct Arg
 {
@@ -33,21 +33,21 @@ public struct Arg
 // 
 // we solve for this using interfaces.
 
-public interface IPipelineStartBuilder<in TInput, TOutput> : IPipelineBuilder<TInput, TOutput>
+public interface IPipelineStartBuilder<in TStart, TOutput> : IPipelineBuilder<TStart, TOutput>
 {
     // head actions: (e.g. Hook) that are only valid at the start of the pipeline 
 }
 
-public interface IPipelineBuilder<in TInput, TOutput> : IPipelineFinalBuilder<TInput, TOutput>
+public interface IPipelineBuilder<in TStart, TOutput> : IPipelineFinalBuilder<TStart, TOutput>
 {
     // normal actions
 }
 
-public interface IPipelineFinalBuilder<in TInput, TOutput> : IPipelineBuilder
+public interface IPipelineFinalBuilder<in TStart, TOutput> : IPipelineBuilder
 {
     // tail actions
-    FunctionAsync<TInput, TOutput> Build();
-    ProcedureAsync<TInput> BuildAsProcedure();
+    FunctionAsync<TStart, TOutput> Build();
+    ProcedureAsync<TStart> BuildAsProcedure();
 }
 
 public interface IPipelineBuilder

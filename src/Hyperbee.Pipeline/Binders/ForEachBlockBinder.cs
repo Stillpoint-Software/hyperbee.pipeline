@@ -2,14 +2,14 @@
 
 namespace Hyperbee.Pipeline.Binders;
 
-internal class ForEachBlockBinder<TInput, TOutput, TElement> : BlockBinder<TInput, TOutput>
+internal class ForEachBlockBinder<TStart, TOutput, TElement> : BlockBinder<TStart, TOutput>
 {
-    public ForEachBlockBinder( FunctionAsync<TInput, TOutput> function )
+    public ForEachBlockBinder( FunctionAsync<TStart, TOutput> function )
         : base( function, default )
     {
     }
 
-    public FunctionAsync<TInput, TOutput> Bind( FunctionAsync<TElement, object> next )
+    public FunctionAsync<TStart, TOutput> Bind( FunctionAsync<TElement, object> next )
 
     {
         return async ( context, argument ) =>

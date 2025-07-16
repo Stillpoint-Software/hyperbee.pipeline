@@ -7,15 +7,16 @@ nav_order: 6
 # Command Pattern
 
 `ICommand*` interfaces and `Command*` base classes provide a lightweight pattern for constructing injectable commands built
- around pipelines and middleware.
+around pipelines and middleware.
 
-| Interface                              | Class                                 | Description
-| -------------------------------------- | ------------------------------------- | ---------------------------------------------------
-| ICommandFunction&lt;TInput,TOutput&gt; | CommandFunction&lt;TInput,TOutput&gt; | A command that takes an input and returns an output
-| ICommandFunction&lt;TOutput&gt;        | CommandFunction&lt;TOutput&gt;        | A command that takes no input and returns an output
-| ICommandProcedure&lt;TInput&gt;        | CommandProcedure&lt;TInput&gt;        | A command that takes an input and returns void
+| Interface                              | Class                                 | Description                                         |
+| -------------------------------------- | ------------------------------------- | --------------------------------------------------- |
+| ICommandFunction&lt;TStart,TOutput&gt; | CommandFunction&lt;TStart,TOutput&gt; | A command that takes an input and returns an output |
+| ICommandFunction&lt;TOutput&gt;        | CommandFunction&lt;TOutput&gt;        | A command that takes no input and returns an output |
+| ICommandProcedure&lt;TStart&gt;        | CommandProcedure&lt;TStart&gt;        | A command that takes an input and returns void      |
 
 ## Example 1
+
 Example of a command that takes an input and produces an output.
 
 ```csharp
@@ -53,6 +54,7 @@ void usage( IMyCommand command )
 ```
 
 ## Example 2
+
 Example of a command that takes no input and produces an output.
 
 ```csharp
@@ -90,6 +92,7 @@ void usage( IMyCommand command )
 ```
 
 ## Example 3
+
 Example of a command that takes an input and produces no output.
 
 ```csharp

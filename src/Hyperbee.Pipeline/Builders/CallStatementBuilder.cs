@@ -7,46 +7,46 @@ namespace Hyperbee.Pipeline;
 
 public static class CallStatementBuilder
 {
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         Procedure<TOutput> next, string name
     )
     {
-        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, config => config.Name = name );
+        return CallStatementBuilder<TStart, TOutput>.Call( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> Call<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         Procedure<TOutput> next,
         Action<IPipelineContext> config = null
     )
     {
-        return CallStatementBuilder<TInput, TOutput>.Call( parent, next, config );
+        return CallStatementBuilder<TStart, TOutput>.Call( parent, next, config );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> CallAsync<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         ProcedureAsync<TOutput> next,
         string name
     )
     {
-        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, config => config.Name = name );
+        return CallStatementBuilder<TStart, TOutput>.CallAsync( parent, next, config => config.Name = name );
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync<TInput, TOutput>(
-        this IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> CallAsync<TStart, TOutput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
         ProcedureAsync<TOutput> next,
         Action<IPipelineContext> config = null
     )
     {
-        return CallStatementBuilder<TInput, TOutput>.CallAsync( parent, next, config );
+        return CallStatementBuilder<TStart, TOutput>.CallAsync( parent, next, config );
     }
 }
 
-internal static class CallStatementBuilder<TInput, TOutput>
+internal static class CallStatementBuilder<TStart, TOutput>
 {
-    public static IPipelineBuilder<TInput, TOutput> Call(
-        IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> Call(
+        IPipelineBuilder<TStart, TOutput> parent,
         Procedure<TOutput> next,
         Action<IPipelineContext> config = null
     )
@@ -55,9 +55,9 @@ internal static class CallStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TOutput>
+        return new PipelineBuilder<TStart, TOutput>
         {
-            Function = new CallStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
+            Function = new CallStatementBinder<TStart, TOutput>( parentFunction, parentMiddleware, config ).Bind( AsyncNext, next.Method ),
             Middleware = parentMiddleware
         };
 
@@ -70,8 +70,8 @@ internal static class CallStatementBuilder<TInput, TOutput>
         }
     }
 
-    public static IPipelineBuilder<TInput, TOutput> CallAsync(
-        IPipelineBuilder<TInput, TOutput> parent,
+    public static IPipelineBuilder<TStart, TOutput> CallAsync(
+        IPipelineBuilder<TStart, TOutput> parent,
         ProcedureAsync<TOutput> next,
         Action<IPipelineContext> config = null
     )
@@ -80,9 +80,9 @@ internal static class CallStatementBuilder<TInput, TOutput>
 
         var (parentFunction, parentMiddleware) = parent.GetPipelineFunction();
 
-        return new PipelineBuilder<TInput, TOutput>
+        return new PipelineBuilder<TStart, TOutput>
         {
-            Function = new CallStatementBinder<TInput, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
+            Function = new CallStatementBinder<TStart, TOutput>( parentFunction, parentMiddleware, config ).Bind( next ),
             Middleware = parentMiddleware
         };
     }

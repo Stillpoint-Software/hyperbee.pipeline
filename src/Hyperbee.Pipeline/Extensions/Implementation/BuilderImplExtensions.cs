@@ -2,9 +2,9 @@
 
 public static class BuilderImplExtensions
 {
-    public static IPipelineFunction<TInput, TOutput> GetPipelineFunction<TInput, TOutput>( this IPipelineBuilder<TInput, TOutput> builder )
+    public static IPipelineFunction<TStart, TOutput> GetPipelineFunction<TStart, TOutput>( this IPipelineBuilder<TStart, TOutput> builder )
     {
-        var provider = builder as IPipelineFunctionProvider<TInput, TOutput>;
+        var provider = builder as IPipelineFunctionProvider<TStart, TOutput>;
         return provider?.GetPipelineFunction();
     }
 }

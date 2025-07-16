@@ -3,11 +3,11 @@ using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Binders.Abstractions;
 
-internal abstract class ConditionalBlockBinder<TInput, TOutput> : BlockBinder<TInput, TOutput>
+internal abstract class ConditionalBlockBinder<TStart, TOutput> : BlockBinder<TStart, TOutput>
 {
     protected Function<TOutput, bool> Condition { get; }
 
-    protected ConditionalBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TInput, TOutput> function, Action<IPipelineContext> configure )
+    protected ConditionalBlockBinder( Function<TOutput, bool> condition, FunctionAsync<TStart, TOutput> function, Action<IPipelineContext> configure )
         : base( function, configure )
     {
         Condition = condition;
