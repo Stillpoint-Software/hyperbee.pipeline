@@ -5,7 +5,7 @@
   "assemblyVersion": { "precision": "revision" },
   /* exports NBGV_* variables to MSBuild & CI */
   "cloudBuild": { "setVersionVariables": true },
-  /* defines which branches are �public releases� */
+  /* defines which branches are public releases */
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
     "^refs/heads/release\\/.+$"
