@@ -5,35 +5,35 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+  # Run when Create Prerelease / Create Release start,
+  # **but only if they run on main or develop**
   workflow_run:
-    workflows:
-      - Create Prerelease
-      - Create Release
+    workflows: [Create Prerelease, Create Release]
     types: [requested]
+    branches: [main, develop]      # ← filter prevents surprise runs
 
 permissions:
   contents: read
+  actions: read                    # shared format.yml may download artifacts
 
 jobs:
   discover:
+    name: Discover the real target branch for every trigger type
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.set_branch.outputs.branch_name }}
     steps:
-      - name: Determine triggering branch
-        id: set_branch
+      - id: set_branch
         run: echo "branch_name=${BRANCH}" >> "$GITHUB_OUTPUT"
         env:
-          # • workflow_run  → github.event.workflow_run.head_branch
-          # • pull_request → github.event.pull_request.base.ref
-          # • push / workflow_dispatch → github.ref_name
           BRANCH: >-
             ${{ github.event_name == 'workflow_run'
-                && github.event.workflow_run.head_branch
+                && github.event.workflow_run.head_branch      # workflow_run
                 || github.event_name == 'pull_request'
-                && github.event.pull_request.base.ref
-                || github.ref_name }}
+                && github.event.pull_request.base.ref         # PRs
+                || github.ref_name }}                         # push / dispatch
 
   format-main:
     needs: discover
