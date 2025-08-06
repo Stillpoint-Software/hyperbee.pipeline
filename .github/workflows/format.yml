@@ -19,26 +19,31 @@ permissions:
   actions: read                
 
 jobs:
-  discover:
-    name: Discover the real target branch for every trigger type
+   discover:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.set_branch.outputs.branch_name }}
+
     steps:
       - id: set_branch
-        run: echo "branch_name=${CLEAN}" >> "$GITHUB_OUTPUT"
-        env:
-          RAW: >-
-            ${{ github.event_name == 'workflow_run'
-                && github.event.workflow_run.head_branch
-                || github.event_name == 'pull_request'
-                && github.event.pull_request.base.ref
-                || github.ref_name }}
-          CLEAN: ${{ startsWith(env.RAW, 'refs/heads/')
-              && replace(env.RAW, 'refs/heads/', '')
-              || env.RAW }}
+        shell: bash
+        run: |
+          # 1. Pick the raw branch/ref for each trigger type
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            RAW='${{ github.event.workflow_run.head_branch }}'   
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            RAW='${{ github.event.pull_request.base.ref }}'       
+          else                                                    
+            RAW='${{ github.ref }}'                                
+          fi
+
+          # 2. Strip the refs/heads/ prefix if present
+          CLEAN="${RAW#refs/heads/}"
+
+          echo "Detected branch: $CLEAN"
+          echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
     
-  show-branch:
+   show-branch:
     needs: discover
     runs-on: ubuntu-latest
     steps:
@@ -46,28 +51,18 @@ jobs:
         run: |
           echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
   
-  format-main:
+   format-main:
     needs: discover
-    if: >-
-     ${{
-        endsWith(needs.discover.outputs.branch_name, '/main') ||
-        needs.discover.outputs.branch_name == 'main'
-      }}
+    if: ${{ needs.discover.outputs.branch_name == 'main' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
       dotnet_version: "9.0.x"
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-
-
-  format-develop:
+   format-develop:
     needs: discover
-    if: >-
-     ${{
-        endsWith(needs.discover.outputs.branch_name, '/develop') ||
-        needs.discover.outputs.branch_name == 'develop'
-      }}
+    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@develop
     with:
       dotnet_version: "9.0.x"
