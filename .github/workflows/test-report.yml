@@ -9,12 +9,10 @@ on:
     workflows: ["Test"]
     types:     [completed]
     branches:  [main, develop]
-
-  # ② Manual – run report on a completed Test run
   workflow_dispatch:
     inputs:
       test_run_id:
-        description: "Run ID of the completed Test workflow (see URL)"
+        description: "Run ID of the completed Test workflow (see the URL)"
         required: true
         type: string
       branch:
@@ -23,15 +21,12 @@ on:
         type: choice
         options: [main, develop]
         default: develop
-
 permissions:
   contents: read
-  actions:  read     # download upstream artifacts
+  actions:  read     
   checks:   write
 
-#########################################################################
-#  JOBS  —  AUTO PATH (workflow_run)
-#########################################################################
+
 jobs:
   discover-auto:
     if: ${{ github.event_name == 'workflow_run' }}      # ← auto only
@@ -63,9 +58,6 @@ jobs:
       test_run_id: ${{ needs.discover-auto.outputs.run_id }}
     secrets: inherit
 
-#########################################################################
-#  JOBS  —  MANUAL PATH (workflow_dispatch)
-#########################################################################
   report-manual-main:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.branch == 'main' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
