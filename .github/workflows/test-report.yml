@@ -1,41 +1,83 @@
 name: Test Report
-run-name: Generate Test Report for workflow ${{ github.event.workflow_run.name }} run ${{ github.event.workflow_run.run_number }} branch ${{ github.event.workflow_run.head_branch }}
 
+#########################################################################
+# TRIGGERS
+#########################################################################
 on:
+  # ① Automatic – when the Test workflow ends on main / develop
   workflow_run:
-    workflows: [ "Test" ]
-    types: [ completed ]
+    workflows: ["Test"]
+    types:     [completed]
+    branches:  [main, develop]
+
+  # ② Manual – run report on a completed Test run
+  workflow_dispatch:
+    inputs:
+      test_run_id:
+        description: "Run ID of the completed Test workflow (see URL)"
+        required: true
+        type: string
+      branch:
+        description: "Branch that Test was run on"
+        required: true
+        type: choice
+        options: [main, develop]
+        default: develop
 
 permissions:
   contents: read
-  actions: read
-  checks: write
+  actions:  read     # download upstream artifacts
+  checks:   write
 
+#########################################################################
+#  JOBS  —  AUTO PATH (workflow_run)
+#########################################################################
 jobs:
-  discover:
+  discover-auto:
+    if: ${{ github.event_name == 'workflow_run' }}      # ← auto only
     runs-on: ubuntu-latest
     outputs:
-      branch_name: ${{ steps.set_branch.outputs.branch_name }}
+      branch_name: ${{ steps.meta.outputs.branch }}
+      sha:          ${{ steps.meta.outputs.sha }}
+      run_id:       ${{ steps.meta.outputs.run_id }}
     steps:
-      - id: set_branch
-        run: echo "branch_name=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+      - id: meta
+        run: |
+          echo "branch=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{    github.event.workflow_run.head_sha    }}" >> "$GITHUB_OUTPUT"
+          echo "run_id=${{ github.event.workflow_run.id }}"        >> "$GITHUB_OUTPUT"
 
-  report-main:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
+  report-auto-main:
+    needs: discover-auto
+    if: ${{ needs.discover-auto.outputs.branch_name == 'main' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
     with:
-      artifact_name:     test-results
-      test_report_name:  Unit Tests
-      path:              "*.trx"
+      test_run_id: ${{ needs.discover-auto.outputs.run_id }}   # empty string is fine; shared workflow ignores in auto mode
+    secrets: inherit
 
-  report-develop:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@develop
+  report-auto-develop:
+    needs: discover-auto
+    if: ${{ needs.discover-auto.outputs.branch_name == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@develop
     with:
-      artifact_name:     test-results
-      test_report_name:  Unit Tests
-      path:              "*.trx"
+      test_run_id: ${{ needs.discover-auto.outputs.run_id }}
+    secrets: inherit
 
+#########################################################################
+#  JOBS  —  MANUAL PATH (workflow_dispatch)
+#########################################################################
+  report-manual-main:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.branch == 'main' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
+    with:
+      test_run_id: ${{ inputs.test_run_id }}
+      branch:      main
+    secrets: inherit
 
+  report-manual-develop:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.branch == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@develop
+    with:
+      test_run_id: ${{ inputs.test_run_id }}
+      branch:      develop
+    secrets: inherit
