@@ -26,18 +26,26 @@ jobs:
       branch_name: ${{ steps.set_branch.outputs.branch_name }}
     steps:
       - id: set_branch
-        run: echo "branch_name=${BRANCH}" >> "$GITHUB_OUTPUT"
+        run: echo "branch_name=${CLEAN}" >> "$GITHUB_OUTPUT"
         env:
-          BRANCH: >-
+          RAW: >-
             ${{ github.event_name == 'workflow_run'
                 && github.event.workflow_run.head_branch
                 || github.event_name == 'pull_request'
                 && github.event.pull_request.base.ref
                 || github.ref_name }}
-          BRANCH_STRIPPED: ${{ startsWith(env.BRANCH, 'refs/heads/')
-                && env.BRANCH[11:]
-                || env.BRANCH }}  
+          CLEAN: ${{ startsWith(env.RAW, 'refs/heads/')
+              && replace(env.RAW, 'refs/heads/', '')
+              || env.RAW }}
     
+  show-branch:
+    needs: discover
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print branch_name from discover
+        run: |
+          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
+  
   format-main:
     needs: discover
     if: >-
@@ -51,13 +59,7 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  show-branch:
-    needs: discover
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print branch_name from discover
-        run: |
-          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
+
 
   format-develop:
     needs: discover
