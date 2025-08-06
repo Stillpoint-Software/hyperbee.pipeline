@@ -1,29 +1,54 @@
 name: Format
 
-on: 
+on:
   push:
-  workflow_run: 
-    workflows: 
-      - Create Prerelease
-      - Create Release
-    types: [requested]
   workflow_dispatch:
   pull_request:
     types: [opened, edited, synchronize, reopened]
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
+  workflow_run:
+    workflows:
+      - Create Prerelease
+      - Create Release
+    types: [requested]
 
 permissions:
-  contents: read 
+  contents: read
 
 jobs:
-  format:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.set_branch.outputs.branch_name }}
+    steps:
+      - name: Determine triggering branch
+        id: set_branch
+        run: echo "branch_name=${BRANCH}" >> "$GITHUB_OUTPUT"
+        env:
+          # • workflow_run  → github.event.workflow_run.head_branch
+          # • pull_request → github.event.pull_request.base.ref
+          # • push / workflow_dispatch → github.ref_name
+          BRANCH: >-
+            ${{ github.event_name == 'workflow_run'
+                && github.event.workflow_run.head_branch
+                || github.event_name == 'pull_request'
+                && github.event.pull_request.base.ref
+                || github.ref_name }}
+
+  format-main:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'main' || needs.discover.outputs.branch_name == 'master' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
       dotnet_version: "9.0.x"
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-
-
+  format-develop:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@develop
+    with:
+      dotnet_version: "9.0.x"
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
