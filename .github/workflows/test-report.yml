@@ -4,8 +4,7 @@ run-name: Generate Test Report for workflow ${{ github.event.workflow_run.name }
 on:
   workflow_run:
     workflows: [ "Test" ]
-    types: 
-      - completed
+    types: [ completed ]
 
 permissions:
   contents: read
@@ -13,9 +12,37 @@ permissions:
   checks: write
 
 jobs:
-  report:
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.set_branch.outputs.branch_name }}
+    steps:
+      - id: set_branch
+        run: echo "branch_name=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_OUTPUT"
+
+  report-main:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'main' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
     with:
-      artifact_name: "test-results"
-      test_report_name: "Unit Tests"
-      path: "*.trx"
+      artifact_name:     test-results
+      test_report_name:  Unit Tests
+      path:              "*.trx"
+
+  report-develop:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@develop
+    with:
+      artifact_name:     test-results
+      test_report_name:  Unit Tests
+      path:              "*.trx"
+
+  report-other:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name != 'main' && needs.discover.outputs.branch_name != 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main   # or @develop, or skip entirely
+    with:
+      artifact_name:     test-results
+      test_report_name:  Unit Tests
+      path:              "*.trx"
