@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: [Create Prerelease, Create Release]
     types: [requested]
+    branches: [main, develop]        
   workflow_dispatch:
   pull_request:
     types: [opened, edited, synchronize, reopened]
@@ -11,10 +12,11 @@ on:
 
 permissions:
   contents: read
-  actions: read        # test.yml in shared-workflows fetches artifacts
+  actions: read
 
 jobs:
   discover:
+    name: Which brand to run for every trigger type
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.set_branch.outputs.branch_name }}
@@ -23,34 +25,24 @@ jobs:
         run: echo "branch_name=${BRANCH}" >> "$GITHUB_OUTPUT"
         env:
           BRANCH: >-
-            ${{ github.event_name == 'pull_request'
-                && github.event.pull_request.base.ref
-                || github.ref_name }}   # workflow_dispatch → current branch
+            ${{ github.event_name == 'workflow_run'
+                && github.event.workflow_run.head_branch      # ① workflow_run
+                || github.event_name == 'pull_request'
+                && github.event.pull_request.base.ref         # PRs
+                || github.ref_name }}                         # push / dispatch
 
   test-main:
     needs: discover
-    if: >
-      ${{
-        (github.event_name == 'workflow_run' &&
-         github.event.workflow_run.head_branch == 'main')  ||
-        (github.event_name != 'workflow_run' &&
-         needs.discover.outputs.branch_name == 'main')
-      }}
+    if: ${{ needs.discover.outputs.branch_name == 'main' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
     with:
       solution_name: ${{ vars.SOLUTION_NAME }}
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
   test-develop:
     needs: discover
-    if: >
-      ${{
-        (github.event_name == 'workflow_run' &&
-         github.event.workflow_run.head_branch == 'develop') ||
-        (github.event_name != 'workflow_run' &&
-         needs.discover.outputs.branch_name == 'develop')
-      }}
+    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@develop
     with:
       solution_name: ${{ vars.SOLUTION_NAME }}
