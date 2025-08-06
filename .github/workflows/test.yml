@@ -1,61 +1,66 @@
 name: Test
 
-on: 
-  workflow_run: 
-    workflows: 
-      - Create Prerelease
-      - Create Release
-      # - Publish
+on:
+  workflow_run:
+    workflows: [Create Prerelease, Create Release]
     types: [requested]
+    branches: [main, develop]        
   workflow_dispatch:
   pull_request:
-    types: [opened,edited,synchronize,reopened]
-    branches:
-    - main
-    - develop
+    types: [opened, edited, synchronize, reopened]
+    branches: [main, develop]
 
-env:
-  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  SOLUTION_NAME: ${{ vars.SOLUTION_NAME }}
-  DOTNET_VERSION: '8.0.x'
-    
+permissions:
+  contents: read
+  actions: read
+
 jobs:
-  test:
+  discover:
     runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.set_branch.outputs.branch_name }}
 
     steps:
-    - name: Release Configuration
-      if: ${{ env.BRANCH_NAME == 'main' }}
-      run: |
-          echo "BUILD_CONFIGURATION=Release" >> $GITHUB_ENV
+      - id: set_branch
+        shell: bash
+        run: |
+          # 1. Pick the raw branch/ref for each trigger type
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            RAW='${{ github.event.workflow_run.head_branch }}'   
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            RAW='${{ github.event.pull_request.base.ref }}'       
+          else                                                    
+            RAW='${{ github.ref }}'                                
+          fi
+
+          # 2. Strip the refs/heads/ prefix if present
+          CLEAN="${RAW#refs/heads/}"
+
+          echo "Detected branch: $CLEAN"
+          echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
     
-    - name: Debug Configuration
-      if: ${{ env.BRANCH_NAME != 'main' }}
-      run: |
-          echo "BUILD_CONFIGURATION=Debug" >> $GITHUB_ENV
+  show-branch:
+    needs: discover
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print branch_name from discover
+        run: |
+          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
 
-    - name: Checkout Code
-      uses: actions/checkout@v4
+  test-main:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'main' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
+    with:
+      solution_name: ${{ vars.SOLUTION_NAME }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Restore Dependencies
-      run: dotnet restore ${{ env.SOLUTION_NAME }}
-
-    - name: Build
-      run: dotnet build --no-restore --configuration ${{ env.BUILD_CONFIGURATION }} ${{ env.SOLUTION_NAME }}
-  
-    - name: Tests
-      run: |
-        dotnet test --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --logger:trx --results-directory:./TestResults ${{ env.SOLUTION_NAME }}
- 
-    - name: Upload Test Results
-      uses: actions/upload-artifact@v4 # upload test results
-      if: success() || failure() # run this step even if previous step failed
-      with:
-        name: test-results
-        path: ./TestResults/**/*.trx
-
+  test-develop:
+    needs: discover
+    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@develop
+    with:
+      solution_name: ${{ vars.SOLUTION_NAME }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
