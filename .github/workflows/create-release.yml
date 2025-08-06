@@ -56,7 +56,7 @@ jobs:
 
   prepare-main:
     needs: validate_branch
-    if: ${{ inputs.target_branch == 'main' || inputs.target_branch == 'master' }}
+    if: ${{ inputs.target_branch == 'main'}}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/nbgv_prepare_release.yml@main
     with:
       target_branch:     ${{ inputs.target_branch }}

@@ -37,7 +37,7 @@ jobs:
 
   format-main:
     needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main' || needs.discover.outputs.branch_name == 'master' }}
+    if: ${{ needs.discover.outputs.branch_name == 'main' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
       dotnet_version: "9.0.x"

@@ -33,7 +33,7 @@ jobs:
                 
   test-main:
     needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main' || needs.discover.outputs.branch_name == 'master' }}
+    if: ${{ needs.discover.outputs.branch_name == 'main'  }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
     with:
       solution_name: ${{ vars.SOLUTION_NAME }}

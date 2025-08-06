@@ -38,11 +38,4 @@ jobs:
       test_report_name:  Unit Tests
       path:              "*.trx"
 
-  report-other:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name != 'main' && needs.discover.outputs.branch_name != 'develop' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main   # or @develop, or skip entirely
-    with:
-      artifact_name:     test-results
-      test_report_name:  Unit Tests
-      path:              "*.trx"
+
