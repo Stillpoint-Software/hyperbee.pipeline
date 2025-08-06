@@ -12,11 +12,11 @@ on:
   workflow_run:
     workflows: [Create Prerelease, Create Release]
     types: [requested]
-    branches: [main, develop]      # ← filter prevents surprise runs
+    branches: [main, develop]     
 
 permissions:
   contents: read
-  actions: read                    # shared format.yml may download artifacts
+  actions: read                
 
 jobs:
   discover:
@@ -30,10 +30,10 @@ jobs:
         env:
           BRANCH: >-
             ${{ github.event_name == 'workflow_run'
-                && github.event.workflow_run.head_branch      # workflow_run
+                && github.event.workflow_run.head_branch    
                 || github.event_name == 'pull_request'
-                && github.event.pull_request.base.ref         # PRs
-                || github.ref_name }}                         # push / dispatch
+                && github.event.pull_request.base.ref        
+                || github.ref_name }}                         
 
   format-main:
     needs: discover
