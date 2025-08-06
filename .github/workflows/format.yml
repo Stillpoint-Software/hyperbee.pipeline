@@ -30,11 +30,14 @@ jobs:
         env:
           BRANCH: >-
             ${{ github.event_name == 'workflow_run'
-                && github.event.workflow_run.head_branch    
+                && github.event.workflow_run.head_branch
                 || github.event_name == 'pull_request'
-                && github.event.pull_request.base.ref        
-                || github.ref_name }}                         
-
+                && github.event.pull_request.base.ref
+                || github.ref_name }}
+          BRANCH_STRIPPED: ${{ startsWith(env.BRANCH, 'refs/heads/')
+                && env.BRANCH[11:]
+                || env.BRANCH }}  
+    
   format-main:
     needs: discover
     if: >-
@@ -47,6 +50,14 @@ jobs:
       dotnet_version: "9.0.x"
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+  show-branch:
+    needs: discover
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print branch_name from discover
+        run: |
+          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
 
   format-develop:
     needs: discover
