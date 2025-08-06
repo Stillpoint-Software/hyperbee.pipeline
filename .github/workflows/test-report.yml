@@ -42,20 +42,24 @@ jobs:
         
   report-auto-main:
     needs: discover-auto
-    if: ${{ needs.discover-auto.outputs.branch_name == 'main' }}
+    if: ${{ github.event_name == 'workflow_run' &&
+          needs.discover-auto.result == 'success' &&
+          needs.discover-auto.outputs.branch_name == 'main' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
     with:
       test_run_id: ${{ needs.discover-auto.outputs.run_id }}
-      branch:      main           # ← NEW: tell shared workflow which branch we’re on
+      branch:      main          
     secrets: inherit
 
   report-auto-develop:
     needs: discover-auto
-    if: ${{ needs.discover-auto.outputs.branch_name == 'develop' }}
+    if: ${{ github.event_name == 'workflow_run' &&
+          needs.discover-auto.result == 'success' &&
+          needs.discover-auto.outputs.branch_name == 'develop' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@develop
     with:
       test_run_id: ${{ needs.discover-auto.outputs.run_id }}
-      branch:      develop        # ← NEW
+      branch:      develop      
     secrets: inherit
   
   report-manual-main:
