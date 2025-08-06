@@ -14,7 +14,8 @@ on:
       - develop
  
 permissions:
-  contents: read 
+  contents: read
+  actions: read
 
 jobs:
   discover:
@@ -22,24 +23,25 @@ jobs:
     outputs:
       branch_name: ${{ steps.set_branch.outputs.branch_name }}
     steps:
-      - name: Determine target branch
-        id: set_branch
+      - id: set_branch
         run: echo "branch_name=${BRANCH}" >> "$GITHUB_OUTPUT"
         env:
           BRANCH: >-
-            ${{ github.event_name == 'pull_request'
+            ${{ github.event_name == 'workflow_run'
+                && github.event.workflow_run.head_branch
+                || github.event_name == 'pull_request'
                 && github.event.pull_request.base.ref
-                || 'main' }}
-                
+                || github.ref_name }}
+
   test-main:
     needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main'  }}
+    if: ${{ needs.discover.outputs.branch_name == 'main' || needs.discover.outputs.branch_name == 'master' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
     with:
       solution_name: ${{ vars.SOLUTION_NAME }}
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
   test-develop:
     needs: discover
     if: ${{ needs.discover.outputs.branch_name == 'develop' }}
