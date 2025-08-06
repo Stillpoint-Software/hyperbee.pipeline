@@ -17,18 +17,15 @@ on:
         required: true
 
 permissions:
-  contents: write   
+  contents: write
   pull-requests: write
-  packages: write   
+  packages: write
 
 jobs:
   validate_branch:
     runs-on: ubuntu-latest
-
-
     outputs:
       version_json_path: ${{ steps.locate_version.outputs.file }}
-
     steps:
       - name: Checkout target branch
         uses: actions/checkout@v4
@@ -36,7 +33,6 @@ jobs:
           fetch-depth: 1
           ref: ${{ inputs.target_branch }}
 
-      # Optional sanity check (keeps the job obvious when the ref is wrong)
       - name: Ensure target branch exists
         run: |
           if ! git rev-parse --verify --quiet "refs/heads/${{ inputs.target_branch }}"; then
@@ -44,33 +40,23 @@ jobs:
             exit 1
           fi
 
-      # Find version.json and emit its absolute path
       - name: Locate version.json
         id: locate_version
         shell: bash
         run: |
-          # Search Git-tracked files first …
           REL_PATH=$(git ls-files --full-name '*version.json' | head -n1)
-
-          # … fall back to a filesystem search for untracked files (optional)
           if [[ -z "$REL_PATH" ]]; then
             REL_PATH=$(find . -type f -name version.json | head -n1 | sed 's|^\./||')
           fi
-
           if [[ -z "$REL_PATH" ]]; then
             echo "::error::version.json not found on branch '${{ inputs.target_branch }}'."
-            tree -L 2 -C || true
             exit 1
           fi
+          echo "file=$GITHUB_WORKSPACE/$REL_PATH" >> "$GITHUB_OUTPUT"
 
-          ABS_PATH="$GITHUB_WORKSPACE/$REL_PATH"
-          echo "Found version.json at: $ABS_PATH"
-
-          # Pass the path to other jobs
-          echo "file=$ABS_PATH" >> "$GITHUB_OUTPUT"
-
-  prepare:
+  prepare-main:
     needs: validate_branch
+    if: ${{ inputs.target_branch == 'main' || inputs.target_branch == 'master' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/nbgv_prepare_release.yml@main
     with:
       target_branch:     ${{ inputs.target_branch }}
@@ -78,13 +64,36 @@ jobs:
       version_file_path: ${{ needs.validate_branch.outputs.version_json_path }}
     secrets: inherit
 
-  publish:
-    needs: prepare
+  prepare-develop:
+    needs: validate_branch
+    if: ${{ inputs.target_branch == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/nbgv_prepare_release.yml@develop
+    with:
+      target_branch:     ${{ inputs.target_branch }}
+      increment:         ${{ inputs.increment }}
+      version_file_path: ${{ needs.validate_branch.outputs.version_json_path }}
+    secrets: inherit
+
+  publish-main:
+    needs: prepare-main
+    if: ${{ inputs.target_branch == 'main' || inputs.target_branch == 'master' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/nbgv_dotnet_pack.yml@main
     with:
-      checkout_ref:         ${{ needs.prepare.outputs.release_branch }}
-      build_configuration:  ${{ inputs.target_branch == 'develop' && 'Develop' || 'Release' }}
+      checkout_ref:         ${{ needs.prepare-main.outputs.release_branch }}
+      build_configuration:  Release
       push_after_pack:      true
-      force_dev_prerelease: ${{ inputs.target_branch == 'develop' }}
+      force_dev_prerelease: false
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+  publish-develop:
+    needs: prepare-develop
+    if: ${{ inputs.target_branch == 'develop' }}
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/nbgv_dotnet_pack.yml@develop
+    with:
+      checkout_ref:         ${{ needs.prepare-develop.outputs.release_branch }}
+      build_configuration:  Develop
+      push_after_pack:      true
+      force_dev_prerelease: true
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
