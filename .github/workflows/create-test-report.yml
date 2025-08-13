@@ -1,24 +1,10 @@
-name: Test Report
+name: Create Test Report
 on:
   # ① Automatic – when the Test workflow ends on main / develop
   workflow_run:
     workflows: ["Test"]
     types:     [completed]
     branches:  [main, develop]
-
-  # ② Manual re-run / ad-hoc report
-  workflow_dispatch:
-    inputs:
-      test_run_id:
-        description: "Run ID of the completed Test workflow (see the URL)"
-        required: true
-        type: string
-      branch:
-        description: "Branch that Test was run on"
-        required: true
-        type: choice
-        options:  [main, develop]
-        default: develop
 
 permissions:
   contents: read
@@ -60,20 +46,4 @@ jobs:
     with:
       test_run_id: ${{ needs.discover-auto.outputs.run_id }}
       branch:      develop      
-    secrets: inherit
-  
-  report-manual-main:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.branch == 'main' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@main
-    with:
-      test_run_id: ${{ inputs.test_run_id }}
-      branch:      main
-    secrets: inherit
-    
-  report-manual-develop:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.branch == 'develop' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test-report.yml@develop
-    with:
-      test_run_id: ${{ inputs.test_run_id }}
-      branch:      develop
     secrets: inherit
