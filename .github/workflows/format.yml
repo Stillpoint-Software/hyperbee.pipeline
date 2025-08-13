@@ -7,15 +7,13 @@ on:
     types: [opened, edited, synchronize, reopened]
     branches: [main, develop]
 
-  # Run when Create Prerelease / Create Release start,
-  # **but only if they run on main or develop**
   workflow_run:
     workflows: [Create Prerelease, Create Release]
     types: [requested]
-    branches: [main, develop]     
-
+ 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
   actions: read                
 
 jobs:
@@ -42,29 +40,13 @@ jobs:
 
           echo "Detected branch: $CLEAN"
           echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
-    
-   show-branch:
+          
+   format:
     needs: discover
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print branch_name from discover
-        run: |
-          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
-  
-   format-main:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main' }}
+    if: ${{ needs.discover.result == 'success' }}
     uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@main
     with:
       dotnet_version: "9.0.x"
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-   format-develop:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/format.yml@develop
-    with:
-      dotnet_version: "9.0.x"
-    secrets:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      branch: ${{ needs.discover.outputs.branch_name }}
+    secrets: inherit
+      

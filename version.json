@@ -1,13 +1,9 @@
 ﻿{
   "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/main/src/NerdBank.GitVersioning/version.schema.json",
   "version": "2.1.0",
-  /* lets assemblies carry height (revision) */
-  "assemblyVersion": { "precision": "revision" },
-  /* exports NBGV_* variables to MSBuild & CI */
-  "cloudBuild": { "setVersionVariables": true },
-  /* defines which branches are public releases */
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
-    "^refs/heads/release\\/.+$"
+    "^refs/heads/hotfix$",
+    "^refs/heads/v\\d+\\.\\d+$"
   ]
 }

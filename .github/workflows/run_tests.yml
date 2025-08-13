@@ -1,4 +1,4 @@
-name: Test
+name: Run Tests
 
 on:
   workflow_run:
@@ -38,29 +38,11 @@ jobs:
 
           echo "Detected branch: $CLEAN"
           echo "branch_name=$CLEAN" >> "$GITHUB_OUTPUT"
-    
-  show-branch:
-    needs: discover
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print branch_name from discover
-        run: |
-          echo "::notice title=branch_name::'${{ needs.discover.outputs.branch_name }}'"
 
-  test-main:
+  test:
     needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'main' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@main
+    uses: Stillpoint-Software/shared-workflows/.github/workflows/run_tests.yml@main
     with:
+      branch: ${{ needs.discover.outputs.branch_name }}
       solution_name: ${{ vars.SOLUTION_NAME }}
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  test-develop:
-    needs: discover
-    if: ${{ needs.discover.outputs.branch_name == 'develop' }}
-    uses: Stillpoint-Software/shared-workflows/.github/workflows/test.yml@develop
-    with:
-      solution_name: ${{ vars.SOLUTION_NAME }}
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    secrets: inherit
