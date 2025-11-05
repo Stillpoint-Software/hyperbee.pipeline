@@ -18,21 +18,21 @@ public class CommandFunctionTests
         var logger = Substitute.For<ILogger>();
         var mockContextFactory = Substitute.For<IPipelineContextFactory>();
         var mockContext = Substitute.For<IPipelineContext>();
-        
+
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
-        
+
         // Setup the factory to return our mock context
-        mockContextFactory.Create(logger, cancellationToken).Returns(mockContext);
-        
+        mockContextFactory.Create( logger, cancellationToken ).Returns( mockContext );
+
         // Create a test command function
-        var testCommand = new TestCommandFunction(mockContextFactory, logger);
-        
+        var testCommand = new TestCommandFunction( mockContextFactory, logger );
+
         // Act
-        await testCommand.ExecuteAsync(0, cancellationToken);
-        
+        await testCommand.ExecuteAsync( 0, cancellationToken );
+
         // Assert
-        mockContextFactory.Received(1).Create(logger, cancellationToken);
+        mockContextFactory.Received( 1 ).Create( logger, cancellationToken );
     }
 
     [TestMethod]
@@ -42,21 +42,21 @@ public class CommandFunctionTests
         var logger = Substitute.For<ILogger>();
         var mockContextFactory = Substitute.For<IPipelineContextFactory>();
         var mockContext = Substitute.For<IPipelineContext>();
-        
+
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
-        
+
         // Setup the factory to return our mock context
-        mockContextFactory.Create(logger, cancellationToken).Returns(mockContext);
-        
+        mockContextFactory.Create( logger, cancellationToken ).Returns( mockContext );
+
         // Create a test command function (parameterless version)
-        var testCommand = new TestCommandFunctionParameterless(mockContextFactory, logger);
-        
+        var testCommand = new TestCommandFunctionParameterless( mockContextFactory, logger );
+
         // Act
-        await testCommand.ExecuteAsync(cancellationToken);
-        
+        await testCommand.ExecuteAsync( cancellationToken );
+
         // Assert
-        mockContextFactory.Received(1).Create(logger, cancellationToken);
+        mockContextFactory.Received( 1 ).Create( logger, cancellationToken );
     }
 
     [TestMethod]
@@ -66,17 +66,17 @@ public class CommandFunctionTests
         var logger = Substitute.For<ILogger>();
         var mockContextFactory = Substitute.For<IPipelineContextFactory>();
         var mockContext = Substitute.For<IPipelineContext>();
-        
+
         // Setup the factory to return our mock context with default cancellation token
-        mockContextFactory.Create(logger, default(CancellationToken)).Returns(mockContext);
-        
-        var testCommand = new TestCommandFunction(mockContextFactory, logger);
-        
+        mockContextFactory.Create( logger, default( CancellationToken ) ).Returns( mockContext );
+
+        var testCommand = new TestCommandFunction( mockContextFactory, logger );
+
         // Act
-        await testCommand.ExecuteAsync(0);
-        
+        await testCommand.ExecuteAsync( 0 );
+
         // Assert
-        mockContextFactory.Received(1).Create(logger, default(CancellationToken));
+        mockContextFactory.Received( 1 ).Create( logger, default( CancellationToken ) );
     }
 
     [TestMethod]
@@ -84,25 +84,25 @@ public class CommandFunctionTests
     {
         // Arrange
         var logger = Substitute.For<ILogger>();
-        var contextFactory = PipelineContextFactory.CreateFactory(resetFactory: true);
-        
+        var contextFactory = PipelineContextFactory.CreateFactory( resetFactory: true );
+
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
-        
-        var testCommand = new TestCommandFunction(contextFactory, logger);
-        
+
+        var testCommand = new TestCommandFunction( contextFactory, logger );
+
         // Act
-        var result = await testCommand.ExecuteAsync(0, cancellationToken);
-        
+        var result = await testCommand.ExecuteAsync( 0, cancellationToken );
+
         // Assert
-        Assert.AreEqual(cancellationToken, result.Context.CancellationToken);
+        Assert.AreEqual( cancellationToken, result.Context.CancellationToken );
     }
 
     // Test implementation of CommandFunction<TStart, TOutput>
     private class TestCommandFunction : CommandFunction<int, int>
     {
-        public TestCommandFunction(IPipelineContextFactory pipelineContextFactory, ILogger logger) 
-            : base(pipelineContextFactory, logger)
+        public TestCommandFunction( IPipelineContextFactory pipelineContextFactory, ILogger logger )
+            : base( pipelineContextFactory, logger )
         {
         }
 
@@ -118,8 +118,8 @@ public class CommandFunctionTests
     // Test implementation of CommandFunction<TOutput> (parameterless version)
     private class TestCommandFunctionParameterless : CommandFunction<int>
     {
-        public TestCommandFunctionParameterless(IPipelineContextFactory pipelineContextFactory, ILogger logger) 
-            : base(pipelineContextFactory, logger)
+        public TestCommandFunctionParameterless( IPipelineContextFactory pipelineContextFactory, ILogger logger )
+            : base( pipelineContextFactory, logger )
         {
         }
 
