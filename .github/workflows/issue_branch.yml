@@ -9,7 +9,7 @@ on:
     types: [opened, closed]          # PR-related features
 
 permissions:
-  contents: read
+  contents: write
   issues: write
   pull-requests: write
 
