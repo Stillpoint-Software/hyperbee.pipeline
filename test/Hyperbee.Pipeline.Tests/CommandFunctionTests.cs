@@ -36,30 +36,6 @@ public class CommandFunctionTests
     }
 
     [TestMethod]
-    public async Task CommandFunction_ExecuteAsync_WithoutArgument_Should_Pass_CancellationToken_To_Context()
-    {
-        // Arrange
-        var logger = Substitute.For<ILogger>();
-        var mockContextFactory = Substitute.For<IPipelineContextFactory>();
-        var mockContext = Substitute.For<IPipelineContext>();
-
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellationTokenSource.Token;
-
-        // Setup the factory to return our mock context
-        mockContextFactory.Create( logger, cancellationToken ).Returns( mockContext );
-
-        // Create a test command function (parameterless version)
-        var testCommand = new TestCommandFunctionParameterless( mockContextFactory, logger );
-
-        // Act
-        await testCommand.ExecuteAsync( cancellationToken );
-
-        // Assert
-        mockContextFactory.Received( 1 ).Create( logger, cancellationToken );
-    }
-
-    [TestMethod]
     public async Task CommandFunction_ExecuteAsync_Should_Pass_Default_CancellationToken_When_None_Provided()
     {
         // Arrange
@@ -79,23 +55,62 @@ public class CommandFunctionTests
         mockContextFactory.Received( 1 ).Create( logger, default( CancellationToken ) );
     }
 
-    [TestMethod]
-    public async Task CommandFunction_ExecuteAsync_Should_Return_Context_With_Correct_CancellationToken()
+        [TestMethod]
+    public async Task CommandFunction_ExecuteAsync_Should_Link_And_Propagate_Cancellation()
     {
         // Arrange
         var logger = Substitute.For<ILogger>();
-        var contextFactory = PipelineContextFactory.CreateFactory( resetFactory: true );
+        var contextFactory = PipelineContextFactory.CreateFactory(resetFactory: true);
 
-        using var cancellationTokenSource = new CancellationTokenSource();
-        var cancellationToken = cancellationTokenSource.Token;
+        using var cts = new CancellationTokenSource();
+        var originalToken = cts.Token;
 
-        var testCommand = new TestCommandFunction( contextFactory, logger );
+        var testCommand = new TestCommandFunction(contextFactory, logger);
 
         // Act
-        var result = await testCommand.ExecuteAsync( 0, cancellationToken );
+        var result = await testCommand.ExecuteAsync(0, originalToken);
+        var contextToken = result.Context.CancellationToken;
 
         // Assert
-        Assert.AreEqual( cancellationToken, result.Context.CancellationToken );
+        // The context creates a linked token source, so the tokens should not be equal
+        Assert.AreNotEqual(originalToken, contextToken, "Context should use a linked CancellationTokenSource.");
+
+        Assert.IsFalse(originalToken.IsCancellationRequested, "Original token should not be canceled yet.");
+        Assert.IsFalse(contextToken.IsCancellationRequested, "Linked context token should not be canceled yet.");
+
+        // Cancel the original and ensure propagation to the linked token
+        await cts.CancelAsync();
+
+        Assert.IsTrue(originalToken.IsCancellationRequested, "Original token should be canceled.");
+        Assert.IsTrue(contextToken.IsCancellationRequested, "Linked context token should be canceled when original is canceled.");
+    }
+
+    [TestMethod]
+    public async Task CommandFunction_Context_Cancellation_Does_Not_Cancel_Original_Token()
+    {
+        // Arrange
+        var logger = Substitute.For<ILogger>();
+        var contextFactory = PipelineContextFactory.CreateFactory(resetFactory: true);
+
+        using var cts = new CancellationTokenSource();
+        var originalToken = cts.Token;
+
+        var testCommand = new TestCommandFunction(contextFactory, logger);
+
+        // Act
+        var result = await testCommand.ExecuteAsync(0, originalToken);
+        var contextToken = result.Context.CancellationToken;
+
+        // Assert preconditions
+        Assert.AreNotEqual(originalToken, contextToken);
+        Assert.IsFalse(originalToken.IsCancellationRequested);
+        Assert.IsFalse(contextToken.IsCancellationRequested);
+
+        // Cancel via context (one-way: does not flow back to original)
+        result.Context.CancelAfter();
+
+        Assert.IsTrue(contextToken.IsCancellationRequested, "Context token should be canceled.");
+        Assert.IsFalse(originalToken.IsCancellationRequested, "Original token should not be canceled by context cancellation.");
     }
 
     // Test implementation of CommandFunction<TStart, TOutput>
