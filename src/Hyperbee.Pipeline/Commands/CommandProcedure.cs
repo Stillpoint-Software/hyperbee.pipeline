@@ -22,7 +22,7 @@ public abstract class CommandProcedure<TStart> : ICommandProcedure<TStart>
 
     public virtual async Task<CommandResult> ExecuteAsync( TStart argument, CancellationToken cancellation = default )
     {
-        var context = ContextFactory.Create( Logger );
+        var context = ContextFactory.Create( Logger, cancellation );
 
         await Pipeline.Value( context, argument ).ConfigureAwait( false );
 
