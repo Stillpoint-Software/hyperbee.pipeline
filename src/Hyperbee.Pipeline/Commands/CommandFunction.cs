@@ -22,7 +22,7 @@ public abstract class CommandFunction<TStart, TOutput> : ICommandFunction<TStart
 
     public virtual async Task<CommandResult<TOutput>> ExecuteAsync( TStart argument, CancellationToken cancellation = default )
     {
-        var context = ContextFactory.Create( Logger );
+        var context = ContextFactory.Create( Logger, cancellation );
 
         return new CommandResult<TOutput>
         {

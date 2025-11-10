@@ -15,9 +15,9 @@ public class PipelineContextFactory : IPipelineContextFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IPipelineContext Create( ILogger logger )
+    public IPipelineContext Create( ILogger logger, CancellationToken cancellation = default )
     {
-        return new PipelineContext
+        return new PipelineContext( cancellation )
         {
             Logger = logger,
             ServiceProvider = _serviceProvider
