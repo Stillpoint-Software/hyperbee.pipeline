@@ -140,7 +140,7 @@ public class PipelineBenchmarks
             new MemoryCache( new MemoryCacheOptions
             {
                 Clock = clock,
-                ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 ),
+                ExpirationScanFrequency = TimeSpan.FromMilliseconds( 100 ), // Safe: constant, not NaN/Infinity
                 TrackLinkedCacheEntries = false
             } ) );
 
