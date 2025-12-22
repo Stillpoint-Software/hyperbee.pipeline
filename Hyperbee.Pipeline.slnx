@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="version.json" />
+    <Project Path="docs/docs.shproj" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/create_release.yml" />
+    <File Path=".github/workflows/create_test_report.yml" />
+    <File Path=".github/workflows/format.yml" />
+    <File Path=".github/workflows/issue_branch.yml" />
+    <File Path=".github/workflows/pack_publish.yml" />
+    <File Path=".github/workflows/run_tests.yml" />
+    <File Path=".github/workflows/unlist_package.yml" />
+  </Folder>
+  <Folder Name="/Solution Tests/">
+    <Project Path="test/Hyperbee.Pipeline.Auth.Tests/Hyperbee.Pipeline.Auth.Tests.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.Tests/Hyperbee.Pipeline.Tests.csproj" />
+    <Project Path="test/Hyperbee.PipelineCaching.Tests/Hyperbee.Pipeline.Caching.Tests.csproj" />
+    <Project Path="test/Hyperbee.Pipleline.Benchmark/Hyperbee.Pipeline.Benchmark.csproj" />
+  </Folder>
+  <Project Path="src/Hyperbee.Pipeline.Auth/Hyperbee.Pipeline.Auth.csproj" />
+  <Project Path="src/Hyperbee.Pipeline/Hyperbee.Pipeline.csproj" />
+  <Project Path="src/Hyperbee.Pipline.Caching/Hyperbee.Pipeline.Caching.csproj" />
+</Solution>
