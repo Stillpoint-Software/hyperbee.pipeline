@@ -8,25 +8,23 @@
     <PackageProjectUrl>https://stillpoint-software.github.io/hyperbee.pipeline/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageId>Hyperbee.Pipeline</PackageId>
     <Copyright>Stillpoint Software, Inc.</Copyright>
     <Title>Hyperbee Piplines</Title>
     <Description>A pipeline library for constructing asynchronous functional fluent pipelines in .NET</Description>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-	<PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
 
   </PropertyGroup>
   <ItemGroup>
     <None Update="$(MSBuildProjectName).csproj.DotSettings" Visible="false" />
   </ItemGroup>
   <ItemGroup>
-	<None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
-	<None Include="..\..\README.md" Pack="true" Visible="true" PackagePath="/" Link="README.md" />
-  <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
-	<PackageReference Update="Microsoft.SourceLink.GitHub">
-    <PrivateAssets>all</PrivateAssets>
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="..\..\README.md" Pack="true" Visible="true" PackagePath="/" Link="README.md" />
+    <None Include="..\..\LICENSE" Pack="true" Visible="false" PackagePath="/" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
