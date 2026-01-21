@@ -11,6 +11,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Copyright>Stillpoint Software, Inc.</Copyright>
     <Title>Hyperbee Pipline Auth</Title>
+    <PackageId>Hyperbee.Pipeline.Auth</PackageId>
     <Description>Auth for Hyperbee.Pipelines async pipelines</Description>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -30,9 +31,6 @@
     </None>
     <PackageReference Include="Microsoft.AspNetCore.Http.Connections.Common" />
     <ProjectReference Include="..\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
-    <PackageReference Update="Microsoft.SourceLink.GitHub">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Hyperbee.Pipeline.Context;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Tests;
 
@@ -33,7 +31,7 @@ public class PipelineEnumerationTests
 
         await command( new PipelineContext(), "e f" );
 
-        Assert.AreEqual( count, 20 );
+        Assert.AreEqual( 20, count );
     }
 
     [TestMethod]
@@ -53,7 +51,7 @@ public class PipelineEnumerationTests
 
         await command( new PipelineContext(), "e f" );
 
-        Assert.AreEqual( count, 25 );
+        Assert.AreEqual( 25, count );
     }
 
     [TestMethod]
@@ -70,6 +68,6 @@ public class PipelineEnumerationTests
 
         var result = await command( new PipelineContext(), "1 2 3 4 5" );
 
-        Assert.AreEqual( result, 70 );
+        Assert.AreEqual( 70, result );
     }
 }
