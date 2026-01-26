@@ -1,5 +1,4 @@
 name: Create Release
-
 on:
   workflow_dispatch:
     inputs:
@@ -31,7 +30,7 @@ permissions:
   pull-requests: write
   packages: write
 
-run-name: "Create Release · ${{ inputs.mode }} · ${{ github.ref_name }}"
+run-name: "Create Release Â· ${{ inputs.mode }} Â· ${{ github.ref_name }}"
 
 jobs:
   validate-inputs:
