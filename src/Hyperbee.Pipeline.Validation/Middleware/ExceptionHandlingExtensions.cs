@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline;
+﻿using Hyperbee.Pipeline;
 using Hyperbee.Pipeline.Validation;
 
 namespace Hyperbee.Pipeline.Middleware;
@@ -24,21 +24,21 @@ public static partial class MiddlewareExtensions
     )
     {
         var config = new ExceptionHandlingConfiguration();
-        configure(config);
+        configure( config );
 
         return builder.HookAsync(
-            async (context, argument, next) =>
+            async ( context, argument, next ) =>
             {
                 try
                 {
-                    var result = await next(context, argument).ConfigureAwait(false);
+                    var result = await next( context, argument ).ConfigureAwait( false );
                     return result;
                 }
-                catch (Exception ex)
+                catch ( Exception ex )
                 {
-                    if (config.TryGetErrorCode(ex.GetType(), out var errorCode))
+                    if ( config.TryGetErrorCode( ex.GetType(), out var errorCode ) )
                     {
-                        context.FailAfter($"{ex.GetType().Name}: {ex.Message}", errorCode);
+                        context.FailAfter( $"{ex.GetType().Name}: {ex.Message}", errorCode );
                         return default;
                     }
 
@@ -63,25 +63,25 @@ public class ExceptionHandlingConfiguration
     /// <typeparam name="TException">The type of exception to map. Must derive from <see cref="Exception"/>.</typeparam>
     /// <param name="errorcode">The error code to associate with the exception type. Defaults to -1 if not specified.</param>
     /// <returns>The current <see cref="ExceptionHandlingConfiguration"/> instance, allowing for method chaining.</returns>
-    public ExceptionHandlingConfiguration AddException<TException>(int errorcode = -1)
+    public ExceptionHandlingConfiguration AddException<TException>( int errorcode = -1 )
         where TException : Exception
     {
-        _exceptionMappings[typeof(TException)] = errorcode;
+        _exceptionMappings[typeof( TException )] = errorcode;
         return this;
     }
 
-    internal bool TryGetErrorCode(Type exceptionType, out int errorCode)
+    internal bool TryGetErrorCode( Type exceptionType, out int errorCode )
     {
         // Check for exact type match
-        if (_exceptionMappings.TryGetValue(exceptionType, out errorCode))
+        if ( _exceptionMappings.TryGetValue( exceptionType, out errorCode ) )
         {
             return true;
         }
 
         // Check for derived types
-        foreach (var kvp in _exceptionMappings)
+        foreach ( var kvp in _exceptionMappings )
         {
-            if (kvp.Key.IsAssignableFrom(exceptionType))
+            if ( kvp.Key.IsAssignableFrom( exceptionType ) )
             {
                 errorCode = kvp.Value;
                 return true;

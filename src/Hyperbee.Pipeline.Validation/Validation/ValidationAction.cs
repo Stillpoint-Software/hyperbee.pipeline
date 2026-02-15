@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Validation;
+﻿namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
 /// Defines the action to take after setting a validation result in the pipeline context.

@@ -1,4 +1,4 @@
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 
 namespace Hyperbee.Pipeline.Validation;
 
@@ -10,5 +10,6 @@ namespace Hyperbee.Pipeline.Validation;
 /// encountered in an application.</remarks>
 /// <param name="propertyName"></param>
 /// <param name="errorMessage"></param>
-public class ApplicationValidationFailure(string propertyName, string errorMessage)
-    : ValidationFailure(propertyName, errorMessage, null) { }
+public class ApplicationValidationFailure( string propertyName, string errorMessage )
+    : ValidationFailure( propertyName, errorMessage, null )
+{ }

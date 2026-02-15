@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 
 namespace Hyperbee.Pipeline.Validation;
 
@@ -10,9 +10,9 @@ namespace Hyperbee.Pipeline.Validation;
 /// authorization errors.</remarks>
 public class UnauthorizedValidationFailure : ApplicationValidationFailure
 {
-    public UnauthorizedValidationFailure(string propertyName, string errorMessage)
-        : base(propertyName, errorMessage)
+    public UnauthorizedValidationFailure( string propertyName, string errorMessage )
+        : base( propertyName, errorMessage )
     {
-        ErrorCode = nameof(HttpStatusCode.Unauthorized);
+        ErrorCode = nameof( HttpStatusCode.Unauthorized );
     }
 }

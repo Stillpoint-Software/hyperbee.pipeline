@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 
 namespace Hyperbee.Pipeline.Validation;
 
@@ -10,9 +10,9 @@ namespace Hyperbee.Pipeline.Validation;
 /// forbidden errors.</remarks>
 public class ForbiddenValidationFailure : ApplicationValidationFailure
 {
-    public ForbiddenValidationFailure(string propertyName, string errorMessage)
-        : base(propertyName, errorMessage)
+    public ForbiddenValidationFailure( string propertyName, string errorMessage )
+        : base( propertyName, errorMessage )
     {
-        ErrorCode = nameof(HttpStatusCode.Forbidden);
+        ErrorCode = nameof( HttpStatusCode.Forbidden );
     }
 }

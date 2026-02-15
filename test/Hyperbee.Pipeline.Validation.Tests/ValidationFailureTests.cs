@@ -1,4 +1,4 @@
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 
 namespace Hyperbee.Pipeline.Validation.Tests;
 

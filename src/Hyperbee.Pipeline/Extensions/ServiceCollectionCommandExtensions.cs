@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Hyperbee.Pipeline.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -31,10 +31,10 @@ public static class ServiceCollectionCommandExtensions
         Assembly? assembly = null,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         Func<CommandScanner.CommandScanResult, bool> filter = null,
-        bool includeInternalTypes = false)
+        bool includeInternalTypes = false )
     {
         assembly ??= Assembly.GetCallingAssembly();
-        return services.AddPipelineCommands([assembly], lifetime, filter, includeInternalTypes);
+        return services.AddPipelineCommands( [assembly], lifetime, filter, includeInternalTypes );
     }
 
     /// <summary>
@@ -51,13 +51,13 @@ public static class ServiceCollectionCommandExtensions
         IEnumerable<Assembly> assemblies,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         Func<CommandScanner.CommandScanResult, bool> filter = null,
-        bool includeInternalTypes = false)
+        bool includeInternalTypes = false )
     {
-        ArgumentNullException.ThrowIfNull(assemblies);
+        ArgumentNullException.ThrowIfNull( assemblies );
 
         CommandScanner
-            .FindCommandsInAssemblies(assemblies, includeInternalTypes)
-            .ForEach(scanResult => services.AddScanResult(scanResult, lifetime, filter));
+            .FindCommandsInAssemblies( assemblies, includeInternalTypes )
+            .ForEach( scanResult => services.AddScanResult( scanResult, lifetime, filter ) );
 
         return services;
     }
@@ -75,9 +75,9 @@ public static class ServiceCollectionCommandExtensions
         this IServiceCollection services,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         Func<CommandScanner.CommandScanResult, bool> filter = null,
-        bool includeInternalTypes = false)
+        bool includeInternalTypes = false )
     {
-        return services.AddPipelineCommands(typeof(T).Assembly, lifetime, filter, includeInternalTypes);
+        return services.AddPipelineCommands( typeof( T ).Assembly, lifetime, filter, includeInternalTypes );
     }
 
     /// <summary>
@@ -94,24 +94,24 @@ public static class ServiceCollectionCommandExtensions
         Type type,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
         Func<CommandScanner.CommandScanResult, bool> filter = null,
-        bool includeInternalTypes = false)
+        bool includeInternalTypes = false )
     {
-        ArgumentNullException.ThrowIfNull(type);
-        return services.AddPipelineCommands(type.Assembly, lifetime, filter, includeInternalTypes);
+        ArgumentNullException.ThrowIfNull( type );
+        return services.AddPipelineCommands( type.Assembly, lifetime, filter, includeInternalTypes );
     }
 
     private static void AddScanResult(
         this IServiceCollection services,
         CommandScanner.CommandScanResult scanResult,
         ServiceLifetime lifetime,
-        Func<CommandScanner.CommandScanResult, bool> filter)
+        Func<CommandScanner.CommandScanResult, bool> filter )
     {
-        if (filter?.Invoke(scanResult) == false)
+        if ( filter?.Invoke( scanResult ) == false )
             return;
- 
-        services.TryAddEnumerable(new ServiceDescriptor(
+
+        services.TryAddEnumerable( new ServiceDescriptor(
             serviceType: scanResult.InterfaceType,
             implementationType: scanResult.CommandType,
-            lifetime: lifetime));
+            lifetime: lifetime ) );
     }
 }

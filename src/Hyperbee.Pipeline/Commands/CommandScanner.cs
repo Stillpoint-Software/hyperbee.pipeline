@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Reflection;
 
 namespace Hyperbee.Pipeline.Commands;
@@ -14,9 +14,9 @@ public class CommandScanner : IEnumerable<CommandScanner.CommandScanResult>
     /// <summary>
     /// Creates a scanner that works on a sequence of types.
     /// </summary>
-    public CommandScanner(IEnumerable<Type> types)
+    public CommandScanner( IEnumerable<Type> types )
     {
-        ArgumentNullException.ThrowIfNull(types);
+        ArgumentNullException.ThrowIfNull( types );
         _types = types;
     }
 
@@ -25,10 +25,10 @@ public class CommandScanner : IEnumerable<CommandScanner.CommandScanResult>
     /// </summary>
     /// <param name="assembly">The assembly to scan.</param>
     /// <param name="includeInternalTypes">Whether to include internal types. The default is false.</param>
-    public static CommandScanner FindCommandsInAssembly(Assembly assembly, bool includeInternalTypes = false)
+    public static CommandScanner FindCommandsInAssembly( Assembly assembly, bool includeInternalTypes = false )
     {
-        ArgumentNullException.ThrowIfNull(assembly);
-        return new CommandScanner(includeInternalTypes ? GetExportedAndInternalTypes(assembly) : assembly.GetExportedTypes());
+        ArgumentNullException.ThrowIfNull( assembly );
+        return new CommandScanner( includeInternalTypes ? GetExportedAndInternalTypes( assembly ) : assembly.GetExportedTypes() );
     }
 
     /// <summary>
@@ -36,63 +36,63 @@ public class CommandScanner : IEnumerable<CommandScanner.CommandScanResult>
     /// </summary>
     /// <param name="assemblies">The assemblies to scan.</param>
     /// <param name="includeInternalTypes">Whether to include internal types. The default is false.</param>
-    public static CommandScanner FindCommandsInAssemblies(IEnumerable<Assembly> assemblies, bool includeInternalTypes = false)
+    public static CommandScanner FindCommandsInAssemblies( IEnumerable<Assembly> assemblies, bool includeInternalTypes = false )
     {
-        ArgumentNullException.ThrowIfNull(assemblies);
+        ArgumentNullException.ThrowIfNull( assemblies );
         var types = assemblies
-            .SelectMany(x => includeInternalTypes ? GetExportedAndInternalTypes(x) : x.GetExportedTypes())
+            .SelectMany( x => includeInternalTypes ? GetExportedAndInternalTypes( x ) : x.GetExportedTypes() )
             .Distinct();
 
-        return new CommandScanner(types);
+        return new CommandScanner( types );
     }
 
     /// <summary>
     /// Finds all command types in the assembly containing the specified type.
     /// </summary>
-    public static CommandScanner FindCommandsInAssemblyContaining<T>(bool includeInternalTypes = false)
+    public static CommandScanner FindCommandsInAssemblyContaining<T>( bool includeInternalTypes = false )
     {
-        return FindCommandsInAssembly(typeof(T).Assembly, includeInternalTypes);
+        return FindCommandsInAssembly( typeof( T ).Assembly, includeInternalTypes );
     }
 
     /// <summary>
     /// Finds all command types in the assembly containing the specified type.
     /// </summary>
-    public static CommandScanner FindCommandsInAssemblyContaining(Type type, bool includeInternalTypes = false)
+    public static CommandScanner FindCommandsInAssemblyContaining( Type type, bool includeInternalTypes = false )
     {
-        ArgumentNullException.ThrowIfNull(type);
-        return FindCommandsInAssembly(type.Assembly, includeInternalTypes);
+        ArgumentNullException.ThrowIfNull( type );
+        return FindCommandsInAssembly( type.Assembly, includeInternalTypes );
     }
 
-    private static Type[] GetExportedAndInternalTypes(Assembly assembly)
+    private static Type[] GetExportedAndInternalTypes( Assembly assembly )
     {
         // GetTypes() returns everything including private/protected nested types.
         // Filter to only public and internal types.
         return assembly.GetTypes()
-            .Where(t => !t.IsNestedPrivate && !t.IsNestedFamily && !t.IsNestedFamANDAssem)
+            .Where( t => !t.IsNestedPrivate && !t.IsNestedFamily && !t.IsNestedFamANDAssem )
             .ToArray();
     }
 
     private IEnumerable<CommandScanResult> Execute()
     {
-        var commandInterfaceType = typeof(ICommand);
+        var commandInterfaceType = typeof( ICommand );
 
         return _types
-            .Where(type => type.IsClass && !type.IsAbstract)
-            .SelectMany(type => type.GetInterfaces()
-                .Where(i => i != commandInterfaceType && commandInterfaceType.IsAssignableFrom(i))
-                .Select(commandInterface => new CommandScanResult(commandInterface, type)));
+            .Where( type => type.IsClass && !type.IsAbstract )
+            .SelectMany( type => type.GetInterfaces()
+                .Where( i => i != commandInterfaceType && commandInterfaceType.IsAssignableFrom( i ) )
+                .Select( commandInterface => new CommandScanResult( commandInterface, type ) ) );
     }
 
     /// <summary>
     /// Performs the specified action on all scan results.
     /// </summary>
-    public void ForEach(Action<CommandScanResult> action)
+    public void ForEach( Action<CommandScanResult> action )
     {
-        ArgumentNullException.ThrowIfNull(action);
+        ArgumentNullException.ThrowIfNull( action );
 
-        foreach (var result in this)
+        foreach ( var result in this )
         {
-            action(result);
+            action( result );
         }
     }
 
@@ -105,7 +105,7 @@ public class CommandScanner : IEnumerable<CommandScanner.CommandScanResult>
     /// </summary>
     public class CommandScanResult
     {
-        public CommandScanResult(Type interfaceType, Type commandType)
+        public CommandScanResult( Type interfaceType, Type commandType )
         {
             InterfaceType = interfaceType;
             CommandType = commandType;

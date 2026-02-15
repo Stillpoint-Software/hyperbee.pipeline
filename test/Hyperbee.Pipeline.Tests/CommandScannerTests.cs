@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Commands;
+﻿using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Tests.TestSupport;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -87,7 +87,7 @@ public class CommandScannerTests
             count++;
         }
 
-        Assert.IsTrue( count > 0 );
+        Assert.IsGreaterThan( 0, count );
     }
 
     [TestMethod]
@@ -98,7 +98,7 @@ public class CommandScannerTests
 
         scanner.ForEach( result => types.Add( result.CommandType ) );
 
-        Assert.IsTrue( types.Contains( typeof( TestPublicCommand ) ) );
+        Assert.Contains( typeof( TestPublicCommand ), types );
     }
 
     [TestMethod]

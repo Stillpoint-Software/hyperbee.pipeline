@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 
 namespace Hyperbee.Pipeline.Validation;
 
@@ -10,9 +10,9 @@ namespace Hyperbee.Pipeline.Validation;
 /// additional context specific to not found errors.</remarks>
 public class NotFoundValidationFailure : ApplicationValidationFailure
 {
-    public NotFoundValidationFailure(string propertyName, string errorMessage)
-        : base(propertyName, errorMessage)
+    public NotFoundValidationFailure( string propertyName, string errorMessage )
+        : base( propertyName, errorMessage )
     {
-        ErrorCode = nameof(HttpStatusCode.NotFound);
+        ErrorCode = nameof( HttpStatusCode.NotFound );
     }
 }

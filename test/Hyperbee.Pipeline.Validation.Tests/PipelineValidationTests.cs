@@ -1,4 +1,4 @@
-using System.ComponentModel.Design;
+﻿using System.ComponentModel.Design;
 using FluentValidation;
 using FluentValidation.Results;
 using Hyperbee.Pipeline.Context;
@@ -228,7 +228,7 @@ public class PipelineValidationTests
         Assert.IsFalse( context.IsValid() );
         Assert.IsTrue( context.IsCanceled );
         var failures = context.ValidationFailures().ToList();
-        Assert.AreEqual( 1, failures.Count );
+        Assert.HasCount( 1, failures );
         Assert.IsInstanceOfType( failures[0], typeof( NotFoundValidationFailure ) );
     }
 

@@ -1,4 +1,4 @@
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 
 namespace Hyperbee.Pipeline.Validation;
 
@@ -14,8 +14,8 @@ public static class Validation
     /// <param name="errorMessage">The error message describing the validation failure.</param>
     /// <param name="errorCode">An optional error code to associate with the validation failure.</param>
     /// <returns>A new <see cref="ValidationFailure"/> instance.</returns>
-    public static ValidationFailure Failure(string propertyName, string errorMessage, string? errorCode = null)
+    public static ValidationFailure Failure( string propertyName, string errorMessage, string? errorCode = null )
     {
-        return new(propertyName, errorMessage) { ErrorCode = errorCode };
+        return new( propertyName, errorMessage ) { ErrorCode = errorCode };
     }
 }

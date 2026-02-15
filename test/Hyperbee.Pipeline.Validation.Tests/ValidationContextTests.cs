@@ -1,4 +1,4 @@
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using Hyperbee.Pipeline.Context;
 
 namespace Hyperbee.Pipeline.Validation.Tests;
@@ -43,7 +43,7 @@ public class ValidationContextTests
 
         var stored = context.GetValidationResult();
         Assert.IsNotNull( stored );
-        Assert.AreEqual( 1, stored.Errors.Count );
+        Assert.HasCount( 1, stored.Errors );
         Assert.AreEqual( "Age", stored.Errors[0].PropertyName );
     }
 
@@ -57,7 +57,7 @@ public class ValidationContextTests
 
         var stored = context.GetValidationResult();
         Assert.IsNotNull( stored );
-        Assert.AreEqual( 1, stored.Errors.Count );
+        Assert.HasCount( 1, stored.Errors );
         Assert.AreEqual( "Email", stored.Errors[0].PropertyName );
     }
 
@@ -75,7 +75,7 @@ public class ValidationContextTests
 
         var stored = context.GetValidationResult();
         Assert.IsNotNull( stored );
-        Assert.AreEqual( 2, stored.Errors.Count );
+        Assert.HasCount( 2, stored.Errors );
     }
 
     [TestMethod]
@@ -110,7 +110,7 @@ public class ValidationContextTests
 
         var stored = context.GetValidationResult();
         Assert.IsNotNull( stored );
-        Assert.AreEqual( 2, stored.Errors.Count );
+        Assert.HasCount( 2, stored.Errors );
         Assert.AreEqual( "Name", stored.Errors[0].PropertyName );
         Assert.AreEqual( "Age", stored.Errors[1].PropertyName );
     }
@@ -124,7 +124,7 @@ public class ValidationContextTests
 
         var stored = context.GetValidationResult();
         Assert.IsNotNull( stored );
-        Assert.AreEqual( 1, stored.Errors.Count );
+        Assert.HasCount( 1, stored.Errors );
     }
 
     [TestMethod]
@@ -158,7 +158,7 @@ public class ValidationContextTests
 
         var failures = context.ValidationFailures().ToList();
 
-        Assert.AreEqual( 2, failures.Count );
+        Assert.HasCount( 2, failures );
         Assert.AreEqual( "A", failures[0].PropertyName );
         Assert.AreEqual( "B", failures[1].PropertyName );
     }
@@ -174,7 +174,7 @@ public class ValidationContextTests
         Assert.IsTrue( context.IsCanceled );
 
         var failures = context.ValidationFailures().ToList();
-        Assert.AreEqual( 1, failures.Count );
+        Assert.HasCount( 1, failures );
         Assert.AreEqual( "Operation", failures[0].PropertyName );
         Assert.AreEqual( "Something went wrong.", failures[0].ErrorMessage );
     }
@@ -187,7 +187,7 @@ public class ValidationContextTests
         context.FailAfter( "Not found.", 404, propertyName: "Item" );
 
         var failures = context.ValidationFailures().ToList();
-        Assert.AreEqual( 1, failures.Count );
+        Assert.HasCount( 1, failures );
         Assert.AreEqual( "404", failures[0].ErrorCode );
         Assert.AreEqual( "Item", failures[0].PropertyName );
     }

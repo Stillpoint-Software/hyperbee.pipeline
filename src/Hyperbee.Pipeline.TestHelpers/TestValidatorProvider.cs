@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Hyperbee.Pipeline.Validation;
 
 namespace Hyperbee.Pipeline.TestHelpers;
@@ -11,18 +11,18 @@ public class TestValidatorProvider : IValidatorProvider
 {
     private readonly System.Collections.Concurrent.ConcurrentDictionary<Type, object> _validators = new();
 
-    public void Register<TModel>(IValidator<TModel> validator)
+    public void Register<TModel>( IValidator<TModel> validator )
         where TModel : class
     {
-        _validators[typeof(TModel)] = validator;
+        _validators[typeof( TModel )] = validator;
     }
 
     public IValidator<TPlugin>? For<TPlugin>()
         where TPlugin : class
     {
-        if (_validators.TryGetValue(typeof(TPlugin), out var validator))
+        if ( _validators.TryGetValue( typeof( TPlugin ), out var validator ) )
         {
-            return (IValidator<TPlugin>)validator;
+            return (IValidator<TPlugin>) validator;
         }
 
         return default;

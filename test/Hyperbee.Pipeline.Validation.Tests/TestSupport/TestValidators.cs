@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Hyperbee.Pipeline.Validation.Tests.TestSupport;
 

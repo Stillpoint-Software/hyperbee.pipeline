@@ -1,4 +1,4 @@
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
 using Hyperbee.Pipeline.AspNetCore.Extensions;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;

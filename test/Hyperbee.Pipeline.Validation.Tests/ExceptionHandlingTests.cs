@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Context;
+﻿using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Middleware;
 
 namespace Hyperbee.Pipeline.Validation.Tests;
@@ -39,9 +39,9 @@ public class ExceptionHandlingTests
         Assert.IsTrue( context.IsCanceled );
 
         var failures = context.ValidationFailures().ToList();
-        Assert.AreEqual( 1, failures.Count );
+        Assert.HasCount( 1, failures );
         Assert.AreEqual( "1001", failures[0].ErrorCode );
-        Assert.IsTrue( failures[0].ErrorMessage.Contains( "Test error" ) );
+        Assert.Contains( "Test error", failures[0].ErrorMessage );
     }
 
     [TestMethod]

@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Commands;
+﻿using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Tests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

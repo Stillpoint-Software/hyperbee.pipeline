@@ -1,11 +1,11 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentValidation.Results;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Hyperbee.Pipeline.Validation;
 
 namespace Hyperbee.Pipeline.AspNetCore.Extensions;
 
@@ -26,12 +26,12 @@ public static class CommandResultExtensions
     /// <param name="commandResult">The command result to convert. Must not be <see langword="null"/>.</param>
     /// <returns>An <see cref="IResult"/> representing the outcome of the command. If the command is invalid,  returns an error
     /// result; otherwise, returns an <see cref="IResult"/> with the successful result.</returns>
-    public static IResult ToResult<T>(this CommandResult<T> commandResult)
+    public static IResult ToResult<T>( this CommandResult<T> commandResult )
     {
-        if (TryHandleInvalidCommand(commandResult.Context, commandResult.CommandType, out var errorResult))
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 
-        return Results.Ok(commandResult.Result);
+        return Results.Ok( commandResult.Result );
     }
 
     /// <summary>
@@ -50,16 +50,16 @@ public static class CommandResultExtensions
     )
         where TResult : class
     {
-        if (TryHandleInvalidCommand(commandResult.Context, commandResult.CommandType, out var errorResult))
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 
-        var transformedResult = selector(commandResult.Result);
+        var transformedResult = selector( commandResult.Result );
 
         // If the selector returns an IResult, use it directly
-        if (transformedResult is IResult result)
+        if ( transformedResult is IResult result )
             return result;
 
-        return transformedResult is not null ? Results.Ok(transformedResult) : Results.NotFound();
+        return transformedResult is not null ? Results.Ok( transformedResult ) : Results.NotFound();
     }
 
     /// <summary>
@@ -72,9 +72,9 @@ public static class CommandResultExtensions
     /// <param name="commandResult">The result of a command execution, including its context and type.</param>
     /// <returns>An <see cref="IResult"/> representing the outcome of the command. If the command is invalid, returns an error
     /// result; otherwise, returns a successful result.</returns>
-    public static IResult ToResult(this CommandResult commandResult)
+    public static IResult ToResult( this CommandResult commandResult )
     {
-        if (TryHandleInvalidCommand(commandResult.Context, commandResult.CommandType, out var errorResult))
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 
         return Results.Ok();
@@ -92,10 +92,10 @@ public static class CommandResultExtensions
         string contentType = "application/json"
     )
     {
-        if (TryHandleInvalidCommand(commandResult.Context, commandResult.CommandType, out var errorResult))
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 
-        return Results.File(commandResult.Result, contentType);
+        return Results.File( commandResult.Result, contentType );
     }
 
     private static bool TryHandleInvalidCommand(
@@ -104,26 +104,26 @@ public static class CommandResultExtensions
         out IResult errorResult
     )
     {
-        if (!context.IsValid())
+        if ( !context.IsValid() )
         {
             var failures = context.ValidationFailures();
 
-            if ( TryHandleValidationFailure<NotFoundValidationFailure>( failures, StatusCodes.Status404NotFound, out errorResult ))
+            if ( TryHandleValidationFailure<NotFoundValidationFailure>( failures, StatusCodes.Status404NotFound, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<ForbiddenValidationFailure>( failures, StatusCodes.Status403Forbidden, out errorResult ))   
+            if ( TryHandleValidationFailure<ForbiddenValidationFailure>( failures, StatusCodes.Status403Forbidden, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<UnauthorizedValidationFailure>( failures, StatusCodes.Status401Unauthorized, out errorResult ))
+            if ( TryHandleValidationFailure<UnauthorizedValidationFailure>( failures, StatusCodes.Status401Unauthorized, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ))
+            if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ))
+            if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<ValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ))
+            if ( TryHandleValidationFailure<ValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
                 return true;
 
             // This should never be reached, but just in case
@@ -135,7 +135,7 @@ public static class CommandResultExtensions
             return true;
         }
 
-        if (context.IsCanceled && context.CancellationValue is IResult cancellationValue)
+        if ( context.IsCanceled && context.CancellationValue is IResult cancellationValue )
         {
             errorResult = cancellationValue;
 
@@ -148,8 +148,8 @@ public static class CommandResultExtensions
             return true;
         }
 
-        if (context.IsError)
-            throw new CommandException($"Command {commandType.Name} failed", context.Exception);
+        if ( context.IsError )
+            throw new CommandException( $"Command {commandType.Name} failed", context.Exception );
 
         errorResult = null!;
         return false;
@@ -165,7 +165,7 @@ public static class CommandResultExtensions
     {
         var matchingFailures = failures.OfType<TValidationFailure>().ToList();
 
-        if (matchingFailures.Count == 0)
+        if ( matchingFailures.Count == 0 )
         {
             errorResult = null!;
             return false;
@@ -173,12 +173,12 @@ public static class CommandResultExtensions
 
         // Determine error body: custom selector or default structure
         var errors =
-            bodySelector != null ? bodySelector(matchingFailures) : matchingFailures.Select(CreateErrorObject).ToList();
+            bodySelector != null ? bodySelector( matchingFailures ) : matchingFailures.Select( CreateErrorObject ).ToList();
 
         errorResult = Results.Problem(
             detail: "One or more validation errors occurred.",
             statusCode: statusCode,
-            title: ReasonPhrases.GetReasonPhrase(statusCode),
+            title: ReasonPhrases.GetReasonPhrase( statusCode ),
             extensions: new Dictionary<string, object?> { ["errors"] = errors }
         );
 
@@ -186,20 +186,20 @@ public static class CommandResultExtensions
 
         // Local function to create error object
 
-        static Dictionary<string, object> CreateErrorObject(ValidationFailure failure)
+        static Dictionary<string, object> CreateErrorObject( ValidationFailure failure )
         {
             var errorDict = new Dictionary<string, object>();
 
-            if (!string.IsNullOrWhiteSpace(failure.PropertyName))
+            if ( !string.IsNullOrWhiteSpace( failure.PropertyName ) )
                 errorDict["propertyName"] = failure.PropertyName;
 
-            if (!string.IsNullOrWhiteSpace(failure.ErrorMessage))
+            if ( !string.IsNullOrWhiteSpace( failure.ErrorMessage ) )
                 errorDict["errorMessage"] = failure.ErrorMessage;
 
-            if (!string.IsNullOrWhiteSpace(failure.ErrorCode))
+            if ( !string.IsNullOrWhiteSpace( failure.ErrorCode ) )
                 errorDict["errorCode"] = failure.ErrorCode;
 
-            if (failure.AttemptedValue != null)
+            if ( failure.AttemptedValue != null )
                 errorDict["attemptedValue"] = failure.AttemptedValue.ToString() ?? string.Empty;
 
             return errorDict;

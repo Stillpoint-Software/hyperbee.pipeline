@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Hyperbee.Pipeline.Validation;
@@ -17,7 +17,7 @@ public class ValidatorProvider : IValidatorProvider
     /// container.
     /// </summary>
     /// <param name="serviceProvider">The dependency injection container used to resolve validator instances. Cannot be <see langword="null"/>.</param>
-    public ValidatorProvider(IServiceProvider serviceProvider)
+    public ValidatorProvider( IServiceProvider serviceProvider )
     {
         _serviceProvider = serviceProvider;
     }
