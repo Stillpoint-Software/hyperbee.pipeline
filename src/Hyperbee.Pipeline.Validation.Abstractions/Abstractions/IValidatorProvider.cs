@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Validation;
+﻿namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
 /// Provides access to validators for specific types.

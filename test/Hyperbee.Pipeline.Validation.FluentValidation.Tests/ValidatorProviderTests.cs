@@ -1,9 +1,8 @@
-using FV = FluentValidation;
-
 ﻿using FluentValidation;
 using Hyperbee.Pipeline.Validation.FluentValidation;
 using Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
+using FV = FluentValidation;
 
 namespace Hyperbee.Pipeline.Validation.FluentValidation.Tests;
 

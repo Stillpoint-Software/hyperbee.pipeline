@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Validation;
+﻿using Hyperbee.Pipeline.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using FV = FluentValidation;
 

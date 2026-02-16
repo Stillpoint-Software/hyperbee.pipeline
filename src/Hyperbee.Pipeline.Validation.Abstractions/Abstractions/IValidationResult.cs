@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Validation;
+﻿namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
 /// Represents the result of a validation operation.

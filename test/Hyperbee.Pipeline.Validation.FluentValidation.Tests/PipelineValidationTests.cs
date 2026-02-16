@@ -1,5 +1,3 @@
-using FV = FluentValidation;
-
 ﻿using System.ComponentModel.Design;
 using FluentValidation;
 using FluentValidation.Results;
@@ -7,6 +5,7 @@ using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using FV = FluentValidation;
 
 namespace Hyperbee.Pipeline.Validation.FluentValidation.Tests;
 
