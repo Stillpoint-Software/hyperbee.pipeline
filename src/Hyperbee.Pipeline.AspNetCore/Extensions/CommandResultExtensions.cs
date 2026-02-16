@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using FluentValidation.Results;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;
@@ -156,12 +155,12 @@ public static class CommandResultExtensions
     }
 
     private static bool TryHandleValidationFailure<TValidationFailure>(
-        IEnumerable<ValidationFailure> failures,
+        IEnumerable<IValidationFailure> failures,
         int statusCode,
         out IResult errorResult,
         Func<IEnumerable<TValidationFailure>, object>? bodySelector = null
     )
-        where TValidationFailure : ValidationFailure
+        where TValidationFailure : IValidationFailure
     {
         var matchingFailures = failures.OfType<TValidationFailure>().ToList();
 
@@ -186,7 +185,7 @@ public static class CommandResultExtensions
 
         // Local function to create error object
 
-        static Dictionary<string, object> CreateErrorObject( ValidationFailure failure )
+        static Dictionary<string, object> CreateErrorObject( TValidationFailure failure )
         {
             var errorDict = new Dictionary<string, object>();
 

@@ -1,6 +1,4 @@
-﻿using FluentValidation.Results;
-
-namespace Hyperbee.Pipeline.Validation.Tests;
+﻿namespace Hyperbee.Pipeline.Validation.Tests;
 
 [TestClass]
 public class ValidationFailureTests
@@ -45,9 +43,9 @@ public class ValidationFailureTests
     }
 
     [TestMethod]
-    public void Validation_Failure_should_create_with_error_code()
+    public void ValidationFailure_Create_should_create_with_error_code()
     {
-        var failure = Validation.Failure( "Field", "Invalid value.", "ERR001" );
+        var failure = ValidationFailure.Create( "Field", "Invalid value.", "ERR001" );
 
         Assert.AreEqual( "Field", failure.PropertyName );
         Assert.AreEqual( "Invalid value.", failure.ErrorMessage );
@@ -55,9 +53,9 @@ public class ValidationFailureTests
     }
 
     [TestMethod]
-    public void Validation_Failure_should_create_without_error_code()
+    public void ValidationFailure_Create_should_create_without_error_code()
     {
-        var failure = Validation.Failure( "Field", "Invalid value." );
+        var failure = ValidationFailure.Create( "Field", "Invalid value." );
 
         Assert.AreEqual( "Field", failure.PropertyName );
         Assert.AreEqual( "Invalid value.", failure.ErrorMessage );

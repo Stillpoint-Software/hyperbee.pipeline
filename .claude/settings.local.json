@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(dotnet build:*)",
+      "Bash(find:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet sln add:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(cat:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet clean:*)",
+      "Bash(/tmp/fix_adapters.txt:*)",
+      "Bash(git checkout:*)",
+      "Bash(git mv:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(dotnet new:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(test:*)",
+      "Bash(sort:*)"
+    ]
+  }
+}

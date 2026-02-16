@@ -1,9 +1,9 @@
-﻿using FluentValidation;
-using Hyperbee.Pipeline.Context;
+﻿using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using FV = FluentValidation;
 
 namespace Hyperbee.Pipeline.TestHelpers;
 
@@ -36,21 +36,23 @@ public class PipelineContextFactoryFixture
     /// </summary>
     public PipelineContextFactoryFixture WithValidator<TModel, TValidator>()
         where TModel : class
-        where TValidator : IValidator<TModel>, new()
+        where TValidator : FV.IValidator<TModel>, new()
     {
         var state = GetState();
-        state.ValidatorProvider.Register( new TValidator() );
+        var fluentValidator = new TValidator();
+        var adapter = new Hyperbee.Pipeline.Validation.FluentValidation.FluentValidatorAdapter<TModel>( fluentValidator );
+        state.ValidatorProvider.Register( adapter );
         return this;
     }
 
     /// <summary>
     /// Registers a validator instance for the specified model type.
     /// </summary>
-    public PipelineContextFactoryFixture WithValidator<TModel>( IValidator<TModel> validator )
+    public PipelineContextFactoryFixture WithValidator<TModel>( FV.IValidator<TModel> validator )
         where TModel : class
     {
         var state = GetState();
-        state.ValidatorProvider.Register( validator );
+        state.ValidatorProvider.Register( new Hyperbee.Pipeline.Validation.FluentValidation.FluentValidatorAdapter<TModel>( validator ) );
         return this;
     }
 

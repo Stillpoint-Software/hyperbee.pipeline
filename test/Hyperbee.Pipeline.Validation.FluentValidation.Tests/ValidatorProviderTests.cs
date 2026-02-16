@@ -1,8 +1,11 @@
+using FV = FluentValidation;
+
 ﻿using FluentValidation;
-using Hyperbee.Pipeline.Validation.Tests.TestSupport;
+using Hyperbee.Pipeline.Validation.FluentValidation;
+using Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Hyperbee.Pipeline.Validation.Tests;
+namespace Hyperbee.Pipeline.Validation.FluentValidation.Tests;
 
 [TestClass]
 public class ValidatorProviderTests
@@ -11,15 +14,15 @@ public class ValidatorProviderTests
     public void ValidatorProvider_should_return_registered_validator()
     {
         var services = new ServiceCollection();
-        services.AddSingleton<IValidator<TestOutput>, TestOutputValidator>();
+        services.AddSingleton<FV.IValidator<TestOutput>, TestOutputValidator>();
         var serviceProvider = services.BuildServiceProvider();
 
-        var provider = new ValidatorProvider( serviceProvider );
+        var provider = new FluentValidatorProvider( serviceProvider );
 
         var validator = provider.For<TestOutput>();
 
         Assert.IsNotNull( validator );
-        Assert.IsInstanceOfType( validator, typeof( TestOutputValidator ) );
+        Assert.IsInstanceOfType<Hyperbee.Pipeline.Validation.IValidator<TestOutput>>( validator );
     }
 
     [TestMethod]
@@ -28,7 +31,7 @@ public class ValidatorProviderTests
         var services = new ServiceCollection();
         var serviceProvider = services.BuildServiceProvider();
 
-        var provider = new ValidatorProvider( serviceProvider );
+        var provider = new FluentValidatorProvider( serviceProvider );
 
         var validator = provider.For<TestOutput>();
 

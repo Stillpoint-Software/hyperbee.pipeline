@@ -12,11 +12,13 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="NSubstitute" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
-    <ProjectReference Include="..\..\src\Hyperbee.Pipeline.Validation\Hyperbee.Pipeline.Validation.csproj" />
+    <ProjectReference Include="..\..\src\Hyperbee.Pipeline.Validation.FluentValidation\Hyperbee.Pipeline.Validation.FluentValidation.csproj" />
   </ItemGroup>
 
   <ItemGroup>

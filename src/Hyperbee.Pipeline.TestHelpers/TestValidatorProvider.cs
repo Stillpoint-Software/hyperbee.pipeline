@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Hyperbee.Pipeline.Validation;
+﻿using Hyperbee.Pipeline.Validation;
 
 namespace Hyperbee.Pipeline.TestHelpers;
 

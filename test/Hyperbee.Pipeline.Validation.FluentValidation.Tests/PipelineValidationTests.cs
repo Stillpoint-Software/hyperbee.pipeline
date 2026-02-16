@@ -1,24 +1,26 @@
+using FV = FluentValidation;
+
 ﻿using System.ComponentModel.Design;
 using FluentValidation;
 using FluentValidation.Results;
 using Hyperbee.Pipeline.Context;
-using Hyperbee.Pipeline.Validation.Tests.TestSupport;
+using Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Hyperbee.Pipeline.Validation.Tests;
+namespace Hyperbee.Pipeline.Validation.FluentValidation.Tests;
 
 [TestClass]
 public class PipelineValidationTests
 {
     private static IPipelineContext CreateContextWithValidator<TModel, TValidator>()
         where TModel : class
-        where TValidator : IValidator<TModel>, new()
+        where TValidator : FV.IValidator<TModel>, new()
     {
         var container = new ServiceContainer();
         var provider = new TestValidatorProvider();
         provider.Register<TModel>( new TValidator() );
-        container.AddService( typeof( IValidatorProvider ), provider );
+        container.AddService( typeof( Hyperbee.Pipeline.Validation.IValidatorProvider ), provider );
         var factory = PipelineContextFactory.CreateFactory( container, resetFactory: true );
         return factory.Create( Substitute.For<ILogger>() );
     }
@@ -272,19 +274,20 @@ public class PipelineValidationTests
         Assert.IsTrue( context.IsCanceled );
     }
 
-    private class TestValidatorProvider : IValidatorProvider
+    private class TestValidatorProvider : Hyperbee.Pipeline.Validation.IValidatorProvider
     {
         private readonly Dictionary<Type, object> _validators = new();
 
-        public void Register<TModel>( IValidator<TModel> validator ) where TModel : class
+        public void Register<TModel>( FV.IValidator<TModel> validator ) where TModel : class
         {
-            _validators[typeof( TModel )] = validator;
+            // Wrap FluentValidation validator in our adapter
+            _validators[typeof( TModel )] = new Hyperbee.Pipeline.Validation.FluentValidation.FluentValidatorAdapter<TModel>( validator );
         }
 
-        public IValidator<TPlugin>? For<TPlugin>() where TPlugin : class
+        public Hyperbee.Pipeline.Validation.IValidator<TPlugin>? For<TPlugin>() where TPlugin : class
         {
             return _validators.TryGetValue( typeof( TPlugin ), out var validator )
-                ? (IValidator<TPlugin>) validator
+                ? (Hyperbee.Pipeline.Validation.IValidator<TPlugin>) validator
                 : null;
         }
     }

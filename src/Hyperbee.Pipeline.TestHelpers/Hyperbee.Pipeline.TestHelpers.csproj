@@ -29,7 +29,8 @@
       <PackagePath>\</PackagePath>
     </None>
     <PackageReference Include="NSubstitute" />
-    <ProjectReference Include="..\Hyperbee.Pipeline.Validation\Hyperbee.Pipeline.Validation.csproj" />
+    <PackageReference Include="FluentValidation" />
+    <ProjectReference Include="..\Hyperbee.Pipeline.Validation.FluentValidation\Hyperbee.Pipeline.Validation.FluentValidation.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 

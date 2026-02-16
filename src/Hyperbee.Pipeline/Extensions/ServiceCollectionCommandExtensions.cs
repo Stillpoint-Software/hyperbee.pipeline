@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿#nullable enable
+
+using System.Reflection;
 using Hyperbee.Pipeline.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -30,7 +32,7 @@ public static class ServiceCollectionCommandExtensions
         this IServiceCollection services,
         Assembly? assembly = null,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
-        Func<CommandScanner.CommandScanResult, bool> filter = null,
+        Func<CommandScanner.CommandScanResult, bool>? filter = null,
         bool includeInternalTypes = false )
     {
         assembly ??= Assembly.GetCallingAssembly();
@@ -50,7 +52,7 @@ public static class ServiceCollectionCommandExtensions
         this IServiceCollection services,
         IEnumerable<Assembly> assemblies,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
-        Func<CommandScanner.CommandScanResult, bool> filter = null,
+        Func<CommandScanner.CommandScanResult, bool>? filter = null,
         bool includeInternalTypes = false )
     {
         ArgumentNullException.ThrowIfNull( assemblies );
@@ -74,7 +76,7 @@ public static class ServiceCollectionCommandExtensions
     public static IServiceCollection AddPipelineCommandsFromAssemblyContaining<T>(
         this IServiceCollection services,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
-        Func<CommandScanner.CommandScanResult, bool> filter = null,
+        Func<CommandScanner.CommandScanResult, bool>? filter = null,
         bool includeInternalTypes = false )
     {
         return services.AddPipelineCommands( typeof( T ).Assembly, lifetime, filter, includeInternalTypes );
@@ -93,7 +95,7 @@ public static class ServiceCollectionCommandExtensions
         this IServiceCollection services,
         Type type,
         ServiceLifetime lifetime = ServiceLifetime.Transient,
-        Func<CommandScanner.CommandScanResult, bool> filter = null,
+        Func<CommandScanner.CommandScanResult, bool>? filter = null,
         bool includeInternalTypes = false )
     {
         ArgumentNullException.ThrowIfNull( type );
@@ -104,7 +106,7 @@ public static class ServiceCollectionCommandExtensions
         this IServiceCollection services,
         CommandScanner.CommandScanResult scanResult,
         ServiceLifetime lifetime,
-        Func<CommandScanner.CommandScanResult, bool> filter )
+        Func<CommandScanner.CommandScanResult, bool>? filter )
     {
         if ( filter?.Invoke( scanResult ) == false )
             return;

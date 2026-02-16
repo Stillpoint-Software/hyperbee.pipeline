@@ -1,4 +1,5 @@
 ﻿using Hyperbee.Pipeline.Commands;
+using Hyperbee.Pipeline.Validation;
 using NSubstitute;
 
 namespace Hyperbee.Pipeline.TestHelpers;
@@ -44,7 +45,7 @@ public static class CommandFunctionHelpers
     /// <typeparam name="TOutput">The output type for the command function.</typeparam>
     /// <param name="commandFunction">The command function to mock.</param>
     /// <param name="failures">The validation failures to include in the result.</param>
-    public static void MockValidationFailureResult<TStart, TOutput>( this ICommandFunction<TStart, TOutput> commandFunction, params FluentValidation.Results.ValidationFailure[] failures )
+    public static void MockValidationFailureResult<TStart, TOutput>( this ICommandFunction<TStart, TOutput> commandFunction, params ValidationFailure[] failures )
     {
         commandFunction.MockCommandFunction( () => CommandResultHelpers.CreateValidationFailure<TOutput>( failures ) );
     }

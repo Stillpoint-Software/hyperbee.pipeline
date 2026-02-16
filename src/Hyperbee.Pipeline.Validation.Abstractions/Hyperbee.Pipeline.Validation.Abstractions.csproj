@@ -5,10 +5,10 @@
     <Nullable>enable</Nullable>
     <Authors>Stillpoint Software, Inc.</Authors>
     <Copyright>Stillpoint Software, Inc.</Copyright>
-    <Title>Hyperbee Pipeline AspNetCore</Title>
-    <PackageId>Hyperbee.Pipeline.AspNetCore</PackageId>
-    <Description>ASP.NET Core integration for Hyperbee.Pipeline with command result mapping and validation</Description>
-    <PackageTags>pipeline;aspnetcore;minimal-api;validation</PackageTags>
+    <Title>Hyperbee Pipeline Validation Abstractions</Title>
+    <PackageId>Hyperbee.Pipeline.Validation.Abstractions</PackageId>
+    <Description>Validation abstractions for Hyperbee.Pipeline async pipelines</Description>
+    <PackageTags>pipeline;validation;abstractions;interfaces</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
@@ -19,7 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
     <None Include="..\..\LICENSE">
       <Pack>True</Pack>
@@ -30,7 +29,6 @@
       <PackagePath>\</PackagePath>
     </None>
     <ProjectReference Include="..\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
-    <ProjectReference Include="..\Hyperbee.Pipeline.Validation\Hyperbee.Pipeline.Validation.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 

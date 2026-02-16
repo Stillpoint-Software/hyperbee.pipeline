@@ -1,6 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using FluentValidation;
-using FluentValidation.Results;
 using Hyperbee.Pipeline;
 using Hyperbee.Pipeline.Context;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,16 +6,20 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
-/// Provides extension methods for adding FluentValidation-based validation to pipeline builders and contexts.
+/// Provides extension methods for adding validation to pipeline builders and contexts.
 /// </summary>
 /// <remarks>
 /// <para>
-/// This class integrates FluentValidation into pipeline execution flows, enabling declarative validation
+/// This class integrates validation into pipeline execution flows, enabling declarative validation
 /// of pipeline arguments with automatic error handling and pipeline cancellation on validation failures.
 /// </para>
 /// <para>
 /// Validators are resolved from the service provider using <see cref="IValidatorProvider"/>, which must be
 /// registered in the dependency injection container for validation to work.
+/// </para>
+/// <para>
+/// All validation methods work with the abstracted <see cref="IValidator{T}"/> interface, making them
+/// compatible with any validation framework that provides an adapter implementation.
 /// </para>
 /// </remarks>
 public static class PipelineValidationExtensions
@@ -25,7 +27,7 @@ public static class PipelineValidationExtensions
     private const string VALIDATION_RESULT_KEY = nameof( VALIDATION_RESULT_KEY );
 
     /// <summary>
-    /// Adds an asynchronous validation step to the pipeline that validates the output argument using FluentValidation.
+    /// Adds an asynchronous validation step to the pipeline that validates the output argument.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -226,25 +228,30 @@ public static class PipelineValidationExtensions
                     return argument;
                 }
 
-                ValidationResult result;
+                IValidationResult result;
                 var ruleSet = ruleSetSelector?.Invoke( context, argument );
 
                 if ( string.IsNullOrWhiteSpace( ruleSet ) )
                 {
-                    var validationContext = new ValidationContext<TOutput>( argument );
                     result = await validator
-                        .ValidateAsync( validationContext, context.CancellationToken )
+                        .ValidateAsync( argument, context.CancellationToken )
                         .ConfigureAwait( false );
                 }
                 else
                 {
-                    var ruleSetString = includeDefaultRules ? $"default,{ruleSet}" : ruleSet;
                     result = await validator
                         .ValidateAsync(
                             argument,
                             options =>
                             {
-                                options.IncludeRuleSets( [.. ruleSetString.Split( ',' ).Select( s => s.Trim() )] );
+                                if ( includeDefaultRules )
+                                {
+                                    options.IncludeRuleSets( ["default", .. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
+                                }
+                                else
+                                {
+                                    options.IncludeRuleSets( [.. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
+                                }
                             },
                             context.CancellationToken
                         )
@@ -281,7 +288,7 @@ public static class PipelineValidationExtensions
     )
     {
         context.SetValidationResult(
-            Validation.Failure( propertyName!, message, code.ToString() ),
+            ValidationFailure.Create( propertyName!, message, code.ToString() ),
             ValidationAction.CancelAfter
         );
     }
@@ -301,7 +308,7 @@ public static class PipelineValidationExtensions
         [CallerMemberName] string propertyName = default!
     )
     {
-        context.SetValidationResult( Validation.Failure( propertyName!, message ), ValidationAction.CancelAfter );
+        context.SetValidationResult( ValidationFailure.Create( propertyName!, message ), ValidationAction.CancelAfter );
     }
 
     // validation result
@@ -311,11 +318,11 @@ public static class PipelineValidationExtensions
     /// </summary>
     /// <param name="context">The pipeline context.</param>
     /// <returns>
-    /// The <see cref="ValidationResult"/> stored in the context, or <see langword="null"/> if no validation result has been set.
+    /// The <see cref="IValidationResult"/> stored in the context, or <see langword="null"/> if no validation result has been set.
     /// </returns>
-    public static ValidationResult? GetValidationResult( this IPipelineContext context )
+    public static IValidationResult? GetValidationResult( this IPipelineContext context )
     {
-        return context.Items.TryGetValue<ValidationResult>( VALIDATION_RESULT_KEY, out var item ) ? item : default;
+        return context.Items.TryGetValue<IValidationResult>( VALIDATION_RESULT_KEY, out var item ) ? item : default;
     }
 
     /// <summary>
@@ -328,7 +335,7 @@ public static class PipelineValidationExtensions
     /// </param>
     public static void SetValidationResult(
         this IPipelineContext context,
-        ValidationResult validationResult,
+        IValidationResult validationResult,
         ValidationAction validationAction = ValidationAction.ContinueAfter
     )
     {
@@ -350,7 +357,7 @@ public static class PipelineValidationExtensions
     /// </param>
     public static void SetValidationResult(
         this IPipelineContext context,
-        IReadOnlyList<ValidationFailure> validationFailures,
+        IReadOnlyList<IValidationFailure> validationFailures,
         ValidationAction validationAction = ValidationAction.ContinueAfter
     )
     {
@@ -369,7 +376,7 @@ public static class PipelineValidationExtensions
     /// </param>
     public static void SetValidationResult(
         this IPipelineContext context,
-        ValidationFailure validationFailure,
+        IValidationFailure validationFailure,
         ValidationAction validationAction = ValidationAction.ContinueAfter
     )
     {
@@ -386,11 +393,11 @@ public static class PipelineValidationExtensions
     /// </param>
     public static void AddValidationResult(
         this IPipelineContext context,
-        ValidationFailure validationFailure,
+        IValidationFailure validationFailure,
         ValidationAction validationAction = ValidationAction.ContinueAfter
     )
     {
-        if ( context.Items.TryGetValue<ValidationResult>( VALIDATION_RESULT_KEY, out var validationResult ) )
+        if ( context.Items.TryGetValue<IValidationResult>( VALIDATION_RESULT_KEY, out var validationResult ) )
         {
             validationResult.Errors.Add( validationFailure );
             return;
@@ -405,7 +412,7 @@ public static class PipelineValidationExtensions
     /// <param name="context">The pipeline context.</param>
     public static void ClearValidationResult( this IPipelineContext context )
     {
-        context.Items.SetValue<ValidationResult>( VALIDATION_RESULT_KEY, null! );
+        context.Items.SetValue<IValidationResult>( VALIDATION_RESULT_KEY, null! );
     }
 
     /// <summary>
@@ -426,11 +433,11 @@ public static class PipelineValidationExtensions
     /// </summary>
     /// <param name="context">The pipeline context.</param>
     /// <returns>
-    /// An enumerable collection of <see cref="ValidationFailure"/> instances, or an empty collection if no validation result exists.
+    /// An enumerable collection of <see cref="IValidationFailure"/> instances, or an empty collection if no validation result exists.
     /// </returns>
-    public static IEnumerable<ValidationFailure> ValidationFailures( this IPipelineContext context )
+    public static IEnumerable<IValidationFailure> ValidationFailures( this IPipelineContext context )
     {
-        return context.GetValidationResult()?.Errors ?? Enumerable.Empty<ValidationFailure>();
+        return context.GetValidationResult()?.Errors ?? Enumerable.Empty<IValidationFailure>();
     }
 
     // pipeline builder extensions
@@ -510,7 +517,7 @@ public static class PipelineValidationExtensions
     /// <returns>The pipeline builder with cancellation logic added.</returns>
     public static IPipelineBuilder<TInput, TOutput> CancelWithValidationResult<TInput, TOutput>(
         this IPipelineBuilder<TInput, TOutput> pipeline,
-        ValidationFailure validationFailure
+        IValidationFailure validationFailure
     )
     {
         // usage: .CancelWithValidationResult( validationFailure )

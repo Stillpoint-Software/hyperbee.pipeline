@@ -1,4 +1,4 @@
-﻿namespace Hyperbee.Pipeline.Validation.Tests.TestSupport;
+﻿namespace Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
 
 public record TestOutput
 {

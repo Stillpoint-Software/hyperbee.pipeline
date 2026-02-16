@@ -1,5 +1,4 @@
-﻿using FluentValidation.Results;
-using Hyperbee.Pipeline.Commands;
+﻿using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;
 using NSubstitute;

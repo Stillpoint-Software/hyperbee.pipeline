@@ -7,8 +7,8 @@
     <Copyright>Stillpoint Software, Inc.</Copyright>
     <Title>Hyperbee Pipeline Validation</Title>
     <PackageId>Hyperbee.Pipeline.Validation</PackageId>
-    <Description>FluentValidation integration for Hyperbee.Pipeline async pipelines</Description>
-    <PackageTags>pipeline;validation;fluent-validation</PackageTags>
+    <Description>Base validation implementations and extensions for Hyperbee.Pipeline async pipelines</Description>
+    <PackageTags>pipeline;validation</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
@@ -28,8 +28,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <PackageReference Include="FluentValidation" />
-    <ProjectReference Include="..\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
+    <ProjectReference Include="..\Hyperbee.Pipeline.Validation.Abstractions\Hyperbee.Pipeline.Validation.Abstractions.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
