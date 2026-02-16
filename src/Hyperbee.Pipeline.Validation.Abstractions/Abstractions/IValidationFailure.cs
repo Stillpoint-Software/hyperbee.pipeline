@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Validation;
+﻿namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
 /// Represents a validation failure for a specific property or field.

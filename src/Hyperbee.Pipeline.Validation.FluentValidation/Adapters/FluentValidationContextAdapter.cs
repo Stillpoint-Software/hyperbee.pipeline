@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Validation;
+﻿using Hyperbee.Pipeline.Validation;
 using FV = FluentValidation;
 
 namespace Hyperbee.Pipeline.Validation.FluentValidation;

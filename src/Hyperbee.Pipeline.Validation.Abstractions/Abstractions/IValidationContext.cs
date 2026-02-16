@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Validation;
+﻿namespace Hyperbee.Pipeline.Validation;
 
 /// <summary>
 /// Provides configuration options for validation operations.
@@ -13,5 +13,5 @@ public interface IValidationContext
     /// RuleSets allow grouping validation rules within a validator and executing them selectively.
     /// Use this method to specify which RuleSets should be executed during validation.
     /// </remarks>
-    void IncludeRuleSets(params string[] ruleSets);
+    void IncludeRuleSets( params string[] ruleSets );
 }
