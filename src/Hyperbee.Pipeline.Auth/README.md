@@ -27,10 +27,6 @@ private async Task<bool> ValidateClaim( IPipelineContext context, string roleVal
     }
 ```
 
-## Dependacy Injection
-
-
-
 ## Dependency Injection
 
 Sometimes Pipelines and Pipeline middleware need access to specific container services. This can be

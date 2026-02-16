@@ -140,11 +140,11 @@ services.AddPipeline(includeAllServices: true);
 ## Related Packages
 
 - **`Hyperbee.Pipeline.Validation.Abstractions`** - Pure interfaces (for framework authors)
-- **`Hyperbee.Pipeline.FluentValidation`** - FluentValidation adapter (most common use case)
+- **`Hyperbee.Pipeline.Validation.FluentValidation`** - FluentValidation adapter (most common use case)
 
 ## For Most Users
 
-If you're using FluentValidation, reference `Hyperbee.Pipeline.FluentValidation` instead. This package is primarily for:
+If you're using FluentValidation, reference `Hyperbee.Pipeline.Validation.FluentValidation` instead. This package is primarily for:
 - Custom validator implementations
 - Framework-agnostic libraries
 - Advanced scenarios requiring multiple validation frameworks

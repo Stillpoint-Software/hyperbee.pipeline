@@ -59,7 +59,7 @@ public class EmailValidator : IValidator<EmailAddress>
 ## Related Packages
 
 - **`Hyperbee.Pipeline.Validation`** - Base implementations and pipeline extensions (framework-agnostic)
-- **`Hyperbee.Pipeline.FluentValidation`** - FluentValidation adapter for the most common validation scenarios
+- **`Hyperbee.Pipeline.Validation.FluentValidation`** - FluentValidation adapter for the most common validation scenarios
 
 ## Dependencies
 

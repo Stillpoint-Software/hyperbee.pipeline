@@ -64,7 +64,7 @@ var command = PipelineFactory
     .Build();
 ```
 
-## Dependacy Injection
+## Dependency Injection
 
 Because this uses the existing DI built into pipelines, caching can be configured with an existing cache.
 

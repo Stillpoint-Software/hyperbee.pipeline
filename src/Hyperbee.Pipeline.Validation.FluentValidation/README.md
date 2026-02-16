@@ -1,6 +1,6 @@
-# Hyperbee.Pipeline.FluentValidation
+# Hyperbee.Pipeline.Validation.FluentValidation
 
-The `Hyperbee.Pipeline.FluentValidation` library integrates [FluentValidation](https://github.com/FluentValidation/FluentValidation) with `Hyperbee.Pipeline`. This is the recommended package for most users who want to add validation to their pipelines.
+The `Hyperbee.Pipeline.Validation.FluentValidation` library integrates [FluentValidation](https://github.com/FluentValidation/FluentValidation) with `Hyperbee.Pipeline`. This is the recommended package for most users who want to add validation to their pipelines.
 
 ## Features
 
@@ -13,7 +13,7 @@ The `Hyperbee.Pipeline.FluentValidation` library integrates [FluentValidation](h
 ## Installation
 
 ```bash
-dotnet add package Hyperbee.Pipeline.FluentValidation
+dotnet add package Hyperbee.Pipeline.Validation.FluentValidation
 ```
 
 This package transitively includes:
@@ -169,7 +169,7 @@ services.AddValidatorsFromAssemblyContaining<OrderValidator>();
 ### After (v2.x)
 
 ```csharp
-<PackageReference Include="Hyperbee.Pipeline.FluentValidation" />
+<PackageReference Include="Hyperbee.Pipeline.Validation.FluentValidation" />
 
 // Recommended
 services.AddFluentValidation(options =>
