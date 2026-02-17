@@ -18,7 +18,6 @@ dotnet add package Hyperbee.Pipeline.Validation.FluentValidation
 
 This package transitively includes:
 - `Hyperbee.Pipeline.Validation` (base implementations and extensions)
-- `Hyperbee.Pipeline.Validation.Abstractions` (interfaces)
 - `FluentValidation` (validation framework)
 
 ## Quick Start
@@ -207,7 +206,6 @@ services.AddFluentValidation(options => options.ScanAssembly(Assembly.GetExecuti
 
 ## Related Packages
 
-- **`Hyperbee.Pipeline.Validation.Abstractions`** - Pure interfaces (for framework authors)
 - **`Hyperbee.Pipeline.Validation`** - Base implementations (for custom validators)
 
 ## Dependencies

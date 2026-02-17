@@ -28,7 +28,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <ProjectReference Include="..\Hyperbee.Pipeline.Validation.Abstractions\Hyperbee.Pipeline.Validation.Abstractions.csproj" />
+    <ProjectReference Include="..\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 

@@ -31,7 +31,6 @@
   <Project Path="src/Hyperbee.Pipline.Caching/Hyperbee.Pipeline.Caching.csproj" />
   <Project Path="src/Hyperbee.Pipeline.Validation/Hyperbee.Pipeline.Validation.csproj" />
   <Project Path="src/Hyperbee.Pipeline.Validation.FluentValidation/Hyperbee.Pipeline.Validation.FluentValidation.csproj" />
-  <Project Path="src/Hyperbee.Pipeline.Validation.Abstractions/Hyperbee.Pipeline.Validation.Abstractions.csproj" />
-  <Project Path="src/Hyperbee.Pipeline.AspNetCore/Hyperbee.Pipeline.AspNetCore.csproj" />
+<Project Path="src/Hyperbee.Pipeline.AspNetCore/Hyperbee.Pipeline.AspNetCore.csproj" />
   <Project Path="src/Hyperbee.Pipeline.TestHelpers/Hyperbee.Pipeline.TestHelpers.csproj" />
 </Solution>

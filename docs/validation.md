@@ -6,10 +6,9 @@ nav_order: 4
 
 # Pipeline Validation
 
-Hyperbee.Pipeline provides a flexible validation system with a pluggable architecture. The validation functionality is split into three packages following .NET conventions:
+Hyperbee.Pipeline provides a flexible validation system with a pluggable architecture. The validation functionality is split into two packages:
 
-- **Hyperbee.Pipeline.Validation.Abstractions** - Pure interfaces for framework authors
-- **Hyperbee.Pipeline.Validation** - Base implementations and extension methods
+- **Hyperbee.Pipeline.Validation** - Interfaces, base implementations, and pipeline extensions
 - **Hyperbee.Pipeline.Validation.FluentValidation** - FluentValidation adapter (recommended)
 
 ## Quick Start
@@ -359,20 +358,11 @@ public async Task Should_Validate_Order()
 
 ## Package Architecture
 
-### Hyperbee.Pipeline.Validation.Abstractions
-
-Contains pure interfaces with no external dependencies:
-
-- `IValidationFailure` - Represents a single validation failure
-- `IValidationResult` - Contains validation results and failures
-- `IValidator<T>` - Contract for validating instances
-- `IValidationContext` - Configuration for validation (RuleSets, etc.)
-- `IValidatorProvider` - Provides validators for types
-
 ### Hyperbee.Pipeline.Validation
 
-Contains base implementations and pipeline extensions:
+Contains interfaces, base implementations, and pipeline extensions:
 
+- `IValidationFailure`, `IValidationResult`, `IValidator<T>`, `IValidationContext`, `IValidatorProvider` - Core interfaces
 - `ValidationFailure` - Base implementation of `IValidationFailure`
 - `ValidationResult` - Base implementation of `IValidationResult`
 - Domain-specific failures: `NotFoundValidationFailure`, `UnauthorizedValidationFailure`, etc.
