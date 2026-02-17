@@ -22,8 +22,15 @@
     <Project Path="test/Hyperbee.Pipeline.Tests/Hyperbee.Pipeline.Tests.csproj" />
     <Project Path="test/Hyperbee.PipelineCaching.Tests/Hyperbee.Pipeline.Caching.Tests.csproj" />
     <Project Path="test/Hyperbee.Pipleline.Benchmark/Hyperbee.Pipeline.Benchmark.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.Validation.Tests/Hyperbee.Pipeline.Validation.Tests.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.Validation.FluentValidation.Tests/Hyperbee.Pipeline.Validation.FluentValidation.Tests.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.AspNetCore.Tests/Hyperbee.Pipeline.AspNetCore.Tests.csproj" />
   </Folder>
   <Project Path="src/Hyperbee.Pipeline.Auth/Hyperbee.Pipeline.Auth.csproj" />
   <Project Path="src/Hyperbee.Pipeline/Hyperbee.Pipeline.csproj" />
   <Project Path="src/Hyperbee.Pipline.Caching/Hyperbee.Pipeline.Caching.csproj" />
+  <Project Path="src/Hyperbee.Pipeline.Validation/Hyperbee.Pipeline.Validation.csproj" />
+  <Project Path="src/Hyperbee.Pipeline.Validation.FluentValidation/Hyperbee.Pipeline.Validation.FluentValidation.csproj" />
+<Project Path="src/Hyperbee.Pipeline.AspNetCore/Hyperbee.Pipeline.AspNetCore.csproj" />
+  <Project Path="src/Hyperbee.Pipeline.TestHelpers/Hyperbee.Pipeline.TestHelpers.csproj" />
 </Solution>

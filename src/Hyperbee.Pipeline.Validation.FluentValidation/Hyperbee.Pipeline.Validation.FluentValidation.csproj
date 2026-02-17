@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <Nullable>enable</Nullable>
+    <Authors>Stillpoint Software, Inc.</Authors>
+    <Copyright>Stillpoint Software, Inc.</Copyright>
+    <Title>Hyperbee Pipeline FluentValidation</Title>
+    <PackageId>Hyperbee.Pipeline.Validation.FluentValidation</PackageId>
+    <AssemblyName>Hyperbee.Pipeline.Validation.FluentValidation</AssemblyName>
+    <Description>FluentValidation integration for Hyperbee.Pipeline async pipelines</Description>
+    <PackageTags>pipeline;validation;fluent-validation</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <ProjectReference Include="..\Hyperbee.Pipeline.Validation\Hyperbee.Pipeline.Validation.csproj" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
+  </ItemGroup>
+
+</Project>

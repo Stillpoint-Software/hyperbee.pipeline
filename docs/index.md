@@ -9,6 +9,7 @@ nav_order: 1
 ## Documentation Structure
 
 - [Conventions](conventions.md): Guidelines for creating builders, binders, and middleware.
+- [Validation](validation.md): How to validate pipeline inputs using FluentValidation or custom validators.
 - [Middleware](middleware.md): How to use and implement middleware in pipelines.
 - [Extending Pipelines](extending.md): How to add new steps, middleware, or binders.
 - [Advanced Patterns](advanced-patterns.md): Real-world examples combining extension methods, custom binders, and middleware.

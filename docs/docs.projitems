@@ -16,6 +16,8 @@
     <None Include="$(MSBuildThisFileDirectory)syntax.md" />
     <None Include="$(MSBuildThisFileDirectory)index.md" />
     <None Include="$(MSBuildThisFileDirectory)middleware.md" />
+    <None Include="$(MSBuildThisFileDirectory)validation.md" />
+    <None Include="$(MSBuildThisFileDirectory)extending.md" />
     <None Include="$(MSBuildThisFileDirectory)_config.yml" />
     <None Include="$(MSBuildThisFileDirectory)advanced-patterns.md" />
   </ItemGroup>
