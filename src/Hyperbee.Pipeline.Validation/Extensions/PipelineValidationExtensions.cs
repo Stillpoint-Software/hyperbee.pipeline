@@ -213,50 +213,9 @@ public static class PipelineValidationExtensions
                     return argument!;
                 }
 
-                var provider = context.ServiceProvider.GetService<IValidatorProvider>();
-                if ( provider == null )
-                {
-                    context.FailAfter( $"'{nameof( IValidatorProvider )}' not registered in service provider" );
-                    return argument;
-                }
-
-                var validator = provider.For<TOutput>();
-
-                if ( validator == null )
-                {
-                    context.FailAfter( $"No validator registered for type '{typeof( TOutput ).Name}'" );
-                    return argument;
-                }
-
-                IValidationResult result;
                 var ruleSet = ruleSetSelector?.Invoke( context, argument );
-
-                if ( string.IsNullOrWhiteSpace( ruleSet ) )
-                {
-                    result = await validator
-                        .ValidateAsync( argument, context.CancellationToken )
-                        .ConfigureAwait( false );
-                }
-                else
-                {
-                    result = await validator
-                        .ValidateAsync(
-                            argument,
-                            options =>
-                            {
-                                if ( includeDefaultRules )
-                                {
-                                    options.IncludeRuleSets( ["default", .. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
-                                }
-                                else
-                                {
-                                    options.IncludeRuleSets( [.. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
-                                }
-                            },
-                            context.CancellationToken
-                        )
-                        .ConfigureAwait( false );
-                }
+                var result = await ValidateCoreAsync( context, argument, ruleSet, includeDefaultRules )
+                    .ConfigureAwait( false );
 
                 if ( !result.IsValid )
                 {
@@ -266,6 +225,119 @@ public static class PipelineValidationExtensions
                 return argument;
             }
         );
+    }
+
+    // context.ValidateAsync
+
+    /// <summary>
+    /// Imperatively validates the specified argument using the registered validator, storing the result in the context.
+    /// </summary>
+    /// <typeparam name="T">The type of the argument to validate. Must be a reference type.</typeparam>
+    /// <param name="context">The pipeline context.</param>
+    /// <param name="argument">The argument to validate.</param>
+    /// <param name="cancellationToken">A cancellation token.</param>
+    /// <returns><see langword="true"/> if validation succeeds; otherwise, <see langword="false"/>.</returns>
+    public static async Task<bool> ValidateAsync<T>( this IPipelineContext context, T argument, CancellationToken cancellationToken = default )
+        where T : class
+    {
+        if ( argument is null )
+            return true;
+
+        var result = await ValidateCoreAsync( context, argument ).ConfigureAwait( false );
+
+        if ( !result.IsValid )
+            context.SetValidationResult( result, ValidationAction.CancelAfter );
+
+        return context.IsValid();
+    }
+
+    /// <summary>
+    /// Imperatively validates the specified argument using the registered validator with a specific RuleSet.
+    /// </summary>
+    /// <typeparam name="T">The type of the argument to validate. Must be a reference type.</typeparam>
+    /// <param name="context">The pipeline context.</param>
+    /// <param name="argument">The argument to validate.</param>
+    /// <param name="ruleSet">The RuleSet name(s) to execute.</param>
+    /// <param name="includeDefaultRules">When true, executes default rules in addition to the specified RuleSet. Defaults to true.</param>
+    /// <returns><see langword="true"/> if validation succeeds; otherwise, <see langword="false"/>.</returns>
+    public static async Task<bool> ValidateAsync<T>( this IPipelineContext context, T argument, string? ruleSet, bool includeDefaultRules = true )
+        where T : class
+    {
+        if ( argument is null )
+            return true;
+
+        var result = await ValidateCoreAsync( context, argument, ruleSet, includeDefaultRules ).ConfigureAwait( false );
+
+        if ( !result.IsValid )
+            context.SetValidationResult( result, ValidationAction.CancelAfter );
+
+        return context.IsValid();
+    }
+
+    /// <summary>
+    /// Imperatively validates the specified argument using the registered validator with a dynamic RuleSet selector.
+    /// </summary>
+    /// <typeparam name="T">The type of the argument to validate. Must be a reference type.</typeparam>
+    /// <param name="context">The pipeline context.</param>
+    /// <param name="argument">The argument to validate.</param>
+    /// <param name="ruleSetSelector">A function that determines which RuleSet(s) to execute.</param>
+    /// <param name="includeDefaultRules">When true, executes default rules in addition to the selected RuleSet(s). Defaults to true.</param>
+    /// <returns><see langword="true"/> if validation succeeds; otherwise, <see langword="false"/>.</returns>
+    public static async Task<bool> ValidateAsync<T>( this IPipelineContext context, T argument, Func<IPipelineContext, T, string?> ruleSetSelector, bool includeDefaultRules = true )
+        where T : class
+    {
+        ArgumentNullException.ThrowIfNull( ruleSetSelector );
+
+        if ( argument is null )
+            return true;
+
+        var ruleSet = ruleSetSelector( context, argument );
+        var result = await ValidateCoreAsync( context, argument, ruleSet, includeDefaultRules ).ConfigureAwait( false );
+
+        if ( !result.IsValid )
+            context.SetValidationResult( result, ValidationAction.CancelAfter );
+
+        return context.IsValid();
+    }
+
+    // core
+
+    internal static async Task<IValidationResult> ValidateCoreAsync<T>(
+        IPipelineContext context,
+        T argument,
+        string? ruleSet = null,
+        bool includeDefaultRules = true
+    )
+        where T : class
+    {
+        var provider = context.ServiceProvider.GetService<IValidatorProvider>();
+        if ( provider == null )
+        {
+            return new ValidationResult( [new ValidationFailure( typeof( T ).Name, $"'{nameof( IValidatorProvider )}' not registered in service provider" )] );
+        }
+
+        var validator = provider.For<T>();
+        if ( validator == null )
+        {
+            return new ValidationResult( [new ValidationFailure( typeof( T ).Name, $"No validator registered for type '{typeof( T ).Name}'" )] );
+        }
+
+        if ( string.IsNullOrWhiteSpace( ruleSet ) )
+        {
+            return await validator.ValidateAsync( argument, context.CancellationToken ).ConfigureAwait( false );
+        }
+
+        return await validator.ValidateAsync(
+            argument,
+            options =>
+            {
+                if ( includeDefaultRules )
+                    options.IncludeRuleSets( ["default", .. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
+                else
+                    options.IncludeRuleSets( [.. ruleSet.Split( ',' ).Select( s => s.Trim() )] );
+            },
+            context.CancellationToken
+        ).ConfigureAwait( false );
     }
 
     // fail helper
