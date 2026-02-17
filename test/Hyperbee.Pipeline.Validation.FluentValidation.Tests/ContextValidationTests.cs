@@ -1,4 +1,4 @@
-using System.ComponentModel.Design;
+﻿using System.ComponentModel.Design;
 using FluentValidation;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation.FluentValidation.Tests.TestSupport;
