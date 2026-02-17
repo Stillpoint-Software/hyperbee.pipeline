@@ -63,15 +63,26 @@ var result = await command(context, new Order { ProductName = "Widget", Amount =
 
 ## Validation Methods
 
+### Builder Extensions (Declarative)
+
 | Method | Description |
 | ------ | ----------- |
-| ValidateAsync | Validates the pipeline input using registered validators |
-| IfValidAsync | Conditionally executes a pipeline if validation passes |
-| ValidateAndCancelOnFailureAsync | Validates and cancels the pipeline on failure |
+| `builder.ValidateAsync()` | Validates the current value at this point in the pipeline |
+| `builder.IfValidAsync(...)` | Conditionally executes a sub-pipeline only if validation passes |
+| `builder.ValidateAndCancelOnFailureAsync()` | Validates and cancels the pipeline on failure |
 
-## ValidateAsync
+### Context Extensions (Imperative)
 
-The `ValidateAsync` method validates the pipeline input at any point in the pipeline. It has three overloads:
+| Method | Description |
+| ------ | ----------- |
+| `ctx.ValidateAsync(argument)` | Validates a value imperatively from within a pipe step |
+| `ctx.IsValid()` | Returns true if no validation failures have been recorded |
+| `ctx.ValidationFailures()` | Returns all recorded validation failures |
+| `ctx.FailAfter(message)` | Records a failure and cancels the pipeline |
+
+## builder.ValidateAsync
+
+`builder.ValidateAsync()` validates the current pipeline value at the point it is called. It has three overloads:
 
 ### Basic Validation
 
@@ -112,6 +123,67 @@ var command2 = PipelineFactory
         order.Amount > 1000 ? "Premium" : null) // Conditionally apply RuleSet
     .Build();
 ```
+
+## ctx.ValidateAsync
+
+`ctx.ValidateAsync()` is the **imperative** counterpart to `builder.ValidateAsync()`. It lets you trigger validation from within a pipe step — useful when the value to validate is produced mid-step, when validation is conditional, or when you need to act on the result immediately.
+
+Returns `true` if validation passes, `false` if it fails. On failure, the context is automatically cancelled.
+
+### Basic Imperative Validation
+
+```csharp
+var command = PipelineFactory
+    .Start<string>()
+    .PipeAsync(async (ctx, id) =>
+    {
+        var order = await _repository.GetOrderAsync(id);
+
+        if (!await ctx.ValidateAsync(order))
+            return null; // Pipeline already cancelled
+
+        return order;
+    })
+    .Build();
+```
+
+### Imperative Validation with RuleSets
+
+```csharp
+var command = PipelineFactory
+    .Start<Order>()
+    .PipeAsync(async (ctx, order) =>
+    {
+        // Static RuleSet
+        if (!await ctx.ValidateAsync(order, "Premium"))
+            return order;
+
+        return await ApplyPremiumProcessing(order);
+    })
+    .Build();
+```
+
+### Imperative Validation with Dynamic RuleSet
+
+```csharp
+var command = PipelineFactory
+    .Start<Order>()
+    .PipeAsync(async (ctx, order) =>
+    {
+        await ctx.ValidateAsync(order,
+            (ctx, o) => o.Amount > 1000 ? "Premium" : null);
+
+        return order;
+    })
+    .Build();
+```
+
+### When to Use Each Style
+
+| Style | Use when |
+| ----- | -------- |
+| `builder.ValidateAsync()` | Validating the pipeline value at a fixed point; fail-fast before downstream steps |
+| `ctx.ValidateAsync()` | Validating a value produced mid-step; conditional validation; need the `bool` result inline |
 
 ## IfValidAsync
 
@@ -161,7 +233,7 @@ using Hyperbee.Pipeline.Validation;
     // Manual validation
     if (order.Amount > 10000)
     {
-        ctx.FailAfter(new ValidationFailure("Amount", "Exceeds maximum allowed"));
+        ctx.FailAfter("Exceeds maximum allowed"); // propertyName auto-filled by CallerMemberName
     }
 
     return order;

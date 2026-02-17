@@ -208,21 +208,11 @@ public static class PipelineValidationExtensions
         return builder.PipeAsync(
             async ( context, argument ) =>
             {
-                if ( argument is null )
-                {
-                    return argument!;
-                }
+                if ( argument is not null )
+                    await context.ValidateAsync( argument, ruleSetSelector ?? ( ( _, _ ) => null ), includeDefaultRules )
+                        .ConfigureAwait( false );
 
-                var ruleSet = ruleSetSelector?.Invoke( context, argument );
-                var result = await ValidateCoreAsync( context, argument, ruleSet, includeDefaultRules )
-                    .ConfigureAwait( false );
-
-                if ( !result.IsValid )
-                {
-                    context.SetValidationResult( result, ValidationAction.CancelAfter );
-                }
-
-                return argument;
+                return argument!;
             }
         );
     }
@@ -235,9 +225,8 @@ public static class PipelineValidationExtensions
     /// <typeparam name="T">The type of the argument to validate. Must be a reference type.</typeparam>
     /// <param name="context">The pipeline context.</param>
     /// <param name="argument">The argument to validate.</param>
-    /// <param name="cancellationToken">A cancellation token.</param>
     /// <returns><see langword="true"/> if validation succeeds; otherwise, <see langword="false"/>.</returns>
-    public static async Task<bool> ValidateAsync<T>( this IPipelineContext context, T argument, CancellationToken cancellationToken = default )
+    public static async Task<bool> ValidateAsync<T>( this IPipelineContext context, T argument )
         where T : class
     {
         if ( argument is null )
@@ -341,6 +330,19 @@ public static class PipelineValidationExtensions
     }
 
     // fail helper
+
+    /// <summary>
+    /// Records a pre-built validation failure and automatically cancels pipeline execution.
+    /// </summary>
+    /// <param name="context">The pipeline context.</param>
+    /// <param name="validationFailure">The validation failure to record.</param>
+    public static void FailAfter(
+        this IPipelineContext context,
+        IValidationFailure validationFailure
+    )
+    {
+        context.SetValidationResult( validationFailure, ValidationAction.CancelAfter );
+    }
 
     /// <summary>
     /// Records a validation failure with an error code and automatically cancels pipeline execution.
