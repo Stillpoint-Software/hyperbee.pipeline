@@ -209,7 +209,7 @@ public static class PipelineValidationExtensions
             async ( context, argument ) =>
             {
                 if ( argument is not null )
-                    await context.ValidateAsync( argument, ruleSetSelector ?? ( ( _, _ ) => null ), includeDefaultRules )
+                    await context.ValidateAsync( argument, ruleSetSelector ?? (( _, _ ) => null), includeDefaultRules )
                         .ConfigureAwait( false );
 
                 return argument!;
