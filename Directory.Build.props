@@ -23,24 +23,24 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageIcon>assets/icon.png</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageReleaseNotes>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/releases/latest</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</PackageProjectUrl>
   </PropertyGroup>
 
-  <!-- Pull README & LICENSE into the package root -->
+  <!-- Pull icon, README & LICENSE into the package root -->
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
-    <None Include="$(MSBuildThisFileDirectory)README.md"
+    <None Include="$(MSBuildThisFileDirectory)assets/icon.png"
           Pack="true"
-          PackagePath="\"
-    Link="README.md" />
+          Visible="false"
+          PackagePath="/" />
 
     <None Include="$(MSBuildThisFileDirectory)LICENSE"
           Pack="true"
           PackagePath="\"
-    Link="LICENSE" />
+          Link="LICENSE" />
   </ItemGroup>
   <!-- Global project properties - .NET 10 LTS First Strategy -->
   <PropertyGroup>

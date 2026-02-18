@@ -9,22 +9,10 @@
     <PackageId>Hyperbee.Pipeline.AspNetCore</PackageId>
     <Description>ASP.NET Core integration for Hyperbee.Pipeline with command result mapping and validation</Description>
     <PackageTags>pipeline;aspnetcore;minimal-api;validation</PackageTags>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
     <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
