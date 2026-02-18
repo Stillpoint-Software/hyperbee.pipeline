@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using FluentValidation;
 using Hyperbee.Pipeline.Validation;
 using Microsoft.Extensions.DependencyInjection;
