@@ -143,6 +143,3 @@ for more details.
 # Help
  See [Todo](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/todo.md)
 
-[![Hyperbee.Pipeline](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/assets/hyperbee.svg?raw=true)](https://github.com/Stillpoint-Software/Hyperbee.Pipeline)
-
-
