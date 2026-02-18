@@ -80,6 +80,34 @@ public class ValidatorProviderTests
     }
 
     [TestMethod]
+    public void ScanAssembly_with_default_lifetime_should_register_validators_as_scoped()
+    {
+        var services = new ServiceCollection();
+        services.AddPipelineValidation( config =>
+            config.UseFluentValidation( options =>
+                options.ScanAssembly( typeof( TestOutputValidator ).Assembly ) ) );
+
+        var descriptor = services.FirstOrDefault( d => d.ServiceType == typeof( FV.IValidator<TestOutput> ) );
+
+        Assert.IsNotNull( descriptor );
+        Assert.AreEqual( ServiceLifetime.Scoped, descriptor.Lifetime );
+    }
+
+    [TestMethod]
+    public void ScanAssembly_with_singleton_lifetime_should_register_validators_as_singleton()
+    {
+        var services = new ServiceCollection();
+        services.AddPipelineValidation( config =>
+            config.UseFluentValidation( options =>
+                options.ScanAssembly( typeof( TestOutputValidator ).Assembly, ServiceLifetime.Singleton ) ) );
+
+        var descriptor = services.FirstOrDefault( d => d.ServiceType == typeof( FV.IValidator<TestOutput> ) );
+
+        Assert.IsNotNull( descriptor );
+        Assert.AreEqual( ServiceLifetime.Singleton, descriptor.Lifetime );
+    }
+
+    [TestMethod]
     public void AddPipelineValidation_UseFluentValidation_with_preregistered_validators_should_resolve()
     {
         var services = new ServiceCollection();

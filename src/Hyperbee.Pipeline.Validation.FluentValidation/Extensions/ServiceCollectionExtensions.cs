@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentValidation;
 using Hyperbee.Pipeline.Validation;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,9 +37,12 @@ public static class ServiceCollectionExtensions
         var options = new FluentValidationOptions();
         configure?.Invoke( options );
 
-        foreach ( var assembly in options.AssembliesToScan )
+        foreach ( var entry in options.AssembliesToScan )
         {
-            config.Services.AddValidatorsFromAssembly( assembly );
+            config.Services.AddValidatorsFromAssembly(
+                entry.Assembly,
+                entry.Lifetime,
+                includeInternalTypes: entry.IncludeInternalTypes );
         }
 
         return config;
@@ -51,19 +54,25 @@ public static class ServiceCollectionExtensions
 /// </summary>
 public class FluentValidationOptions
 {
-    /// <summary>
-    /// Gets the list of assemblies to scan for FluentValidation validators.
-    /// </summary>
-    public List<Assembly> AssembliesToScan { get; } = [];
+    internal List<AssemblyScanEntry> AssembliesToScan { get; } = [];
 
     /// <summary>
-    /// Adds an assembly to scan for FluentValidation validators.
+    /// Scans the specified assembly for FluentValidation validators and registers them.
     /// </summary>
-    /// <param name="assembly">The assembly to scan.</param>
-    /// <returns>The options instance for method chaining.</returns>
-    public FluentValidationOptions ScanAssembly( Assembly assembly )
+    /// <param name="assembly">The assembly to scan for validators.</param>
+    /// <param name="lifetime">The service lifetime for registered validators. Defaults to <see cref="ServiceLifetime.Scoped"/>.</param>
+    /// <param name="includeInternalTypes">Whether to include internal validator types. Defaults to false.</param>
+    public FluentValidationOptions ScanAssembly(
+        Assembly assembly,
+        ServiceLifetime lifetime = ServiceLifetime.Scoped,
+        bool includeInternalTypes = false )
     {
-        AssembliesToScan.Add( assembly );
+        AssembliesToScan.Add( new AssemblyScanEntry( assembly, lifetime, includeInternalTypes ) );
         return this;
     }
+
+    internal record AssemblyScanEntry(
+        Assembly Assembly,
+        ServiceLifetime Lifetime,
+        bool IncludeInternalTypes );
 }
