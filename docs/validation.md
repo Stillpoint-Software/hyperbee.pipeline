@@ -48,8 +48,9 @@ public class OrderValidator : AbstractValidator<Order>
 }
 
 // 3. Register validators in DI
-services.AddFluentValidation(options =>
-    options.ScanAssembly(typeof(OrderValidator).Assembly));
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(OrderValidator).Assembly)));
 
 // 4. Use ValidateAsync in your pipeline
 var command = PipelineFactory
@@ -374,8 +375,9 @@ public class OrderValidator : AbstractValidator<Order> { }
 public class PaymentValidator : IValidator<Payment> { }
 
 // In Startup.cs
-services.AddFluentValidation(options =>
-    options.ScanAssembly(Assembly.GetExecutingAssembly()));
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(Assembly.GetExecutingAssembly())));
 
 // FluentValidatorProvider will only return validators for types with FluentValidation validators
 // You can chain or create a composite provider for mixed scenarios
@@ -449,7 +451,7 @@ Adapter that integrates FluentValidation:
 
 - `FluentValidatorProvider` - Resolves FluentValidation validators from DI
 - Adapter classes that bridge FluentValidation types to pipeline abstractions
-- `AddFluentValidation()` extension method for DI registration
+- `UseFluentValidation()` extension method for DI registration via `AddPipelineValidation`
 
 **This is the recommended package for most users.**
 

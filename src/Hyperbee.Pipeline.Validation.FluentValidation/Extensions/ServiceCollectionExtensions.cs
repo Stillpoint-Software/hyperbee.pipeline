@@ -6,38 +6,43 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Hyperbee.Pipeline.Validation.FluentValidation;
 
 /// <summary>
-/// Provides extension methods for registering FluentValidation with the dependency injection container.
+/// Provides extension methods for registering FluentValidation as the pipeline validation provider.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers FluentValidation support for Hyperbee.Pipeline validation.
+    /// Configures FluentValidation as the pipeline validation provider.
     /// </summary>
-    /// <param name="services">The service collection.</param>
+    /// <param name="config">The pipeline validation configuration.</param>
     /// <param name="configure">Optional configuration action for specifying assemblies to scan for validators.</param>
-    /// <returns>The service collection for method chaining.</returns>
+    /// <returns>The pipeline validation configuration for method chaining.</returns>
     /// <example>
     /// <code>
-    /// services.AddFluentValidation(options =>
-    ///     options.ScanAssembly(typeof(OrderValidator).Assembly));
+    /// // Recommended: scan for validators automatically
+    /// services.AddPipelineValidation(config =>
+    ///     config.UseFluentValidation(options =>
+    ///         options.ScanAssembly(typeof(OrderValidator).Assembly)));
+    ///
+    /// // If you already register FluentValidation validators separately, omit the scanner:
+    /// services.AddValidatorsFromAssemblyContaining&lt;OrderValidator&gt;();
+    /// services.AddPipelineValidation(config => config.UseFluentValidation());
     /// </code>
     /// </example>
-    public static IServiceCollection AddFluentValidation(
-        this IServiceCollection services,
+    public static IPipelineValidationConfiguration UseFluentValidation(
+        this IPipelineValidationConfiguration config,
         Action<FluentValidationOptions>? configure = null )
     {
-        services.AddSingleton<IValidatorProvider, FluentValidatorProvider>();
+        config.Services.AddSingleton<IValidatorProvider, FluentValidatorProvider>();
 
-        // Auto-register FluentValidation validators from assembly scanning
         var options = new FluentValidationOptions();
         configure?.Invoke( options );
 
         foreach ( var assembly in options.AssembliesToScan )
         {
-            services.AddValidatorsFromAssembly( assembly );
+            config.Services.AddValidatorsFromAssembly( assembly );
         }
 
-        return services;
+        return config;
     }
 }
 
@@ -49,7 +54,7 @@ public class FluentValidationOptions
     /// <summary>
     /// Gets the list of assemblies to scan for FluentValidation validators.
     /// </summary>
-    public List<Assembly> AssembliesToScan { get; } = new();
+    public List<Assembly> AssembliesToScan { get; } = [];
 
     /// <summary>
     /// Adds an assembly to scan for FluentValidation validators.

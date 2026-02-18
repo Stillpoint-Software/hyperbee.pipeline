@@ -42,14 +42,16 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderInput>
 
 ```csharp
 using Hyperbee.Pipeline.Validation;
+using Hyperbee.Pipeline.Validation.FluentValidation;
 
-// Recommended: Use helper method
-services.AddFluentValidation(options =>
-    options.ScanAssembly(typeof(CreateOrderValidator).Assembly));
+// Recommended: scan for validators automatically
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(CreateOrderValidator).Assembly)));
 
-// Alternative: Manual registration
-services.AddSingleton<IValidatorProvider, FluentValidatorProvider>();
+// Alternative: if you already register FV validators separately
 services.AddValidatorsFromAssemblyContaining<CreateOrderValidator>();
+services.AddPipelineValidation(config => config.UseFluentValidation());
 ```
 
 ### 3. Use in Pipelines
@@ -171,12 +173,13 @@ services.AddValidatorsFromAssemblyContaining<OrderValidator>();
 <PackageReference Include="Hyperbee.Pipeline.Validation.FluentValidation" />
 
 // Recommended
-services.AddFluentValidation(options =>
-    options.ScanAssembly(typeof(OrderValidator).Assembly));
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(OrderValidator).Assembly)));
 
 // Or keep manual registration
-services.AddSingleton<IValidatorProvider, FluentValidatorProvider>();
 services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+services.AddPipelineValidation(config => config.UseFluentValidation());
 ```
 
 **Pipeline code remains unchanged** - all `ValidateAsync()` calls work exactly the same.
@@ -201,7 +204,9 @@ public class PaymentValidator : IValidator<Payment>
 }
 
 // FluentValidatorProvider handles both via the adapter pattern
-services.AddFluentValidation(options => options.ScanAssembly(Assembly.GetExecutingAssembly()));
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(Assembly.GetExecutingAssembly())));
 ```
 
 ## Related Packages

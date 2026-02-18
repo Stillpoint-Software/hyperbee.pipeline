@@ -1,20 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <Authors>Stillpoint Software, Inc.</Authors>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>pipeline;caching</PackageTags>
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline/</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageId>Hyperbee.Pipeline.Caching</PackageId>
     <Copyright>Stillpoint Software, Inc.</Copyright>
+    <PackageTags>pipeline;caching</PackageTags>
+    <PackageId>Hyperbee.Pipeline.Caching</PackageId>
     <Title>Hyperbee Pipeline Caching</Title>
     <Description>Caching for Hyperbee.Pipelines async pipelines</Description>
-    <RepositoryUrl>https://github.com/Stillpoint-Software/Hyperbee.Pipeline</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>https://github.com/Stillpoint-Software/hyperbee.pipeline/releases/latest</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,11 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\assets\icon.png" Pack="true" Visible="false" PackagePath="/" />
-    <None Include="..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
     <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
