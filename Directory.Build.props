@@ -32,6 +32,10 @@
 
   <!-- Pull icon, README & LICENSE into the package root -->
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)README.md"
+          Pack="true"
+          PackagePath="\"
+    Link="README.md" />
     <None Include="$(MSBuildThisFileDirectory)assets/icon.png"
           Pack="true"
           Visible="false"
