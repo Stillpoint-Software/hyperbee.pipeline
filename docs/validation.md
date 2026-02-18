@@ -62,6 +62,52 @@ var command = PipelineFactory
 var result = await command(context, new Order { ProductName = "Widget", Amount = 10 });
 ```
 
+## Registration
+
+### ScanAssembly Options
+
+`ScanAssembly` accepts optional parameters that control how FluentValidation registers discovered validators:
+
+| Parameter | Type | Default | Description |
+| --------- | ---- | ------- | ----------- |
+| `assembly` | `Assembly` | _(required)_ | The assembly to scan for validators |
+| `lifetime` | `ServiceLifetime` | `Scoped` | The DI lifetime for registered validators |
+| `includeInternalTypes` | `bool` | `false` | Whether to register validators declared as `internal` |
+
+```csharp
+// Default: Scoped lifetime, public types only
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(OrderValidator).Assembly)));
+
+// Singleton lifetime (e.g. validators with no per-request state)
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(OrderValidator).Assembly, ServiceLifetime.Singleton)));
+
+// Include internal validators
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(OrderValidator).Assembly, includeInternalTypes: true)));
+
+// Scan multiple assemblies with different settings
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+    {
+        options.ScanAssembly(typeof(OrderValidator).Assembly, ServiceLifetime.Singleton);
+        options.ScanAssembly(typeof(PaymentValidator).Assembly);
+    }));
+```
+
+### Pre-registered Validators
+
+If you register FluentValidation validators separately (e.g. with `AddValidatorsFromAssemblyContaining`), omit the scanner:
+
+```csharp
+services.AddValidatorsFromAssemblyContaining<OrderValidator>();
+services.AddPipelineValidation(config => config.UseFluentValidation());
+```
+
 ## Validation Methods
 
 ### Builder Extensions (Declarative)

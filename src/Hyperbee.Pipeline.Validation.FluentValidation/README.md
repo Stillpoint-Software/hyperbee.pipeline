@@ -44,10 +44,20 @@ public class CreateOrderValidator : AbstractValidator<CreateOrderInput>
 using Hyperbee.Pipeline.Validation;
 using Hyperbee.Pipeline.Validation.FluentValidation;
 
-// Recommended: scan for validators automatically
+// Recommended: scan for validators automatically (Scoped lifetime by default)
 services.AddPipelineValidation(config =>
     config.UseFluentValidation(options =>
         options.ScanAssembly(typeof(CreateOrderValidator).Assembly)));
+
+// Singleton lifetime (validators with no per-request state)
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(CreateOrderValidator).Assembly, ServiceLifetime.Singleton)));
+
+// Include internal validator types
+services.AddPipelineValidation(config =>
+    config.UseFluentValidation(options =>
+        options.ScanAssembly(typeof(CreateOrderValidator).Assembly, includeInternalTypes: true)));
 
 // Alternative: if you already register FV validators separately
 services.AddValidatorsFromAssemblyContaining<CreateOrderValidator>();
