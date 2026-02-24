@@ -119,10 +119,7 @@ public static class CommandResultExtensions
             if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
                 return true;
 
-            if ( TryHandleValidationFailure<ApplicationValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
-                return true;
-
-            if ( TryHandleValidationFailure<ValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
+            if ( TryHandleValidationFailure<IValidationFailure>( failures, StatusCodes.Status400BadRequest, out errorResult ) )
                 return true;
 
             // This should never be reached, but just in case
