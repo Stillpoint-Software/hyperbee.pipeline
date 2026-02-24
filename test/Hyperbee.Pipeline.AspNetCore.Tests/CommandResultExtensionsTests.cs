@@ -257,4 +257,65 @@ public class CommandResultExtensionsTests
         var problem = (ProblemHttpResult) result;
         Assert.AreEqual( StatusCodes.Status404NotFound, problem.StatusCode );
     }
+
+    // Adapter-style validation failure tests
+
+    [TestMethod]
+    public void ToResult_should_return_error_details_for_adapter_validation_failures()
+    {
+        // Arrange - simulate failures from a validation adapter (e.g., FluentValidationFailureAdapter)
+        // that implements IValidationFailure but does NOT inherit from ValidationFailure.
+        var commandResult = CreateAdapterFailureResult<string>(
+            new AdapterValidationFailure( "BasePrice", "Base price must be greater than zero." )
+            {
+                ErrorCode = "GreaterThanOrEqualValidator",
+                AttemptedValue = "-945.00"
+            },
+            new AdapterValidationFailure( "RatePlanConfiguration.RatePlans", "Rate plans must contain at least one tier starting at 0." )
+        );
+
+        // Act
+        var result = commandResult.ToResult();
+
+        // Assert
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+        Assert.AreEqual( "One or more validation errors occurred.", problem.ProblemDetails.Detail );
+
+        Assert.IsTrue(
+            problem.ProblemDetails.Extensions.TryGetValue( "errors", out var errorsObj ),
+            "Response must include 'errors' extension with validation failure details."
+        );
+
+        var errors = errorsObj as System.Collections.IList;
+        Assert.IsNotNull( errors );
+        Assert.HasCount( 2, errors );
+    }
+
+    private static CommandResult<T> CreateAdapterFailureResult<T>( params IValidationFailure[] failures )
+    {
+        var context = new PipelineContext();
+        context.SetValidationResult(
+            (IReadOnlyList<IValidationFailure>) failures.ToList(),
+            ValidationAction.CancelAfter
+        );
+        return new CommandResult<T>
+        {
+            Context = context,
+            CommandType = typeof( CommandResultExtensionsTests )
+        };
+    }
+
+    /// <summary>
+    /// Simulates a validation adapter failure (like FluentValidationFailureAdapter)
+    /// that implements IValidationFailure without inheriting from ValidationFailure.
+    /// </summary>
+    private class AdapterValidationFailure( string propertyName, string errorMessage ) : IValidationFailure
+    {
+        public string PropertyName { get; set; } = propertyName;
+        public string ErrorMessage { get; set; } = errorMessage;
+        public string? ErrorCode { get; set; }
+        public object? AttemptedValue { get; set; }
+    }
 }

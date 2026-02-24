@@ -173,7 +173,7 @@ var command2 = PipelineFactory
 
 ## ctx.ValidateAsync
 
-`ctx.ValidateAsync()` is the **imperative** counterpart to `builder.ValidateAsync()`. It lets you trigger validation from within a pipe step — useful when the value to validate is produced mid-step, when validation is conditional, or when you need to act on the result immediately.
+`ctx.ValidateAsync()` is the **imperative** counterpart to `builder.ValidateAsync()`. It lets you trigger validation from within a pipe step -- useful when the value to validate is produced mid-step, when validation is conditional, or when you need to act on the result immediately.
 
 Returns `true` if validation passes, `false` if it fails. On failure, the context is automatically cancelled.
 

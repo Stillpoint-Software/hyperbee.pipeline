@@ -61,14 +61,16 @@ an optional input value as parameters, and returns a result.
 
 ```csharp
 var command = PipelineFactory
-    .Start<string>()
-    .Pipe( ( ctx, arg ) => $"hello {arg}" )
-    .Build();
+    .Start<string>()                               // TStart=string, TOutput=string
+    .Pipe( ( ctx, arg ) => $"hello {arg}" )        // TOutput=string (string->string)
+    .Build();                                      // -> FunctionAsync<string, string>
 
 var result = await command( new PipelineContext(), "pipeline" );
 
 Assert.AreEqual( "hello pipeline", result );
 ```
+
+The type parameter `TStart` (set by `Start<string>()`) remains invariant throughout the pipeline. Each `Pipe` step can transform the output type (`TOutput`), while `Call` steps preserve it. See [Conventions](conventions.md) for the full type parameter naming guide and the monadic foundations of the pipeline.
 
 ## Dependency Injection
 

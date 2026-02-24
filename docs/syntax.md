@@ -6,26 +6,38 @@ nav_order: 2
 
 # Pipeline Syntax
 
+## How Types Flow
+
+Every pipeline starts with `PipelineFactory.Start<TStart>()`. The `TStart` type is invariant -- it never changes throughout composition. Each step receives the previous step's output (`TOutput`) and produces a new output (`TNext`). See [Conventions](conventions.md) for the full type parameter naming guide.
+
+```csharp
+PipelineFactory.Start<string>()          // TStart=string, TOutput=string
+    .Pipe((ctx, arg) => int.Parse(arg))  // TStart=string, TOutput=int    (Pipe transforms type)
+    .Call((ctx, arg) => Log(arg))        // TStart=string, TOutput=int    (Call preserves type)
+    .Pipe((ctx, arg) => arg.ToString())  // TStart=string, TOutput=string (Pipe transforms type)
+    .Build();                            // -> FunctionAsync<string, string>
+```
+
 ## Statements
-             
-| Method     | Description 
-| ---------- | ----------- 
-| Call       | Execute a `void` statement that does not transform the pipeline output.
-| CallAsync  | Asynchronously execute a `void` statement that does not transform the pipeline output.
-| Pipe       | Execute a statement that transforms the pipeline output.
-| PipeAsync  | Asynchronously execute a statement that transforms the pipeline output.
+
+| Method     | Description | Type Effect |
+| ---------- | ----------- | ----------- |
+| Call       | Execute a `void` statement that does not transform the pipeline output. | Preserves `TOutput` |
+| CallAsync  | Asynchronously execute a `void` statement that does not transform the pipeline output. | Preserves `TOutput` |
+| Pipe       | Execute a statement that transforms the pipeline output. | `TOutput` -> `TNext` |
+| PipeAsync  | Asynchronously execute a statement that transforms the pipeline output. | `TOutput` -> `TNext` |
 
 ## Flow Control
 
-| Method     | Description 
-| ---------- | ----------- 
-| Pipe       | Pipes a child pipeline with optional middlewares.
-| PipeIf     | Conditionally pipes a child pipeline with optional middlewares.
-| Call       | Calls a child pipeline with optional middlewares.
-| CallIf     | Conditionally calls a child pipeline with optional middlewares.
-| ForEach    | Enumerates a collection pipeline input.
-| Reduce     | Transforms an enumerable pipeline input.
-| WaitAll    | Waits for concurrent pipelines to complete.
+| Method     | Description | Type Effect |
+| ---------- | ----------- | ----------- |
+| Pipe       | Pipes a child pipeline with optional middlewares. | `TOutput` -> `TNext` |
+| PipeIf     | Conditionally pipes a child pipeline with optional middlewares. | `TOutput` -> `TNext` |
+| Call       | Calls a child pipeline with optional middlewares. | Preserves `TOutput` |
+| CallIf     | Conditionally calls a child pipeline with optional middlewares. | Preserves `TOutput` |
+| ForEach    | Enumerates a collection pipeline input. | Preserves `TOutput` |
+| Reduce     | Transforms an enumerable pipeline input. | `IEnumerable<TElement>` -> `TNext` |
+| WaitAll    | Waits for concurrent pipelines to complete. | `TOutput` -> `TNext` (via reducer) |
 
 ## Cancellation
 
@@ -43,20 +55,20 @@ nav_order: 2
 - `Pipe` - Execute a statement that transforms the pipeline output.
 - `PipeAsync` - Asynchronously execute a statement that transforms the pipeline output.
 
-In this example notice that `arg + 9` is not returned from the use of `Call`.
+In this example notice that `arg + 9` is not returned from the use of `Call`. The `Call` block executes its inner pipeline but discards its result -- the outer pipeline's `TOutput` is preserved.
 
 ```csharp
 var callResult = string.Empty;
 
 var command = PipelineFactory
-    .Start<string>()
-    .Pipe( ( ctx, arg ) => arg + "1" )
-    .Pipe( ( ctx, arg ) => arg + "2" )
-    .Call( builder => builder
-        .Call( ( ctx, arg ) => callResult = arg + "3" )
-        .Pipe( ( ctx, arg ) => arg + "9" )
+    .Start<string>()                                     // TStart=string, TOutput=string
+    .Pipe( ( ctx, arg ) => arg + "1" )                   // TOutput=string (string->string)
+    .Pipe( ( ctx, arg ) => arg + "2" )                   // TOutput=string
+    .Call( builder => builder                             // Call: TOutput stays string
+        .Call( ( ctx, arg ) => callResult = arg + "3" )  //   inner side-effect
+        .Pipe( ( ctx, arg ) => arg + "9" )               //   inner result discarded
     )
-    .Pipe( ( ctx, arg ) => arg + "4" )
+    .Pipe( ( ctx, arg ) => arg + "4" )                   // TOutput=string (continues from "12")
     .Build();
 
 var result = await command( new PipelineContext() );
@@ -93,18 +105,18 @@ Assert.AreEqual(0, answer2);
 
 ### ForEach
 
-`ForEach` and `ForEachAsync` allow you to enumerate a collection pipeline input and apply a pipeline to each element. 
+`ForEach` and `ForEachAsync` allow you to enumerate a collection pipeline input and apply a pipeline to each element. The `ForEach` preserves the pipeline's `TOutput` -- the inner pipeline processes each `TElement` for its side effects.
 
 ```csharp
 var count = 0;
 
 var command = PipelineFactory
-    .Start<string>()
-    .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-    .ForEach().Type<string>( builder => builder
-        .Pipe( ( ctx, arg ) => count += 10 )
+    .Start<string>()                                     // TStart=string, TOutput=string
+    .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )            // TOutput=string[] (string->string[])
+    .ForEach().Type<string>( builder => builder           // TElement=string, TOutput stays string[]
+        .Pipe( ( ctx, arg ) => count += 10 )              //   inner pipeline processes each element
     )
-    .Pipe( ( ctx, arg ) => count += 5 )
+    .Pipe( ( ctx, arg ) => count += 5 )                  // TOutput=int (string[]->int via assignment)
     .Build();
 
 await command( new PipelineContext(), "e f" );
@@ -114,17 +126,17 @@ Assert.AreEqual( count, 25 );
 
 ### Reduce
 
-`Reduce` and `ReduceAync` allow you to transform an enumerable pipeline input to a single value. You can specify a reducer function
-that defines how the elements should be combined, and a builder function that creates the pipeline for processing the elements.### Cancel
+`Reduce` and `ReduceAsync` allow you to transform an enumerable pipeline input to a single value. You can specify a reducer function
+that defines how the elements should be combined, and a builder function that creates the pipeline for processing the elements. The `.Type<TElement, TNext>()` call specifies the element type and the reduced output type.
 
 ```csharp
 var command = PipelineFactory
-     .Start<string>()
-     .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )
-     .Reduce().Type<string, int>( ( aggregate, value ) => aggregate + value, builder => builder
-         .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )
+     .Start<string>()                                                                     // TStart=string, TOutput=string
+     .Pipe( ( ctx, arg ) => arg.Split( ' ' ) )                                            // TOutput=string[]
+     .Reduce().Type<string, int>( ( aggregate, value ) => aggregate + value, builder => builder  // TElement=string, TNext=int
+         .Pipe( ( ctx, arg ) => int.Parse( arg ) + 10 )                                   //   each element: string->int
      )
-     .Pipe( ( ctx, arg ) => arg + 5 )
+     .Pipe( ( ctx, arg ) => arg + 5 )                                                     // TOutput=int (int->int)
      .Build();
 
 var result = await command( new PipelineContext(), "1 2 3 4 5" );
