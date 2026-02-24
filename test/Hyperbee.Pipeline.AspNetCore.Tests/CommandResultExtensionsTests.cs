@@ -290,7 +290,7 @@ public class CommandResultExtensionsTests
 
         var errors = errorsObj as System.Collections.IList;
         Assert.IsNotNull( errors );
-        Assert.AreEqual( 2, errors.Count );
+        Assert.HasCount( 2, errors );
     }
 
     private static CommandResult<T> CreateAdapterFailureResult<T>( params IValidationFailure[] failures )
