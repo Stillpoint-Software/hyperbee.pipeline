@@ -21,6 +21,7 @@ public interface IPipelineContext
 
     void CancelAfter();
     void CancelAfter( object cancellationValue );
+    void ThrowIfError();
     IPipelineContext Clone( bool throws );
 
     string Name { get; set; }
