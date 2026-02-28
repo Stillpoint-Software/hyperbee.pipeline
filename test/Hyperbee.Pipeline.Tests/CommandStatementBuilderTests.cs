@@ -62,6 +62,40 @@ public class CommandStatementBuilderTests
         }
     }
 
+    private class DoubleIntCommand : CommandFunction<int, int>, ICommandFunction<int, int>
+    {
+        public DoubleIntCommand()
+            : base( Substitute.For<IPipelineContextFactory>(), Substitute.For<ILogger>() )
+        {
+        }
+
+        protected override FunctionAsync<int, int> CreatePipeline()
+        {
+            return PipelineFactory
+                .Start<int>()
+                .Pipe( ( ctx, arg ) => arg * 2 )
+                .Build();
+        }
+    }
+
+    private class LogIntProcedureCommand : CommandProcedure<int>, ICommandProcedure<int>
+    {
+        public int LastValue { get; private set; }
+
+        public LogIntProcedureCommand()
+            : base( Substitute.For<IPipelineContextFactory>(), Substitute.For<ILogger>() )
+        {
+        }
+
+        protected override ProcedureAsync<int> CreatePipeline()
+        {
+            return PipelineFactory
+                .Start<int>()
+                .Call( ( ctx, arg ) => LastValue = arg )
+                .BuildAsProcedure();
+        }
+    }
+
     // PipeAsync tests
 
     [TestMethod]
@@ -73,7 +107,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, string>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -92,7 +126,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, int>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -115,7 +149,7 @@ public class CommandStatementBuilderTests
                 ctx.Items.SetValue( "key", "shared" );
                 return arg;
             } )
-            .PipeAsync( (ICommandFunction<string, string>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -136,7 +170,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, string>) command, "append-exclamation" )
+            .PipeAsync( command, "append-exclamation" )
             .Build();
 
         // Act
@@ -157,7 +191,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( (ICommandProcedure<string>) command )
+            .CallAsync( command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -178,7 +212,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( (ICommandProcedure<string>) command, "log-step" )
+            .CallAsync( command, "log-step" )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -201,7 +235,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => true, (ICommandFunction<string, string>) command )
+            .PipeIf( ( ctx, arg ) => true, command )
             .Build();
 
         // Act
@@ -220,7 +254,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => false, (ICommandFunction<string, string>) command )
+            .PipeIf( ( ctx, arg ) => false, command )
             .Build();
 
         // Act
@@ -241,11 +275,11 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => true, command )
             .Build();
 
         // Act
-        var result = await pipeline( new PipelineContext(), "world" );
+        await pipeline( new PipelineContext(), "world" );
 
         // Assert
         Assert.AreEqual( "hello world", command.LastValue );
@@ -260,7 +294,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => false, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => false, command )
             .Build();
 
         // Act
@@ -279,7 +313,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => true, command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -291,38 +325,10 @@ public class CommandStatementBuilderTests
         Assert.AreEqual( "hello world", command.LastValue );
     }
 
-    // Implicit cast tests
+    // PipelineFunction property tests
 
     [TestMethod]
-    public async Task Implicit_cast_should_convert_CommandFunction_to_FunctionAsync()
-    {
-        // Arrange
-        var command = new AppendExclamationCommand();
-        FunctionAsync<string, string> function = command;
-
-        // Act
-        var result = await function( new PipelineContext(), "test" );
-
-        // Assert
-        Assert.AreEqual( "test!", result );
-    }
-
-    [TestMethod]
-    public async Task Implicit_cast_should_convert_CommandProcedure_to_ProcedureAsync()
-    {
-        // Arrange
-        var command = new LogProcedureCommand();
-        ProcedureAsync<string> procedure = command;
-
-        // Act
-        await procedure( new PipelineContext(), "test" );
-
-        // Assert
-        Assert.AreEqual( "test", command.LastValue );
-    }
-
-    [TestMethod]
-    public async Task PipelineFunction_property_should_return_pipeline_delegate()
+    public async Task PipelineFunction_should_return_function_delegate()
     {
         // Arrange
         ICommandFunction<string, string> command = new AppendExclamationCommand();
@@ -335,16 +341,109 @@ public class CommandStatementBuilderTests
     }
 
     [TestMethod]
-    public async Task PipelineFunction_property_should_return_procedure_delegate()
+    public async Task PipelineFunction_should_return_procedure_delegate()
     {
         // Arrange
-        var concreteCommand = new LogProcedureCommand();
-        ICommandProcedure<string> command = concreteCommand;
+        var command = new LogProcedureCommand();
 
         // Act
-        await command.PipelineFunction( new PipelineContext(), "test" );
+        await ((ICommandProcedure<string>) command).PipelineFunction( new PipelineContext(), "test" );
 
         // Assert
-        Assert.AreEqual( "test", concreteCommand.LastValue );
+        Assert.AreEqual( "test", command.LastValue );
+    }
+
+    // Selector overload tests
+
+    [TestMethod]
+    public async Task PipeAsync_with_selector_should_map_type_before_command()
+    {
+        // Arrange - string pipeline, command takes int, selector maps string -> int
+        var command = new DoubleIntCommand();
+
+        var pipeline = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) => $"hello {arg}" )
+            .PipeAsync( command, selector: ( ctx, arg ) => arg.Length )
+            .Build();
+
+        // Act
+        var result = await pipeline( new PipelineContext(), "world" );
+
+        // Assert - "hello world".Length == 11, doubled == 22
+        Assert.AreEqual( "hello world".Length * 2, result );
+    }
+
+    [TestMethod]
+    public async Task PipeAsync_with_selector_should_share_context()
+    {
+        // Arrange
+        var command = new DoubleIntCommand();
+
+        var pipeline = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) =>
+            {
+                ctx.Items.SetValue( "key", "shared" );
+                return arg;
+            } )
+            .PipeAsync( command, selector: ( ctx, arg ) => arg.Length )
+            .Build();
+
+        // Act
+        var context = new PipelineContext();
+        await pipeline( context, "hi" );
+
+        // Assert
+        Assert.IsTrue( context.Items.TryGetValue<string>( "key", out var value ) );
+        Assert.AreEqual( "shared", value );
+    }
+
+    [TestMethod]
+    public async Task CallAsync_with_selector_should_map_type_before_procedure_and_preserve_input()
+    {
+        // Arrange - string pipeline, procedure takes int, selector maps string -> int
+        var command = new LogIntProcedureCommand();
+
+        var pipeline = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) => $"hello {arg}" )
+            .CallAsync( command, selector: ( ctx, arg ) => arg.Length )
+            .Pipe( ( ctx, arg ) => arg + " done" )
+            .Build();
+
+        // Act
+        var result = await pipeline( new PipelineContext(), "world" );
+
+        // Assert - original string preserved, procedure received the length
+        Assert.AreEqual( "hello world done", result );
+        Assert.AreEqual( "hello world".Length, command.LastValue );
+    }
+
+    [TestMethod]
+    public async Task CallAsync_with_selector_should_share_context_and_preserve_input()
+    {
+        // Arrange
+        var command = new LogIntProcedureCommand();
+
+        var pipeline = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) =>
+            {
+                ctx.Items.SetValue( "key", "shared" );
+                return $"hello {arg}";
+            } )
+            .CallAsync( command, selector: ( ctx, arg ) => arg.Length )
+            .Build();
+
+        // Act
+        var context = new PipelineContext();
+        var result = await pipeline( context, "world" );
+
+        // Assert - input string preserved, context shared, procedure received the length
+        Assert.AreEqual( "hello world", result );
+        Assert.AreEqual( "hello world".Length, command.LastValue );
+        Assert.IsTrue( context.Items.TryGetValue<string>( "key", out var value ) );
+        Assert.AreEqual( "shared", value );
     }
 }
