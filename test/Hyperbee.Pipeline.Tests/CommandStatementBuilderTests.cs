@@ -73,7 +73,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, string>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -92,7 +92,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, int>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -115,7 +115,7 @@ public class CommandStatementBuilderTests
                 ctx.Items.SetValue( "key", "shared" );
                 return arg;
             } )
-            .PipeAsync( (ICommandFunction<string, string>) command )
+            .PipeAsync( command )
             .Build();
 
         // Act
@@ -136,7 +136,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( (ICommandFunction<string, string>) command, "append-exclamation" )
+            .PipeAsync( command, "append-exclamation" )
             .Build();
 
         // Act
@@ -157,7 +157,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( (ICommandProcedure<string>) command )
+            .CallAsync( command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -178,7 +178,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( (ICommandProcedure<string>) command, "log-step" )
+            .CallAsync( command, "log-step" )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -201,7 +201,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => true, (ICommandFunction<string, string>) command )
+            .PipeIf( ( ctx, arg ) => true, command )
             .Build();
 
         // Act
@@ -220,7 +220,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => false, (ICommandFunction<string, string>) command )
+            .PipeIf( ( ctx, arg ) => false, command )
             .Build();
 
         // Act
@@ -241,11 +241,11 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => true, command )
             .Build();
 
         // Act
-        var result = await pipeline( new PipelineContext(), "world" );
+        await pipeline( new PipelineContext(), "world" );
 
         // Assert
         Assert.AreEqual( "hello world", command.LastValue );
@@ -260,7 +260,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => false, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => false, command )
             .Build();
 
         // Act
@@ -279,7 +279,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
+            .CallIf( ( ctx, arg ) => true, command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
