@@ -18,6 +18,10 @@ public abstract class CommandProcedure<TStart> : ICommandProcedure<TStart>
 
     protected abstract ProcedureAsync<TStart> CreatePipeline();
 
+    ProcedureAsync<TStart> ICommandProcedure<TStart>.PipelineFunction => Pipeline.Value;
+
+    public static implicit operator ProcedureAsync<TStart>( CommandProcedure<TStart> command ) => command.Pipeline.Value;
+
     public virtual Task<CommandResult> ExecuteAsync( CancellationToken cancellation = default ) => ExecuteAsync( default, cancellation );
 
     public virtual async Task<CommandResult> ExecuteAsync( TStart argument, CancellationToken cancellation = default )
