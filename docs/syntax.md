@@ -32,9 +32,11 @@ PipelineFactory.Start<string>()          // TStart=string, TOutput=string
 | Method     | Description | Type Effect |
 | ---------- | ----------- | ----------- |
 | Pipe       | Pipes a child pipeline with optional middlewares. | `TOutput` -> `TNext` |
-| PipeIf     | Conditionally pipes a child pipeline with optional middlewares. | `TOutput` -> `TNext` |
+| PipeAsync  | Pipes a child pipeline or [command](command-pattern.md). | `TOutput` -> `TNext` |
+| PipeIf     | Conditionally pipes a child pipeline or [command](command-pattern.md). | `TOutput` -> `TNext` |
 | Call       | Calls a child pipeline with optional middlewares. | Preserves `TOutput` |
-| CallIf     | Conditionally calls a child pipeline with optional middlewares. | Preserves `TOutput` |
+| CallAsync  | Calls a child pipeline or [command](command-pattern.md) procedure. | Preserves `TOutput` |
+| CallIf     | Conditionally calls a child pipeline or [command](command-pattern.md) procedure. | Preserves `TOutput` |
 | ForEach    | Enumerates a collection pipeline input. | Preserves `TOutput` |
 | Reduce     | Transforms an enumerable pipeline input. | `IEnumerable<TElement>` -> `TNext` |
 | WaitAll    | Waits for concurrent pipelines to complete. | `TOutput` -> `TNext` (via reducer) |
