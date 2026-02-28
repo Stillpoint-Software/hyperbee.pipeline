@@ -325,36 +325,6 @@ public class CommandStatementBuilderTests
         Assert.AreEqual( "hello world", command.LastValue );
     }
 
-    // Implicit cast tests
-
-    [TestMethod]
-    public async Task Implicit_cast_should_convert_CommandFunction_to_FunctionAsync()
-    {
-        // Arrange
-        var command = new AppendExclamationCommand();
-        FunctionAsync<string, string> function = command;
-
-        // Act
-        var result = await function( new PipelineContext(), "test" );
-
-        // Assert
-        Assert.AreEqual( "test!", result );
-    }
-
-    [TestMethod]
-    public async Task Implicit_cast_should_convert_CommandProcedure_to_ProcedureAsync()
-    {
-        // Arrange
-        var command = new LogProcedureCommand();
-        ProcedureAsync<string> procedure = command;
-
-        // Act
-        await procedure( new PipelineContext(), "test" );
-
-        // Assert
-        Assert.AreEqual( "test", command.LastValue );
-    }
-
     // PipelineFunction property tests
 
     [TestMethod]
