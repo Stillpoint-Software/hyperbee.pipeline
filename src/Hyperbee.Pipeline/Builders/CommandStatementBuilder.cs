@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;

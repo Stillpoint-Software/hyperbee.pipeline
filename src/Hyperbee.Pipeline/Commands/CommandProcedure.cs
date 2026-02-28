@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Context;
 using Microsoft.Extensions.Logging;
 
 namespace Hyperbee.Pipeline.Commands;

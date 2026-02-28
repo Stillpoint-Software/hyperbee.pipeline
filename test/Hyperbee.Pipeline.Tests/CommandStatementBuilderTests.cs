@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Microsoft.Extensions.Logging;
@@ -107,7 +107,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( command )
+            .PipeAsync( (ICommandFunction<string, string>) command )
             .Build();
 
         // Act
@@ -126,7 +126,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( command )
+            .PipeAsync( (ICommandFunction<string, int>) command )
             .Build();
 
         // Act
@@ -149,7 +149,7 @@ public class CommandStatementBuilderTests
                 ctx.Items.SetValue( "key", "shared" );
                 return arg;
             } )
-            .PipeAsync( command )
+            .PipeAsync( (ICommandFunction<string, string>) command )
             .Build();
 
         // Act
@@ -170,7 +170,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeAsync( command, "append-exclamation" )
+            .PipeAsync( (ICommandFunction<string, string>) command, "append-exclamation" )
             .Build();
 
         // Act
@@ -191,7 +191,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( command )
+            .CallAsync( (ICommandProcedure<string>) command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -212,7 +212,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallAsync( command, "log-step" )
+            .CallAsync( (ICommandProcedure<string>) command, "log-step" )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -235,7 +235,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => true, command )
+            .PipeIf( ( ctx, arg ) => true, (ICommandFunction<string, string>) command )
             .Build();
 
         // Act
@@ -254,7 +254,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .PipeIf( ( ctx, arg ) => false, command )
+            .PipeIf( ( ctx, arg ) => false, (ICommandFunction<string, string>) command )
             .Build();
 
         // Act
@@ -275,7 +275,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, command )
+            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
             .Build();
 
         // Act
@@ -294,7 +294,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => false, command )
+            .CallIf( ( ctx, arg ) => false, (ICommandProcedure<string>) command )
             .Build();
 
         // Act
@@ -313,7 +313,7 @@ public class CommandStatementBuilderTests
         var pipeline = PipelineFactory
             .Start<string>()
             .Pipe( ( ctx, arg ) => $"hello {arg}" )
-            .CallIf( ( ctx, arg ) => true, command )
+            .CallIf( ( ctx, arg ) => true, (ICommandProcedure<string>) command )
             .Pipe( ( ctx, arg ) => arg + " done" )
             .Build();
 
@@ -323,6 +323,36 @@ public class CommandStatementBuilderTests
         // Assert
         Assert.AreEqual( "hello world done", result );
         Assert.AreEqual( "hello world", command.LastValue );
+    }
+
+    // Implicit cast tests
+
+    [TestMethod]
+    public async Task Implicit_cast_should_convert_CommandFunction_to_FunctionAsync()
+    {
+        // Arrange
+        var command = new AppendExclamationCommand();
+        FunctionAsync<string, string> function = command;
+
+        // Act
+        var result = await function( new PipelineContext(), "test" );
+
+        // Assert
+        Assert.AreEqual( "test!", result );
+    }
+
+    [TestMethod]
+    public async Task Implicit_cast_should_convert_CommandProcedure_to_ProcedureAsync()
+    {
+        // Arrange
+        var command = new LogProcedureCommand();
+        ProcedureAsync<string> procedure = command;
+
+        // Act
+        await procedure( new PipelineContext(), "test" );
+
+        // Assert
+        Assert.AreEqual( "test", command.LastValue );
     }
 
     // PipelineFunction property tests
@@ -344,13 +374,14 @@ public class CommandStatementBuilderTests
     public async Task PipelineFunction_should_return_procedure_delegate()
     {
         // Arrange
-        var command = new LogProcedureCommand();
+        var concreteCommand = new LogProcedureCommand();
+        ICommandProcedure<string> command = concreteCommand;
 
         // Act
-        await ((ICommandProcedure<string>) command).PipelineFunction( new PipelineContext(), "test" );
+        await command.PipelineFunction( new PipelineContext(), "test" );
 
         // Assert
-        Assert.AreEqual( "test", command.LastValue );
+        Assert.AreEqual( "test", concreteCommand.LastValue );
     }
 
     // Selector overload tests
