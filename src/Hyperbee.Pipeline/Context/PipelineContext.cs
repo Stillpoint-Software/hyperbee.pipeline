@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.ExceptionServices;
+using Microsoft.Extensions.Logging;
 
 namespace Hyperbee.Pipeline.Context;
 
@@ -102,6 +103,12 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
     {
         CancellationSource.Cancel();
         CancellationValue = cancellationValue;
+    }
+
+    public void ThrowIfError()
+    {
+        if ( Exception != null )
+            ExceptionDispatchInfo.Capture( Exception ).Throw();
     }
 
     public IPipelineContext Clone( bool throws = false )
