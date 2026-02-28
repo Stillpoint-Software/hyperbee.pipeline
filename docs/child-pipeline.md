@@ -35,3 +35,21 @@ var result = await pipeline1( new PipelineContext(), "you" );
 Assert.AreEqual( "hello you again!", result );
 ```
 
+## Composing Commands
+
+[Commands](command-pattern.md) are injectable wrappers around pipelines. You can compose a command's
+pipeline directly into another pipeline using `PipeAsync`, `CallAsync`, `PipeIf`, or `CallIf`. The
+command's pipeline is used as a step -- the pipeline context flows through without creating a new context.
+
+```csharp
+// commandB is an ICommandFunction<string, string> injected via DI
+
+var pipeline = PipelineFactory
+    .Start<string>()
+    .Pipe( ( ctx, arg ) => $"hello {arg}" )
+    .PipeAsync( commandB )          // compose command's pipeline
+    .Build();
+```
+
+See [Commands](command-pattern.md) for more details.
+
