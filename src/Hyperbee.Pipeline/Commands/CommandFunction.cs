@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Context;
+using Hyperbee.Pipeline.Context;
 using Microsoft.Extensions.Logging;
 
 namespace Hyperbee.Pipeline.Commands;
@@ -19,8 +19,6 @@ public abstract class CommandFunction<TStart, TOutput> : ICommandFunction<TStart
     protected abstract FunctionAsync<TStart, TOutput> CreatePipeline();
 
     FunctionAsync<TStart, TOutput> ICommandFunction<TStart, TOutput>.PipelineFunction => Pipeline.Value;
-
-    public static implicit operator FunctionAsync<TStart, TOutput>( CommandFunction<TStart, TOutput> command ) => command.Pipeline.Value;
 
     public virtual Task<CommandResult<TOutput>> ExecuteAsync( CancellationToken cancellation = default ) => ExecuteAsync( default, cancellation );
 
@@ -53,8 +51,6 @@ public abstract class CommandFunction<TOutput> : ICommandFunction<TOutput>
     protected abstract FunctionAsync<Arg.Empty, TOutput> CreatePipeline();
 
     FunctionAsync<Arg.Empty, TOutput> ICommandFunction<TOutput>.PipelineFunction => Pipeline.Value;
-
-    public static implicit operator FunctionAsync<Arg.Empty, TOutput>( CommandFunction<TOutput> command ) => command.Pipeline.Value;
 
     public virtual async Task<CommandResult<TOutput>> ExecuteAsync( CancellationToken cancellation = default )
     {

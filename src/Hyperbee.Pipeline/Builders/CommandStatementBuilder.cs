@@ -1,4 +1,4 @@
-﻿using Hyperbee.Pipeline.Binders;
+using Hyperbee.Pipeline.Binders;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Extensions.Implementation;
@@ -93,5 +93,38 @@ public static class CommandStatementBuilder
                 .Bind( wrappedFunction ),
             Middleware = parentMiddleware
         };
+    }
+
+    // PipeAsync with selector: map TOutput -> TInput before running command
+
+    public static IPipelineBuilder<TStart, TNext> PipeAsync<TStart, TOutput, TInput, TNext>(
+        this IPipelineBuilder<TStart, TOutput> parent,
+        ICommandFunction<TInput, TNext> command,
+        Function<TOutput, TInput> selector,
+        Action<IPipelineContext> config = null
+    )
+    {
+        ArgumentNullException.ThrowIfNull( command );
+        ArgumentNullException.ThrowIfNull( selector );
+
+        return parent.Pipe( selector ).PipeAsync( command.PipelineFunction, config );
+    }
+
+    // CallAsync with selector: map TOutput -> TInput before running procedure, preserve TOutput
+
+    public static IPipelineBuilder<TStart, TOutput> CallAsync<TStart, TOutput, TInput>(
+        this IPipelineBuilder<TStart, TOutput> parent,
+        ICommandProcedure<TInput> command,
+        Function<TOutput, TInput> selector,
+        Action<IPipelineContext> config = null
+    )
+    {
+        ArgumentNullException.ThrowIfNull( command );
+        ArgumentNullException.ThrowIfNull( selector );
+
+        ProcedureAsync<TOutput> adapted = async ( context, argument ) =>
+            await command.PipelineFunction( context, selector( context, argument ) ).ConfigureAwait( false );
+
+        return parent.CallAsync( adapted, config );
     }
 }
