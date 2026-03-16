@@ -129,6 +129,49 @@ void usage( IMyCommand command )
 }
 ```
 
+## Example 4
+
+Example of a command using `PipelineFactory.Create` with an injected `IPipelineMiddlewareProvider`
+to automatically apply cross-cutting hooks and wraps.
+
+```csharp
+public interface IDeleteSubscriptionCommand : ICommandFunction<string, DeleteOutput>
+{
+}
+
+public class DeleteSubscriptionCommand : CommandFunction<string, DeleteOutput>, IDeleteSubscriptionCommand
+{
+    private readonly IPipelineMiddlewareProvider _middlewareProvider;
+
+    public DeleteSubscriptionCommand(
+        IPipelineMiddlewareProvider middlewareProvider,
+        IPipelineContextFactory pipelineContextFactory,
+        ILogger<DeleteSubscriptionCommand> logger )
+        : base( pipelineContextFactory, logger )
+    {
+        _middlewareProvider = middlewareProvider;
+    }
+
+    protected override FunctionAsync<string, DeleteOutput> CreatePipeline()
+    {
+        return PipelineFactory.Create<string, DeleteOutput>( _middlewareProvider, builder =>
+            builder
+                .Pipe( ValidateId )
+                .PipeAsync( LoadSubscriptionAsync )
+                .ValidateAsync()
+                .PipeAsync( DeleteSubscriptionAsync )
+                .Pipe( Result )
+        );
+    }
+
+    // ... step methods
+}
+```
+
+The `Create` method applies the provider's hooks after `Start` and wraps before `Build`, so every
+command that uses the provider gets consistent middleware without any extra boilerplate. See
+[Middleware](middleware.md) for more details on `IPipelineMiddlewareProvider`.
+
 ## Composing Commands into Pipelines
 
 Commands expose their inner pipeline delegate via the `PipelineFunction` property. This allows one command's

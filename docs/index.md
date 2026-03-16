@@ -24,8 +24,8 @@ as data processing, message handling, and workflow automation.
 Some key features are:
 
 - Middleware
-- Hooks
-- Wraps
+- Hooks and Wraps
+- Middleware providers for cross-cutting concerns
 - Conditional flows
 - Loops
 - Parallel processing
@@ -97,6 +97,23 @@ services.AddPipeline( (factoryServices, rootProvider) =>
     factoryServices.ProxyService<IPrincipalProvider>( rootProvider ); // pull from root container
 } );
 ```
+
+## Middleware Providers
+
+Use `IPipelineMiddlewareProvider` to define cross-cutting middleware (logging, error mapping, etc.) in
+one place and inject it via DI. The `PipelineFactory.Create` convenience method applies hooks and wraps
+automatically:
+
+```csharp
+var command = PipelineFactory.Create<string, string>( middlewareProvider, builder =>
+    builder
+        .Pipe( ( ctx, arg ) => $"hello {arg}" )
+        .Pipe( ( ctx, arg ) => $"{arg}!" )
+);
+```
+
+For explicit control, use `UseHooks` and `UseWraps` builder extensions. See [Middleware](middleware.md)
+for details.
 
 ## Pipeline of Pipelines
 
