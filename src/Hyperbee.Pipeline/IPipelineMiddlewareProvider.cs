@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline;
+﻿namespace Hyperbee.Pipeline;
 
 /// <summary>
 /// Provides hooks and wraps that can be injected into pipeline definitions.

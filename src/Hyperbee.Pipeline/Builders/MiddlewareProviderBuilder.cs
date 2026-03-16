@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline;
+﻿namespace Hyperbee.Pipeline;
 
 /// <summary>
 /// Provides extension methods for applying middleware from an <see cref="IPipelineMiddlewareProvider"/>
