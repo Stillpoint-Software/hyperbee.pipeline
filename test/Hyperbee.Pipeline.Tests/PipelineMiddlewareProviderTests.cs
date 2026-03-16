@@ -219,16 +219,14 @@ public class PipelineMiddlewareProviderTests
     }
 
     [TestMethod]
-    public async Task Create_should_work_with_null_provider()
+    public void Create_should_throw_with_null_provider()
     {
-        var command = PipelineFactory.Create<string, string>( null, builder =>
-            builder
-                .Pipe( ( ctx, arg ) => arg + "1" )
+        Assert.ThrowsExactly<System.ArgumentNullException>( () =>
+            PipelineFactory.Create<string, string>( null, builder =>
+                builder
+                    .Pipe( ( ctx, arg ) => arg + "1" )
+            )
         );
-
-        var result = await command( new PipelineContext() );
-
-        Assert.AreEqual( "1", result );
     }
 
     [TestMethod]
