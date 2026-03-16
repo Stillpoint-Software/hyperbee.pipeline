@@ -60,9 +60,28 @@ PipelineContextFactory.CreateFactory( serviceProvider );
 var factory = PipelineContextFactory.Instance;
 ```
 
-Once you have registered pipeline services, custom middleware can get service instances at runtime 
+Once you have registered pipeline services, custom middleware can get service instances at runtime
 by accessing the `context.ServiceProvider` property.
 
 ```csharp
 context.ServiceProvider.GetRequiredService<IPrincipleProvider>()
+```
+
+## Middleware Provider
+
+Register an `IPipelineMiddlewareProvider` to inject cross-cutting hooks and wraps into pipelines
+via DI. Commands that accept the provider can use `PipelineFactory.Create` to apply the middleware
+automatically. See [Middleware](middleware.md) for details.
+
+```csharp
+services.AddSingleton<IPipelineMiddlewareProvider, MyMiddlewareProvider>();
+```
+
+## Result Mapper
+
+Register an `IResultMapper` to apply shared exception-to-HTTP-status mapping across endpoints.
+See the [AspNetCore README](../src/Hyperbee.Pipeline.AspNetCore/README.md) for details.
+
+```csharp
+services.AddSingleton<IResultMapper, ConflictResultMapper>();
 ```

@@ -15,6 +15,13 @@ public class PipelineContextFactoryFixture
 {
     private static readonly AsyncLocal<ContextState> _asyncLocalState = new();
 
+    /// <summary>
+    /// Gets or sets a default <see cref="IPipelineMiddlewareProvider"/> that is automatically
+    /// registered with every fixture instance. Set this once in test setup (e.g., [AssemblyInitialize])
+    /// to apply shared middleware across all tests.
+    /// </summary>
+    public static IPipelineMiddlewareProvider? DefaultMiddlewareProvider { get; set; }
+
     private readonly string _contextId;
 
     public PipelineContextFactoryFixture()
@@ -57,6 +64,31 @@ public class PipelineContextFactoryFixture
     }
 
     /// <summary>
+    /// Registers an <see cref="IPipelineMiddlewareProvider"/> for injection into commands.
+    /// </summary>
+    /// <typeparam name="TProvider">The middleware provider type to register.</typeparam>
+    public PipelineContextFactoryFixture WithMiddlewareProvider<TProvider>()
+        where TProvider : class, IPipelineMiddlewareProvider, new()
+    {
+        var state = GetState();
+        state.Services.AddSingleton<IPipelineMiddlewareProvider>( new TProvider() );
+        state.HasMiddlewareProvider = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Registers an <see cref="IPipelineMiddlewareProvider"/> instance for injection into commands.
+    /// </summary>
+    /// <param name="provider">The middleware provider instance to register.</param>
+    public PipelineContextFactoryFixture WithMiddlewareProvider( IPipelineMiddlewareProvider provider )
+    {
+        var state = GetState();
+        state.Services.AddSingleton( provider );
+        state.HasMiddlewareProvider = true;
+        return this;
+    }
+
+    /// <summary>
     /// Configures the service collection for DI setup.
     /// </summary>
     public PipelineContextFactoryFixture WithServices( Action<IServiceCollection> configure )
@@ -73,6 +105,10 @@ public class PipelineContextFactoryFixture
     public IPipelineContextFactory Create()
     {
         var state = GetState();
+
+        // Register the default middleware provider if set and not explicitly overridden
+        if ( DefaultMiddlewareProvider is { } defaultProvider && !state.HasMiddlewareProvider )
+            state.Services.AddSingleton<IPipelineMiddlewareProvider>( defaultProvider );
 
         // Register the validator provider as a singleton
         state.Services.AddSingleton<IValidatorProvider>( state.ValidatorProvider );
@@ -150,5 +186,6 @@ public class PipelineContextFactoryFixture
         public ServiceCollection Services { get; init; } = null!;
         public TestValidatorProvider ValidatorProvider { get; init; } = null!;
         public IServiceProvider? ServiceProvider { get; set; }
+        public bool HasMiddlewareProvider { get; set; }
     }
 }

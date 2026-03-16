@@ -56,4 +56,28 @@ public class PipelineFactory
             Middleware = functionMiddleware
         };
     }
+
+    /// <summary>
+    /// Creates a pipeline with middleware from a provider applied automatically.
+    /// Hooks are applied after Start, wraps are applied before Build.
+    /// </summary>
+    /// <typeparam name="TStart">The input type of the pipeline.</typeparam>
+    /// <typeparam name="TOutput">The output type of the pipeline.</typeparam>
+    /// <param name="provider">The middleware provider supplying hooks and wraps.</param>
+    /// <param name="configure">A function that configures the pipeline steps.</param>
+    /// <returns>The built pipeline function.</returns>
+    public static FunctionAsync<TStart, TOutput> Create<TStart, TOutput>(
+        IPipelineMiddlewareProvider provider,
+        Func<IPipelineStartBuilder<TStart, TStart>, IPipelineBuilder<TStart, TOutput>> configure
+    )
+    {
+        ArgumentNullException.ThrowIfNull( configure );
+
+        var builder = Start<TStart>()
+            .UseHooks( provider );
+
+        return configure( builder )
+            .UseWraps( provider )
+            .Build();
+    }
 }

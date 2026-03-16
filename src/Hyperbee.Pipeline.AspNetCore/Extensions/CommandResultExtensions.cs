@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;
@@ -27,6 +27,63 @@ public static class CommandResultExtensions
     /// result; otherwise, returns an <see cref="IResult"/> with the successful result.</returns>
     public static IResult ToResult<T>( this CommandResult<T> commandResult )
     {
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
+            return errorResult;
+
+        return Results.Ok( commandResult.Result );
+    }
+
+    /// <summary>
+    /// Converts a <see cref="CommandResult{T}"/> to an <see cref="IResult"/> using a result mapper
+    /// that has full access to the command result for custom error and success handling.
+    /// </summary>
+    /// <remarks>
+    /// The <paramref name="resultMapper"/> runs before default error handling. If it returns a non-null
+    /// <see cref="IResult"/>, that result is used directly. If it returns <see langword="null"/>, the
+    /// default error and success handling logic applies.
+    /// </remarks>
+    /// <typeparam name="T">The type of the result contained in the <see cref="CommandResult{T}"/>.</typeparam>
+    /// <param name="commandResult">The command result to convert.</param>
+    /// <param name="resultMapper">A function that inspects the full command result and optionally returns
+    /// an <see cref="IResult"/>. Return <see langword="null"/> to fall through to default handling.</param>
+    /// <returns>An <see cref="IResult"/> representing the outcome of the command.</returns>
+    public static IResult ToResult<T>(
+        this CommandResult<T> commandResult,
+        Func<CommandResult<T>, IResult?> resultMapper
+    )
+    {
+        var mapped = resultMapper( commandResult );
+        if ( mapped != null )
+            return mapped;
+
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
+            return errorResult;
+
+        return Results.Ok( commandResult.Result );
+    }
+
+    /// <summary>
+    /// Converts a <see cref="CommandResult{T}"/> to an <see cref="IResult"/> using an injected
+    /// <see cref="IResultMapper"/> for cross-cutting result handling.
+    /// </summary>
+    /// <remarks>
+    /// The mapper runs before default error handling. If it returns a non-null
+    /// <see cref="IResult"/>, that result is used directly. If it returns <see langword="null"/>, the
+    /// default error and success handling logic applies.
+    /// </remarks>
+    /// <typeparam name="T">The type of the result contained in the <see cref="CommandResult{T}"/>.</typeparam>
+    /// <param name="commandResult">The command result to convert.</param>
+    /// <param name="resultMapper">An <see cref="IResultMapper"/> that inspects the command result.</param>
+    /// <returns>An <see cref="IResult"/> representing the outcome of the command.</returns>
+    public static IResult ToResult<T>(
+        this CommandResult<T> commandResult,
+        IResultMapper resultMapper
+    )
+    {
+        var mapped = resultMapper.Map( commandResult );
+        if ( mapped != null )
+            return mapped;
+
         if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 
@@ -73,6 +130,61 @@ public static class CommandResultExtensions
     /// result; otherwise, returns a successful result.</returns>
     public static IResult ToResult( this CommandResult commandResult )
     {
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
+            return errorResult;
+
+        return Results.Ok();
+    }
+
+    /// <summary>
+    /// Converts a <see cref="CommandResult"/> to an <see cref="IResult"/> using a result mapper
+    /// that has full access to the command result for custom error and success handling.
+    /// </summary>
+    /// <remarks>
+    /// The <paramref name="resultMapper"/> runs before default error handling. If it returns a non-null
+    /// <see cref="IResult"/>, that result is used directly. If it returns <see langword="null"/>, the
+    /// default error and success handling logic applies.
+    /// </remarks>
+    /// <param name="commandResult">The command result to convert.</param>
+    /// <param name="resultMapper">A function that inspects the full command result and optionally returns
+    /// an <see cref="IResult"/>. Return <see langword="null"/> to fall through to default handling.</param>
+    /// <returns>An <see cref="IResult"/> representing the outcome of the command.</returns>
+    public static IResult ToResult(
+        this CommandResult commandResult,
+        Func<CommandResult, IResult?> resultMapper
+    )
+    {
+        var mapped = resultMapper( commandResult );
+        if ( mapped != null )
+            return mapped;
+
+        if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
+            return errorResult;
+
+        return Results.Ok();
+    }
+
+    /// <summary>
+    /// Converts a <see cref="CommandResult"/> to an <see cref="IResult"/> using an injected
+    /// <see cref="IResultMapper"/> for cross-cutting result handling.
+    /// </summary>
+    /// <remarks>
+    /// The mapper runs before default error handling. If it returns a non-null
+    /// <see cref="IResult"/>, that result is used directly. If it returns <see langword="null"/>, the
+    /// default error and success handling logic applies.
+    /// </remarks>
+    /// <param name="commandResult">The command result to convert.</param>
+    /// <param name="resultMapper">An <see cref="IResultMapper"/> that inspects the command result.</param>
+    /// <returns>An <see cref="IResult"/> representing the outcome of the command.</returns>
+    public static IResult ToResult(
+        this CommandResult commandResult,
+        IResultMapper resultMapper
+    )
+    {
+        var mapped = resultMapper.Map( commandResult );
+        if ( mapped != null )
+            return mapped;
+
         if ( TryHandleInvalidCommand( commandResult.Context, commandResult.CommandType, out var errorResult ) )
             return errorResult;
 

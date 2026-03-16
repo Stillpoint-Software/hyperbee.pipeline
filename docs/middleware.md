@@ -243,3 +243,85 @@ _output:_
 ```
 
 :warning: In this case because the child pipeline does not inherit the parent middleware only the one "jim" hook wraps the `$"hello {++arg}"` step.
+
+## Middleware Provider
+
+When you have cross-cutting middleware concerns (logging, error mapping, etc.) that need to be applied
+consistently across many pipelines, you can use `IPipelineMiddlewareProvider` to define them in one place
+and inject them via DI.
+
+### Defining a Provider
+
+Implement the `IPipelineMiddlewareProvider` interface to supply hooks and wraps:
+
+```csharp
+public class MyMiddlewareProvider : IPipelineMiddlewareProvider
+{
+    private readonly ILogger _logger;
+
+    public MyMiddlewareProvider( ILogger<MyMiddlewareProvider> logger )
+    {
+        _logger = logger;
+    }
+
+    public IEnumerable<MiddlewareAsync<object, object>> Hooks =>
+    [
+        async ( context, argument, next ) =>
+        {
+            _logger.LogDebug( "Step {Id} begin with {Arg}", context.Id, argument );
+            var result = await next( context, argument );
+            _logger.LogDebug( "Step {Id} end with {Result}", context.Id, result );
+            return result;
+        }
+    ];
+
+    public IEnumerable<MiddlewareAsync<object, object>> Wraps =>
+    [
+        async ( context, argument, next ) =>
+        {
+            using var scope = _logger.BeginScope( "Pipeline" );
+            return await next( context, argument );
+        }
+    ];
+}
+```
+
+Register the provider with DI:
+
+```csharp
+services.AddSingleton<IPipelineMiddlewareProvider, MyMiddlewareProvider>();
+```
+
+### Using UseHooks and UseWraps
+
+For explicit control, use the `UseHooks` and `UseWraps` extension methods to apply the provider's
+middleware at specific points in the pipeline:
+
+```csharp
+var command = PipelineFactory
+    .Start<string>()
+    .UseHooks( provider )                    // apply hooks from the provider
+    .Pipe( ( ctx, arg ) => $"hello {arg}" )
+    .Pipe( ( ctx, arg ) => $"{arg}!" )
+    .UseWraps( provider )                    // apply wraps from the provider
+    .Build();
+```
+
+### Using PipelineFactory.Create
+
+For the common case, use the `PipelineFactory.Create` convenience method. It applies hooks after
+`Start` and wraps before `Build` automatically:
+
+```csharp
+var command = PipelineFactory.Create<string, string>( provider, builder =>
+    builder
+        .Pipe( ( ctx, arg ) => $"hello {arg}" )
+        .Pipe( ( ctx, arg ) => $"{arg}!" )
+);
+```
+
+This is equivalent to calling `Start`, `UseHooks`, your pipeline steps, `UseWraps`, and `Build`
+manually. The `Create` method is especially useful when many commands share the same provider,
+as it reduces boilerplate and ensures consistent middleware application.
+
+See [Commands](command-pattern.md) for an example of using `Create` inside a command class.
