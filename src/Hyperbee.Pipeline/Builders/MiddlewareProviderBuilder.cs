@@ -19,7 +19,7 @@ public static class MiddlewareProviderBuilder
         IPipelineMiddlewareProvider provider
     )
     {
-        if ( provider == null )
+        if ( provider == null || provider.Hooks == null || !provider.Hooks.Any() )
             return builder;
 
         return builder.HookAsync( provider.Hooks );
@@ -38,7 +38,7 @@ public static class MiddlewareProviderBuilder
         IPipelineMiddlewareProvider provider
     )
     {
-        if ( provider == null )
+        if ( provider == null || provider.Wraps == null || !provider.Wraps.Any() )
             return builder;
 
         foreach ( var wrap in provider.Wraps )
