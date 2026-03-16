@@ -325,7 +325,7 @@ Available failure types:
 When using `Hyperbee.Pipeline.AspNetCore`, validation failures are automatically mapped to HTTP responses:
 
 ```csharp
-using Hyperbee.Pipeline.AspNetCore;
+using Hyperbee.Pipeline.AspNetCore.Extensions;
 
 app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> command) =>
 {
@@ -336,9 +336,44 @@ app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> 
     // - 404 Not Found for NotFoundValidationFailure
     // - 401 Unauthorized for UnauthorizedValidationFailure
     // - 403 Forbidden for ForbiddenValidationFailure
-    return result.ToHttpResult();
+    return result.ToResult();
 });
 ```
+
+### Custom Result Mapping
+
+Use a `resultMapper` to handle specific exceptions alongside validation failures:
+
+```csharp
+app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> command) =>
+{
+    var result = await command.ExecuteAsync(order);
+    return result.ToResult( cr =>
+    {
+        if ( cr.Context.IsError && cr.Context.Exception is DbUpdateConcurrencyException )
+            return Results.Conflict( "Version conflict. Reload and retry." );
+        return null; // fall through to default validation/error handling
+    } );
+});
+```
+
+For shared mapping logic across many endpoints, implement `IResultMapper` and register it with DI:
+
+```csharp
+services.AddSingleton<IResultMapper, ConflictResultMapper>();
+
+app.MapPost("/orders", async (
+    Order order,
+    ICommandFunction<Order, OrderResult> command,
+    IResultMapper resultMapper) =>
+{
+    var result = await command.ExecuteAsync(order);
+    return result.ToResult( resultMapper );
+});
+```
+
+See the [AspNetCore README](../src/Hyperbee.Pipeline.AspNetCore/README.md) for full details on
+`IResultMapper` and all `ToResult` overloads.
 
 ## Advanced Scenarios
 

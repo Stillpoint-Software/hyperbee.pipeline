@@ -37,6 +37,26 @@ public async Task Should_return_result_when_input_is_valid()
 }
 ```
 
+### Register a Middleware Provider
+
+```csharp
+// Set a default provider for all tests (e.g., in [AssemblyInitialize])
+PipelineContextFactoryFixture.DefaultMiddlewareProvider = new LoggingMiddlewareProvider();
+
+// Every fixture automatically includes it
+var factory = PipelineContextFactoryFixture.Default();
+
+// Or register per-fixture (overrides the default)
+var factory = new PipelineContextFactoryFixture()
+    .WithMiddlewareProvider<LoggingMiddlewareProvider>()
+    .Create();
+
+// Or with an instance
+var factory = new PipelineContextFactoryFixture()
+    .WithMiddlewareProvider( new LoggingMiddlewareProvider( logger ) )
+    .Create();
+```
+
 ### Register Custom Services
 
 ```csharp

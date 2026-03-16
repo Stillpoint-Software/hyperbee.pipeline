@@ -32,6 +32,11 @@
 //
 public class PipelineFactory
 {
+    /// <summary>
+    /// Starts a pipeline with an identity function. This is the monadic 'return' or 'pure' operation, which lifts a value into the pipeline context.
+    /// </summary>
+    /// <typeparam name="TStart"></typeparam>
+    /// <returns></returns>
     public static IPipelineStartBuilder<TStart, TStart> Start<TStart>()
     {
         return new PipelineBuilder<TStart, TStart>
@@ -40,6 +45,10 @@ public class PipelineFactory
         };
     }
 
+    /// <summary>
+    /// Starts a pipeline with an identity function and an initial middleware. This overload allows you to provide middleware that will be applied at the start of the pipeline, before any steps are configured. The provided middleware will wrap the initial identity function, allowing you to inject behavior right from the beginning of the pipeline execution.
+    /// </summary>
+    /// <returns></returns>
     public static IPipelineStartBuilder<Arg.Empty, Arg.Empty> Start()
     {
         return new PipelineBuilder<Arg.Empty, Arg.Empty>
@@ -55,5 +64,47 @@ public class PipelineFactory
             Function = ( context, argument ) => Task.FromResult( argument ),
             Middleware = functionMiddleware
         };
+    }
+
+    /// <summary>
+    /// Creates a pipeline by applying a configuration function.
+    /// </summary>
+    /// <typeparam name="TStart">The input type of the pipeline.</typeparam>
+    /// <typeparam name="TOutput">The output type of the pipeline.</typeparam>
+    /// <param name="configure">A function that configures the pipeline steps.</param>
+    /// <returns>The built pipeline function.</returns>
+    public static FunctionAsync<TStart, TOutput> Create<TStart, TOutput>(
+        Func<IPipelineStartBuilder<TStart, TStart>, IPipelineBuilder<TStart, TOutput>> configure
+    )
+    {
+        ArgumentNullException.ThrowIfNull( configure );
+
+        return configure( Start<TStart>() )
+            .Build();
+    }
+
+    /// <summary>
+    /// Creates a pipeline with middleware from a provider applied automatically.
+    /// Hooks are applied after Start, wraps are applied before Build.
+    /// </summary>
+    /// <typeparam name="TStart">The input type of the pipeline.</typeparam>
+    /// <typeparam name="TOutput">The output type of the pipeline.</typeparam>
+    /// <param name="provider">The middleware provider supplying hooks and wraps.</param>
+    /// <param name="configure">A function that configures the pipeline steps.</param>
+    /// <returns>The built pipeline function.</returns>
+    public static FunctionAsync<TStart, TOutput> Create<TStart, TOutput>(
+        IPipelineMiddlewareProvider provider,
+        Func<IPipelineStartBuilder<TStart, TStart>, IPipelineBuilder<TStart, TOutput>> configure
+    )
+    {
+        ArgumentNullException.ThrowIfNull( provider );
+        ArgumentNullException.ThrowIfNull( configure );
+
+        var builder = Start<TStart>()
+            .UseHooks( provider );
+
+        return configure( builder )
+            .UseWraps( provider )
+            .Build();
     }
 }
