@@ -97,7 +97,6 @@ public class PipelineFactory
         Func<IPipelineStartBuilder<TStart, TStart>, IPipelineBuilder<TStart, TOutput>> configure
     )
     {
-        ArgumentNullException.ThrowIfNull( provider );
         ArgumentNullException.ThrowIfNull( configure );
 
         var builder = Start<TStart>()
