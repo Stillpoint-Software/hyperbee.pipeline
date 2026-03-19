@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.AspNetCore.Extensions;
+﻿using Hyperbee.Pipeline.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;

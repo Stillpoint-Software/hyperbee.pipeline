@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;

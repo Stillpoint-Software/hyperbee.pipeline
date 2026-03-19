@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.AspNetCore;
+﻿using Hyperbee.Pipeline.AspNetCore;
 using Hyperbee.Pipeline.AspNetCore.Extensions;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
