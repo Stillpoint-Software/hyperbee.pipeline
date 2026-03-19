@@ -61,7 +61,6 @@ public static class CommandResultExtensions
         Func<TSource, TResult?> contentSelector,
         ResultMapper? mapper = null
     )
-        where TResult : class
     {
         mapper ??= ResultMapper.Default;
 
