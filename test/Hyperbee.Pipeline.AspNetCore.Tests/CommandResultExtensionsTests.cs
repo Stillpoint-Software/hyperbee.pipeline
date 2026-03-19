@@ -1,4 +1,5 @@
-﻿using Hyperbee.Pipeline.AspNetCore.Extensions;
+using Hyperbee.Pipeline.AspNetCore;
+using Hyperbee.Pipeline.AspNetCore.Extensions;
 using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.Context;
 using Hyperbee.Pipeline.Validation;
@@ -72,6 +73,16 @@ public class CommandResultExtensionsTests
     }
 
     [TestMethod]
+    public void ToResult_should_return_not_found_for_null_result()
+    {
+        var commandResult = CreateSuccessResult<string>( null );
+
+        var result = commandResult.ToResult();
+
+        Assert.IsInstanceOfType( result, typeof( NotFound ) );
+    }
+
+    [TestMethod]
     public void ToResult_should_return_404_for_not_found_failure()
     {
         var commandResult = CreateFailureResult<string>(
@@ -114,7 +125,7 @@ public class CommandResultExtensionsTests
     }
 
     [TestMethod]
-    public void ToResult_should_return_400_for_application_failure()
+    public void ToResult_should_return_422_for_application_failure()
     {
         var commandResult = CreateFailureResult<string>(
             new ApplicationValidationFailure( "Field", "Invalid." )
@@ -124,11 +135,11 @@ public class CommandResultExtensionsTests
 
         Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
         var problem = (ProblemHttpResult) result;
-        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
     }
 
     [TestMethod]
-    public void ToResult_should_return_400_for_general_validation_failure()
+    public void ToResult_should_return_422_for_general_validation_failure()
     {
         var commandResult = CreateFailureResult<string>(
             new ValidationFailure( "Name", "Name is required." )
@@ -138,13 +149,13 @@ public class CommandResultExtensionsTests
 
         Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
         var problem = (ProblemHttpResult) result;
-        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
     }
 
-    // ToResult with selector tests
+    // ToResult with contentSelector tests
 
     [TestMethod]
-    public void ToResult_with_selector_should_transform_result()
+    public void ToResult_with_contentSelector_should_transform_result()
     {
         var commandResult = CreateSuccessResult( "hello" );
 
@@ -155,7 +166,7 @@ public class CommandResultExtensionsTests
     }
 
     [TestMethod]
-    public void ToResult_with_selector_should_return_not_found_for_null()
+    public void ToResult_with_contentSelector_should_return_not_found_for_null()
     {
         var commandResult = CreateSuccessResult( "hello" );
 
@@ -165,7 +176,7 @@ public class CommandResultExtensionsTests
     }
 
     [TestMethod]
-    public void ToResult_with_selector_should_return_error_for_invalid()
+    public void ToResult_with_contentSelector_should_return_error_for_invalid()
     {
         var commandResult = CreateFailureResult<string>(
             new NotFoundValidationFailure( "Item", "Not found." )
@@ -176,6 +187,16 @@ public class CommandResultExtensionsTests
         Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
         var problem = (ProblemHttpResult) result;
         Assert.AreEqual( StatusCodes.Status404NotFound, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void ToResult_with_contentSelector_returning_IResult_should_passthrough()
+    {
+        var commandResult = CreateSuccessResult( "hello" );
+
+        var result = commandResult.ToResult<string, IResult>( _ => Results.NoContent() );
+
+        Assert.IsInstanceOfType( result, typeof( NoContent ) );
     }
 
     // ToResult non-generic tests
@@ -205,7 +226,7 @@ public class CommandResultExtensionsTests
     }
 
     [TestMethod]
-    public void ToResult_non_generic_should_return_400_for_validation_failure()
+    public void ToResult_non_generic_should_return_422_for_validation_failure()
     {
         var commandResult = CreateNonGenericFailureResult(
             new ValidationFailure( "Name", "Required." )
@@ -215,7 +236,7 @@ public class CommandResultExtensionsTests
 
         Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
         var problem = (ProblemHttpResult) result;
-        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
     }
 
     // ToFileResult tests
@@ -263,8 +284,6 @@ public class CommandResultExtensionsTests
     [TestMethod]
     public void ToResult_should_return_error_details_for_adapter_validation_failures()
     {
-        // Arrange - simulate failures from a validation adapter (e.g., FluentValidationFailureAdapter)
-        // that implements IValidationFailure but does NOT inherit from ValidationFailure.
         var commandResult = CreateAdapterFailureResult<string>(
             new AdapterValidationFailure( "BasePrice", "Base price must be greater than zero." )
             {
@@ -274,13 +293,11 @@ public class CommandResultExtensionsTests
             new AdapterValidationFailure( "RatePlanConfiguration.RatePlans", "Rate plans must contain at least one tier starting at 0." )
         );
 
-        // Act
         var result = commandResult.ToResult();
 
-        // Assert
         Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
         var problem = (ProblemHttpResult) result;
-        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
         Assert.AreEqual( "One or more validation errors occurred.", problem.ProblemDetails.Detail );
 
         Assert.IsTrue(
@@ -291,6 +308,34 @@ public class CommandResultExtensionsTests
         var errors = errorsObj as System.Collections.IList;
         Assert.IsNotNull( errors );
         Assert.HasCount( 2, errors );
+    }
+
+    // Custom mapper tests
+
+    [TestMethod]
+    public void ToResult_with_custom_mapper_should_use_custom_status_code()
+    {
+        var customMapper = new Custom422To400Mapper();
+        var commandResult = CreateFailureResult<string>(
+            new ApplicationValidationFailure( "Field", "Invalid." )
+        );
+
+        var result = commandResult.ToResult( customMapper );
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void ToResult_with_contentSelector_and_mapper_should_compose()
+    {
+        var commandResult = CreateSuccessResult( "hello" );
+
+        var result = commandResult.ToResult( s => new { Value = s.ToUpper() }, ResultMapper.Default );
+
+        Assert.IsTrue( result.GetType().IsGenericType );
+        Assert.AreEqual( "Ok`1", result.GetType().GetGenericTypeDefinition().Name );
     }
 
     private static CommandResult<T> CreateAdapterFailureResult<T>( params IValidationFailure[] failures )
@@ -307,15 +352,22 @@ public class CommandResultExtensionsTests
         };
     }
 
-    /// <summary>
-    /// Simulates a validation adapter failure (like FluentValidationFailureAdapter)
-    /// that implements IValidationFailure without inheriting from ValidationFailure.
-    /// </summary>
     private class AdapterValidationFailure( string propertyName, string errorMessage ) : IValidationFailure
     {
         public string PropertyName { get; set; } = propertyName;
         public string ErrorMessage { get; set; } = errorMessage;
         public string? ErrorCode { get; set; }
         public object? AttemptedValue { get; set; }
+    }
+
+    private class Custom422To400Mapper : ResultMapper
+    {
+        public override int GetStatusCode( IValidationFailure failure ) => failure switch
+        {
+            NotFoundValidationFailure => StatusCodes.Status404NotFound,
+            ForbiddenValidationFailure => StatusCodes.Status403Forbidden,
+            UnauthorizedValidationFailure => StatusCodes.Status401Unauthorized,
+            _ => StatusCodes.Status400BadRequest
+        };
     }
 }
