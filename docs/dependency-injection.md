@@ -79,9 +79,9 @@ services.AddSingleton<IPipelineMiddlewareProvider, MyMiddlewareProvider>();
 
 ## Result Mapper
 
-Register an `IResultMapper` to apply shared exception-to-HTTP-status mapping across endpoints.
+Subclass `ResultMapper` to apply shared exception-to-HTTP-status mapping across endpoints.
 See the [AspNetCore README](../src/Hyperbee.Pipeline.AspNetCore/README.md) for details.
 
 ```csharp
-services.AddSingleton<IResultMapper, ConflictResultMapper>();
+services.AddSingleton<ResultMapper, ConflictResultMapper>();
 ```
