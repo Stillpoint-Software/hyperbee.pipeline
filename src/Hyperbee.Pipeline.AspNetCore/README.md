@@ -17,7 +17,7 @@ app.MapPost( "/items", async (
 } );
 ```
 
-### Transform Results Before Returning
+### Transform Results with a Content Selector
 
 ```csharp
 app.MapGet( "/items/{id}", async (
@@ -41,60 +41,78 @@ app.MapGet( "/reports/{id}", async (
 } );
 ```
 
-### Custom Result Mapping
+### Custom Result Mapping with ResultMapper
 
-Use a `resultMapper` to handle specific exceptions or customize both error and success responses.
-The mapper receives the full `CommandResult` and returns an `IResult`, or `null` to fall through
-to default handling.
-
-```csharp
-app.MapPost( "/items", async (
-    CreateItemRequest request,
-    ICommandFunction<CreateItemRequest, Item> command ) =>
-{
-    var commandResult = await command.ExecuteAsync( request );
-    return commandResult.ToResult( cr =>
-    {
-        if ( cr.Context.IsError && cr.Context.Exception is DbUpdateConcurrencyException )
-            return Results.Conflict( "Version conflict. Reload and retry." );
-        return null; // fall through to default handling
-    } );
-} );
-```
-
-### Cross-Cutting Result Mapping with IResultMapper
-
-For shared result mapping logic, implement the `IResultMapper` interface and register it with DI.
-This is useful when multiple endpoints need the same exception-to-HTTP-status mapping.
+Subclass `ResultMapper` to customize error handling, status codes, and success responses.
+Override only the methods you need.
 
 ```csharp
-public class ConflictResultMapper : IResultMapper
+public class BillingResultMapper : ResultMapper
 {
-    public IResult? Map( CommandResult commandResult )
+    public override IResult? MapException( Exception exception ) => exception switch
     {
-        if ( commandResult.Context.IsError &&
-             commandResult.Context.Exception is DbUpdateConcurrencyException )
-        {
-            return Results.Conflict( "Version conflict. Reload and retry." );
-        }
-
-        return null; // fall through to default handling
-    }
+        WriteConflictRepositoryException => Results.Conflict( "Version mismatch. Reload and retry." ),
+        CommandException { InnerException: WriteConflictRepositoryException }
+            => Results.Conflict( "Version mismatch. Reload and retry." ),
+        _ => base.MapException( exception )
+    };
 }
 ```
 
 Register with DI and inject into endpoints:
 
 ```csharp
-services.AddSingleton<IResultMapper, ConflictResultMapper>();
+services.AddSingleton<ResultMapper, BillingResultMapper>();
 
 app.MapPost( "/items", async (
     CreateItemRequest request,
     ICommandFunction<CreateItemRequest, Item> command,
-    IResultMapper resultMapper ) =>
+    ResultMapper mapper ) =>
 {
     var commandResult = await command.ExecuteAsync( request );
-    return commandResult.ToResult( resultMapper );
+    return commandResult.ToResult( mapper );
+} );
+```
+
+### One-Off Mapper with Lambdas
+
+Use `ResultMapper.Create()` for one-off customizations without subclassing:
+
+```csharp
+var mapper = ResultMapper.Create(
+    mapException: ex => ex is DbUpdateConcurrencyException
+        ? Results.Conflict( "Version conflict." )
+        : null
+);
+
+return commandResult.ToResult( x => x?.ToPresentation(), mapper );
+```
+
+### Response Decorators
+
+Chain `.WithHeader()` and `.WithNoContent()` to customize successful responses:
+
+```csharp
+// Add an ETag header
+return commandResult.ToResult( x => x?.ToPresentation(), mapper )
+    .WithHeader( "ETag", commandResult.Result?.VersionTag );
+
+// Return 204 No Content for write operations
+return commandResult.ToResult( mapper ).WithNoContent();
+```
+
+### Inline Result Mapping
+
+Use a `Func<CommandResult<T>, IResult?>` for one-off custom handling.
+Return `null` to fall through to default handling.
+
+```csharp
+var commandResult = await command.ExecuteAsync( request );
+return commandResult.ToResult( cr =>
+{
+    if ( cr.Context.IsError && cr.Context.Exception is DbUpdateConcurrencyException )
+        return Results.Conflict( "Version conflict. Reload and retry." );
+    return null;
 } );
 ```
 
@@ -108,5 +126,7 @@ RFC 7807 Problem Details responses:
 | `NotFoundValidationFailure` | 404 Not Found |
 | `UnauthorizedValidationFailure` | 401 Unauthorized |
 | `ForbiddenValidationFailure` | 403 Forbidden |
-| `ApplicationValidationFailure` | 400 Bad Request |
-| `ValidationFailure` | 400 Bad Request |
+| `ApplicationValidationFailure` | 422 Unprocessable Entity |
+| `ValidationFailure` | 422 Unprocessable Entity |
+
+Override `GetStatusCode` on your `ResultMapper` subclass to customize these mappings.

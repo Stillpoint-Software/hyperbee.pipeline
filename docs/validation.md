@@ -332,7 +332,7 @@ app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> 
     var result = await command.ExecuteAsync(order, cancellationToken);
 
     // Automatically returns:
-    // - 400 Bad Request for validation failures
+    // - 422 Unprocessable Entity for validation failures
     // - 404 Not Found for NotFoundValidationFailure
     // - 401 Unauthorized for UnauthorizedValidationFailure
     // - 403 Forbidden for ForbiddenValidationFailure
@@ -357,23 +357,41 @@ app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> 
 });
 ```
 
-For shared mapping logic across many endpoints, implement `IResultMapper` and register it with DI:
+For shared mapping logic across many endpoints, subclass `ResultMapper` and register it with DI:
 
 ```csharp
-services.AddSingleton<IResultMapper, ConflictResultMapper>();
+services.AddSingleton<ResultMapper, ConflictResultMapper>();
 
 app.MapPost("/orders", async (
     Order order,
     ICommandFunction<Order, OrderResult> command,
-    IResultMapper resultMapper) =>
+    ResultMapper mapper) =>
 {
     var result = await command.ExecuteAsync(order);
-    return result.ToResult( resultMapper );
+    return result.ToResult( mapper );
 });
 ```
 
+For one-off customizations without subclassing, use `ResultMapper.Create()` with lambdas:
+
+```csharp
+app.MapPost("/orders", async (Order order, ICommandFunction<Order, OrderResult> command) =>
+{
+    var mapper = ResultMapper.Create(
+        mapException: ex => ex is DbUpdateConcurrencyException
+            ? Results.Conflict( "Version conflict. Reload and retry." )
+            : null
+    );
+
+    var result = await command.ExecuteAsync(order);
+    return result.ToResult( x => x?.ToPresentation(), mapper );
+});
+```
+
+Any lambda not provided falls back to the default behavior.
+
 See the [AspNetCore README](../src/Hyperbee.Pipeline.AspNetCore/README.md) for full details on
-`IResultMapper` and all `ToResult` overloads.
+`ResultMapper` and all `ToResult` overloads.
 
 ## Advanced Scenarios
 
