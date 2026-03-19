@@ -499,7 +499,108 @@ public class ResultMapperTests
         Assert.AreEqual( StatusCodes.Status400BadRequest, problem.StatusCode );
     }
 
+    // GetPriorityStatusCode tests
+
+    [TestMethod]
+    public void GetPriorityStatusCode_should_pick_404_over_422()
+    {
+        var failures = new IValidationFailure[]
+        {
+            new ApplicationValidationFailure( "Field", "Invalid." ),
+            new NotFoundValidationFailure( "Item", "Not found." )
+        };
+
+        var statusCode = ResultMapper.Default.GetPriorityStatusCode( failures );
+
+        Assert.AreEqual( StatusCodes.Status404NotFound, statusCode );
+    }
+
+    [TestMethod]
+    public void GetPriorityStatusCode_should_pick_403_over_401()
+    {
+        var failures = new IValidationFailure[]
+        {
+            new UnauthorizedValidationFailure( "User", "Unauthenticated." ),
+            new ForbiddenValidationFailure( "Resource", "Denied." )
+        };
+
+        var statusCode = ResultMapper.Default.GetPriorityStatusCode( failures );
+
+        Assert.AreEqual( StatusCodes.Status403Forbidden, statusCode );
+    }
+
+    [TestMethod]
+    public void GetPriorityStatusCode_with_custom_mapper_should_respect_custom_codes()
+    {
+        var mapper = new Custom409Mapper();
+        var failures = new IValidationFailure[]
+        {
+            new ApplicationValidationFailure( "Field", "Conflict." )
+        };
+
+        var statusCode = mapper.GetPriorityStatusCode( failures );
+
+        Assert.AreEqual( StatusCodes.Status409Conflict, statusCode );
+    }
+
+    [TestMethod]
+    public void GetPriorityStatusCode_should_use_lowest_for_unknown_custom_codes()
+    {
+        var mapper = new Custom409Mapper();
+        var failures = new IValidationFailure[]
+        {
+            new ApplicationValidationFailure( "A", "Conflict." ),
+            new ValidationFailure( "B", "Also conflict." )
+        };
+
+        // Both map to 409 via Custom409Mapper
+        var statusCode = mapper.GetPriorityStatusCode( failures );
+
+        Assert.AreEqual( StatusCodes.Status409Conflict, statusCode );
+    }
+
+    // Non-generic MapSuccess override tests
+
+    [TestMethod]
+    public void Non_generic_ToResult_should_use_MapSuccess()
+    {
+        var mapper = new NoContentSuccessMapper();
+        var commandResult = new CommandResult
+        {
+            Context = new PipelineContext(),
+            CommandType = typeof( ResultMapperTests )
+        };
+
+        var result = commandResult.ToResult( mapper );
+
+        Assert.IsInstanceOfType( result, typeof( NoContent ) );
+    }
+
+    [TestMethod]
+    public void Default_non_generic_MapSuccess_should_return_ok()
+    {
+        var result = ResultMapper.Default.MapSuccess();
+
+        Assert.IsInstanceOfType( result, typeof( Ok ) );
+    }
+
     // Test helpers
+
+    private class Custom409Mapper : ResultMapper
+    {
+        public override int GetStatusCode( IValidationFailure failure ) => failure switch
+        {
+            NotFoundValidationFailure => StatusCodes.Status404NotFound,
+            ForbiddenValidationFailure => StatusCodes.Status403Forbidden,
+            UnauthorizedValidationFailure => StatusCodes.Status401Unauthorized,
+            _ => StatusCodes.Status409Conflict
+        };
+    }
+
+    private class NoContentSuccessMapper : ResultMapper
+    {
+        public override IResult MapSuccess() => Results.NoContent();
+    }
 
     private class TimeoutCancellationMapper : ResultMapper
     {

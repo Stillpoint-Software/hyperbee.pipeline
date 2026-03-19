@@ -92,7 +92,7 @@ public static class CommandResultExtensions
         return mapper.HandleCommand(
             commandResult.Context,
             commandResult.CommandType,
-            () => Results.Ok()
+            mapper.MapSuccess
         );
     }
 

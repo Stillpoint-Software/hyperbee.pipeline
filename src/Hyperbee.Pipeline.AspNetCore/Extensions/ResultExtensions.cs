@@ -9,7 +9,7 @@ public static class ResultExtensions
 {
     /// <summary>
     /// Adds an HTTP header to the response. If the value is null or whitespace, the
-    /// header is not added.
+    /// header is not added. Multiple headers can be chained.
     /// </summary>
     /// <param name="result">The result to decorate.</param>
     /// <param name="name">The header name.</param>
@@ -24,16 +24,15 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Replaces the response with a 204 No Content result while preserving any
+    /// Replaces the response with a 204 No Content result while preserving all
     /// previously chained decorators (e.g., headers).
     /// </summary>
     /// <param name="result">The result to replace.</param>
-    /// <returns>A 204 No Content <see cref="IResult"/> with any prior decorators preserved.</returns>
+    /// <returns>A 204 No Content <see cref="IResult"/> with all prior decorators preserved.</returns>
     public static IResult WithNoContent( this IResult result )
     {
-        // If there are existing decorators, preserve them on top of NoContent
         if ( result is DecoratedResult decorated )
-            return new DecoratedResult( Results.NoContent(), decorated.Decorator );
+            return new DecoratedResult( Results.NoContent(), decorated.Decorators );
 
         return Results.NoContent();
     }

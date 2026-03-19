@@ -110,6 +110,16 @@ public class ResultMapper
     }
 
     /// <summary>
+    /// Maps a successful command with no result value to an <see cref="IResult"/>.
+    /// Used by the non-generic <c>ToResult</c> overload.
+    /// </summary>
+    /// <returns>An <see cref="IResult"/> representing the success response.</returns>
+    public virtual IResult MapSuccess()
+    {
+        return Results.Ok();
+    }
+
+    /// <summary>
     /// Creates a <see cref="ResultMapper"/> from lambda functions. Any lambda not provided
     /// falls back to the default behavior. Useful for one-off customizations without subclassing.
     /// </summary>
@@ -173,11 +183,18 @@ public class ResultMapper
         return onSuccess();
     }
 
-    private int GetPriorityStatusCode( List<IValidationFailure> failures )
+    /// <summary>
+    /// Determines the single status code to use when multiple validation failures
+    /// produce different status codes. Override to change the priority logic.
+    /// The default priority is: 404 &gt; 403 &gt; 401 &gt; lowest remaining code.
+    /// </summary>
+    /// <param name="failures">The validation failures.</param>
+    /// <returns>The status code to use for the response.</returns>
+    public virtual int GetPriorityStatusCode( IEnumerable<IValidationFailure> failures )
     {
-        // Priority order matches the original waterfall: 404 > 403 > 401 > default
         var statusCodes = failures.Select( GetStatusCode ).Distinct().ToList();
 
+        // Well-known priority order
         if ( statusCodes.Contains( StatusCodes.Status404NotFound ) )
             return StatusCodes.Status404NotFound;
 
@@ -187,7 +204,8 @@ public class ResultMapper
         if ( statusCodes.Contains( StatusCodes.Status401Unauthorized ) )
             return StatusCodes.Status401Unauthorized;
 
-        return statusCodes.FirstOrDefault( StatusCodes.Status422UnprocessableEntity );
+        // For any other codes (including custom ones), use the lowest
+        return statusCodes.DefaultIfEmpty( StatusCodes.Status422UnprocessableEntity ).Min();
     }
 
     private sealed class LambdaResultMapper(
