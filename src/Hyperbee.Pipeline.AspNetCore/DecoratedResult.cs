@@ -17,7 +17,7 @@ internal sealed class DecoratedResult : IResult
         if ( inner is DecoratedResult existing )
         {
             Inner = existing.Inner;
-            Decorators = [..existing.Decorators, decorator];
+            Decorators = [.. existing.Decorators, decorator];
         }
         else
         {
