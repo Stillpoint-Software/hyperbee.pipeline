@@ -24,16 +24,31 @@ public static class ResultExtensions
     }
 
     /// <summary>
-    /// Replaces the response with a 204 No Content result while preserving all
-    /// previously chained decorators (e.g., headers).
+    /// Replaces a successful response with a 204 No Content result while preserving all
+    /// previously chained decorators (e.g., headers). Non-success results (e.g., validation
+    /// errors, exceptions) are returned unchanged.
     /// </summary>
     /// <param name="result">The result to replace.</param>
-    /// <returns>A 204 No Content <see cref="IResult"/> with all prior decorators preserved.</returns>
+    /// <returns>A 204 No Content <see cref="IResult"/> if the original result was successful;
+    /// otherwise, the original result unchanged.</returns>
     public static IResult WithNoContent( this IResult result )
     {
-        if ( result is DecoratedResult decorated )
-            return new DecoratedResult( Results.NoContent(), decorated.Decorators );
+        if ( !IsSuccessResult( result ) )
+            return result;
+
+        if ( result is DecoratedResult dec )
+            return new DecoratedResult( Results.NoContent(), dec.Decorators );
 
         return Results.NoContent();
+    }
+
+    private static bool IsSuccessResult( IResult result )
+    {
+        // Unwrap DecoratedResult to inspect the actual response status code
+        var effective = result is DecoratedResult decorated ? decorated.Inner : result;
+
+        // Only treat confirmed 2xx as success. If the result doesn't expose a
+        // status code, preserve it unchanged — safe default over silent replacement.
+        return effective is IStatusCodeHttpResult { StatusCode: >= 200 and <= 299 };
     }
 }
