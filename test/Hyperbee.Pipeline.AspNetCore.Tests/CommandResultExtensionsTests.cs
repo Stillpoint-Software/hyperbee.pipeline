@@ -75,7 +75,7 @@ public class CommandResultExtensionsTests
     [TestMethod]
     public void ToResult_should_return_not_found_for_null_result()
     {
-        var commandResult = CreateSuccessResult<string>( null );
+        var commandResult = CreateSuccessResult<string>( null! );
 
         var result = commandResult.ToResult();
 
