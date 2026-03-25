@@ -157,4 +157,125 @@ public class ResultExtensionsTests
 
         Assert.AreEqual( StatusCodes.Status204NoContent, httpContext.Response.StatusCode );
     }
+
+    // WithNoContent error-preservation tests
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_422_validation_error()
+    {
+        var result = Results.Problem(
+            detail: "Validation failed.",
+            statusCode: StatusCodes.Status422UnprocessableEntity
+        ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_401_unauthorized()
+    {
+        var result = Results.Problem(
+            detail: "Unauthorized.",
+            statusCode: StatusCodes.Status401Unauthorized
+        ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status401Unauthorized, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_403_forbidden()
+    {
+        var result = Results.Problem(
+            detail: "Forbidden.",
+            statusCode: StatusCodes.Status403Forbidden
+        ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status403Forbidden, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_404_not_found()
+    {
+        var result = Results.NotFound().WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status404NotFound, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_500_error()
+    {
+        var result = Results.Problem(
+            detail: "Server error.",
+            statusCode: StatusCodes.Status500InternalServerError
+        ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status500InternalServerError, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_preserve_error_with_headers()
+    {
+        var result = Results.Problem(
+            detail: "Not found.",
+            statusCode: StatusCodes.Status404NotFound
+        )
+        .WithHeader( "X-Trace", "abc" )
+        .WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status404NotFound, httpContext.Response.StatusCode );
+        Assert.AreEqual( "abc", httpContext.Response.Headers["X-Trace"].ToString() );
+    }
+
+    // WithNoContent should convert all 2xx success responses
+
+    [TestMethod]
+    public async Task WithNoContent_should_replace_200_ok()
+    {
+        var result = Results.Ok( "hello" ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status204NoContent, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_replace_201_created()
+    {
+        var result = Results.Created( "/items/1", new { Id = 1 } ).WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status204NoContent, httpContext.Response.StatusCode );
+    }
+
+    [TestMethod]
+    public async Task WithNoContent_should_replace_202_accepted()
+    {
+        var result = Results.Accepted().WithNoContent();
+
+        var httpContext = CreateHttpContext();
+        await result.ExecuteAsync( httpContext );
+
+        Assert.AreEqual( StatusCodes.Status204NoContent, httpContext.Response.StatusCode );
+    }
 }
