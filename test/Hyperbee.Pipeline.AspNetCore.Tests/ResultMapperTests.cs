@@ -147,7 +147,7 @@ public class ResultMapperTests
     [TestMethod]
     public void Default_MapSuccess_should_return_not_found_for_null()
     {
-        var result = ResultMapper.Default.MapSuccess<string>( null );
+        var result = ResultMapper.Default.MapSuccess<string>( null! );
         Assert.IsInstanceOfType( result, typeof( NotFound ) );
     }
 

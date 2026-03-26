@@ -59,6 +59,9 @@ public delegate Task ProcedureAsync<in TStart>( IPipelineContext context, TStart
 /// <typeparam name="TStart">The input type to this composition.</typeparam>
 public delegate void Procedure<in TStart>( IPipelineContext context, TStart argument = default );
 
+/// <summary>
+/// An empty struct placeholder, <c>Arg.Empty</c>, for pipelines that don't require an input argument.
+/// </summary>
 public struct Arg
 {
     // Convenience structure for pipelines that want an empty start.
