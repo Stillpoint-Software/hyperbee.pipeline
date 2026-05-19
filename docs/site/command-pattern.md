@@ -176,8 +176,9 @@ command that uses the provider gets consistent middleware without any extra boil
 
 Commands expose their inner pipeline delegate via the `PipelineFunction` property. This allows one command's
 pipeline to directly compose another command's pipeline as a step, without calling `ExecuteAsync`. The key
-benefit is that the pipeline context flows through naturally -- shared state, middleware, exception handling,
-and cancellation are all preserved.
+benefit is that the pipeline context flows through naturally -- shared state, middleware, and cancellation are
+preserved, and an error in a composed command halts the outer pipeline (see
+[Halt-on-Error and the Boundary Model](#halt-on-error-and-the-boundary-model)).
 
 ### PipeAsync with Commands
 
@@ -238,6 +239,39 @@ Conditionally compose a command's pipeline based on a runtime condition.
 ```csharp
 .PipeIf( ( ctx, arg ) => arg.Length > 5, _formatCommand )
 .CallIf( ( ctx, arg ) => arg.StartsWith( "log:" ), _logCommand )
+```
+
+### Halt-on-Error and the Boundary Model
+
+A pipeline has two distinct boundaries, and they behave differently on error.
+
+The outermost boundary returns a result and does not throw. Running a built pipeline
+(or a command's `ExecuteAsync`) captures any failure on the context rather than
+propagating it as an exception -- `CommandResult.Context` exposes `Success`,
+`IsError`, and `Exception` as diagnostics. This is the same model as a compiler that
+returns a result with diagnostics rather than throwing on a compile error. (Set
+`context.Throws` to opt a specific run into rethrowing instead.)
+
+Between steps, progression halts on error. When any step -- including a composed
+command -- fails with an exception, the pipeline stops: subsequent steps do not run,
+and the failure surfaces at the boundary as `IsError` / `Exception`. This prevents a
+swallowed error from feeding `default` data into later steps. Because the halt reuses
+the cancellation short-circuit, an errored pipeline also reports `IsCanceled == true`;
+`IsError` distinguishes an error from a plain cancellation.
+
+This halt-on-error behavior is the default. To restore the prior behavior, where
+steps continue running after an error is recorded, configure it once at DI wire-up:
+
+```csharp
+services.AddPipeline( options => options.HaltOnError = false );
+```
+
+The option composes with the other `AddPipeline` overloads:
+
+```csharp
+services.AddPipeline(
+    ( factoryServices, rootProvider ) => { /* register factory services */ },
+    options => options.HaltOnError = false );
 ```
 
 ### Implicit Conversion

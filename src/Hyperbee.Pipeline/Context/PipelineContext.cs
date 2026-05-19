@@ -30,6 +30,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
         Logger = source.Logger;
         ServiceProvider = source.ServiceProvider;
         Throws = throws;
+        HaltOnError = source.HaltOnError;
     }
 
     private object _cancellationValue;
@@ -70,6 +71,7 @@ public class PipelineContext : IPipelineContext, IPipelineContextControl
 
     public Exception Exception { get; set; }
     public bool Throws { get; }
+    public bool HaltOnError { get; init; } = true;
 
     public bool Success => !IsError && !IsCanceled;
     public bool IsError => Exception != null;

@@ -46,6 +46,21 @@ services.AddPipeline( (factoryServices, rootProvider) =>
 } );
 ```
 
+### Pipeline Options
+
+Pipeline-wide behavior is configured with a `configure` delegate accepted by every
+`AddPipeline` overload. Currently this exposes `HaltOnError` (default `true`), which
+controls whether a step error halts the pipeline. See
+[Halt-on-Error and the Boundary Model](command-pattern.md#halt-on-error-and-the-boundary-model).
+
+```csharp
+// restore the prior run-through-on-error behavior
+services.AddPipeline( options => options.HaltOnError = false );
+
+// composes with the other overloads
+services.AddPipeline( includeAllServices: true, configure: options => options.HaltOnError = false );
+```
+
 ### Example 4
 Register Pipeline services manually and provide Pipeline dependencies using a specialized container.
 
