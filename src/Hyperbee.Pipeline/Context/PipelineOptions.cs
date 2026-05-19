@@ -1,4 +1,4 @@
-namespace Hyperbee.Pipeline.Context;
+﻿namespace Hyperbee.Pipeline.Context;
 
 public sealed class PipelineOptions
 {
