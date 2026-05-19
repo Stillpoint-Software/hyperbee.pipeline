@@ -29,6 +29,12 @@ public class PipelineBuilder<TStart, TOutput> : PipelineFactory, IPipelineStartB
             {
                 context.Exception = ex;
 
+                // Halt step progression on error by reusing the cancellation
+                // short-circuit. The boundary still returns a result (no throw
+                // unless context.Throws); IsError/Exception carry the diagnostic.
+                if ( context.HaltOnError && !context.IsCanceled )
+                    context.CancelAfter();
+
                 if ( context.Throws )
                     throw;
             }
@@ -49,6 +55,12 @@ public class PipelineBuilder<TStart, TOutput> : PipelineFactory, IPipelineStartB
             catch ( Exception ex )
             {
                 context.Exception = ex;
+
+                // Halt step progression on error by reusing the cancellation
+                // short-circuit. The boundary still returns a result (no throw
+                // unless context.Throws); IsError/Exception carry the diagnostic.
+                if ( context.HaltOnError && !context.IsCanceled )
+                    context.CancelAfter();
 
                 if ( context.Throws )
                     throw;

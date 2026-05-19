@@ -6,16 +6,20 @@ namespace Hyperbee.Pipeline;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddPipeline( this IServiceCollection services, bool includeAllServices = false )
+    public static IServiceCollection AddPipeline( this IServiceCollection services, bool includeAllServices = false, Action<PipelineOptions> configure = null )
     {
         return services.AddSingleton( serviceProvider =>
         {
             var factoryServices = includeAllServices ? serviceProvider : null; // use application wide service provider, or none
-            return PipelineContextFactory.CreateFactory( factoryServices );
+
+            var options = new PipelineOptions();
+            configure?.Invoke( options );
+
+            return PipelineContextFactory.CreateFactory( factoryServices, options: options );
         } );
     }
 
-    public static IServiceCollection AddPipeline( this IServiceCollection services, Action<IServiceCollection, IServiceProvider> implementationFactory )
+    public static IServiceCollection AddPipeline( this IServiceCollection services, Action<IServiceCollection, IServiceProvider> implementationFactory, Action<PipelineOptions> configure = null )
     {
         ArgumentNullException.ThrowIfNull( implementationFactory );
 
@@ -24,7 +28,10 @@ public static class ServiceCollectionExtensions
             var factoryServices = new ServiceCollection(); // use a specialized factory services container
             implementationFactory( factoryServices, serviceProvider );
 
-            return PipelineContextFactory.CreateFactory( factoryServices.BuildServiceProvider() );
+            var options = new PipelineOptions();
+            configure?.Invoke( options );
+
+            return PipelineContextFactory.CreateFactory( factoryServices.BuildServiceProvider(), options: options );
         } );
     }
 

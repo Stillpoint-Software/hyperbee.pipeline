@@ -11,6 +11,7 @@ public interface IPipelineContext
 
     Exception Exception { get; set; }
     bool Throws { get; }
+    bool HaltOnError { get; }
 
     bool Success { get; }
     bool IsError { get; }
