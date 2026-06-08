@@ -8,6 +8,30 @@ namespace Hyperbee.Pipeline.TestHelpers;
 public static class CommandResultHelpers
 {
     /// <summary>
+    /// Creates a successful CommandResult (no output) for an <see cref="ICommandProcedure{TStart}"/>.
+    /// </summary>
+    /// <returns>A CommandResult with valid state.</returns>
+    public static CommandResult CreateSuccess()
+    {
+        var context = CreateContext();
+        context.SetValidationResult( new ValidationResult() );
+
+        return new CommandResult { Context = context };
+    }
+
+    /// <summary>
+    /// Creates a failed CommandResult (no output) whose ThrowIfError() throws the supplied exception.
+    /// </summary>
+    /// <param name="exception">The exception to set in the context.</param>
+    /// <returns>A CommandResult in an error state.</returns>
+    public static CommandResult CreateWithException( Exception exception )
+    {
+        var context = CreateErrorContext( exception );
+
+        return new CommandResult { Context = context };
+    }
+
+    /// <summary>
     /// Creates a CommandResult with a successful validation result.
     /// </summary>
     /// <typeparam name="TOutput">The output type of the command result.</typeparam>
