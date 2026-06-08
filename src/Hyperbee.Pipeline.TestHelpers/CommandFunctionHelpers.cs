@@ -61,4 +61,35 @@ public static class CommandFunctionHelpers
     {
         commandFunction.MockCommandFunction( () => CommandResultHelpers.CreateWithException<TOutput>( exception ) );
     }
+
+    /// <summary>
+    /// Mocks a command procedure to return a successful result (no output).
+    /// </summary>
+    /// <typeparam name="TStart">The input type for the command procedure.</typeparam>
+    /// <param name="commandProcedure">The command procedure to mock.</param>
+    public static void MockSuccessfulResult<TStart>( this ICommandProcedure<TStart> commandProcedure )
+    {
+        var commandResult = CommandResultHelpers.CreateSuccess();
+
+        commandProcedure.ExecuteAsync(
+            NSubstitute.Arg.Any<TStart>(),
+            NSubstitute.Arg.Any<CancellationToken>() )
+            .Returns( commandResult );
+    }
+
+    /// <summary>
+    /// Mocks a command procedure to return an exception result with the specified exception.
+    /// </summary>
+    /// <typeparam name="TStart">The input type for the command procedure.</typeparam>
+    /// <param name="commandProcedure">The command procedure to mock.</param>
+    /// <param name="exception">The exception to include in the result.</param>
+    public static void MockExceptionCommandResult<TStart>( this ICommandProcedure<TStart> commandProcedure, Exception exception )
+    {
+        var commandResult = CommandResultHelpers.CreateWithException( exception );
+
+        commandProcedure.ExecuteAsync(
+            NSubstitute.Arg.Any<TStart>(),
+            NSubstitute.Arg.Any<CancellationToken>() )
+            .Returns( commandResult );
+    }
 }
