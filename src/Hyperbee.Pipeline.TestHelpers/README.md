@@ -37,6 +37,24 @@ public async Task Should_return_result_when_input_is_valid()
 }
 ```
 
+### Mock a Command Procedure
+
+`ICommandProcedure<TStart>` commands have no output. Mock them the same way as command functions:
+
+```csharp
+var procedure = Substitute.For<ICommandProcedure<OrderInput>>();
+
+// Successful (no-output) result
+procedure.MockSuccessfulResult();
+
+// Or an error result whose ThrowIfError() throws
+procedure.MockExceptionCommandResult( new InvalidOperationException( "failed" ) );
+
+var result = await procedure.ExecuteAsync( new OrderInput { Name = "Widget" } );
+
+Assert.False( result.Context.IsError );
+```
+
 ### Register a Middleware Provider
 
 ```csharp
