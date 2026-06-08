@@ -91,8 +91,7 @@ public static class CommandResultHelpers
     /// <returns>A CommandResult with an exception.</returns>
     public static CommandResult<TOutput> CreateWithException<TOutput>( Exception exception, Type? commandType = null )
     {
-        var context = CreateContext();
-        context.Exception.Returns( exception );
+        var context = CreateErrorContext( exception );
 
         return new CommandResult<TOutput>
         {
@@ -118,6 +117,21 @@ public static class CommandResultHelpers
             nonPublic: true )!;
 
         context.Items.Returns( contextItems );
+
+        return context;
+    }
+
+    /// <summary>
+    /// Creates a mock IPipelineContext in an error state, with ThrowIfError() wired to throw the supplied exception.
+    /// </summary>
+    /// <param name="exception">The exception to associate with the context.</param>
+    /// <returns>A mocked IPipelineContext in an error state.</returns>
+    private static IPipelineContext CreateErrorContext( Exception exception )
+    {
+        var context = CreateContext();
+        context.IsError.Returns( true );
+        context.Exception.Returns( exception );
+        context.When( c => c.ThrowIfError() ).Do( _ => throw exception );
 
         return context;
     }
