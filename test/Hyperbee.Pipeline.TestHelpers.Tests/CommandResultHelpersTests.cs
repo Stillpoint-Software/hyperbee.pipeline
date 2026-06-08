@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.TestHelpers;
+﻿using Hyperbee.Pipeline.TestHelpers;
 using Hyperbee.Pipeline.Validation;
 
 namespace Hyperbee.Pipeline.TestHelpers.Tests;

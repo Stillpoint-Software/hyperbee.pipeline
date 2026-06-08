@@ -1,4 +1,4 @@
-using Hyperbee.Pipeline.Commands;
+﻿using Hyperbee.Pipeline.Commands;
 using Hyperbee.Pipeline.TestHelpers;
 using NSubstitute;
 
