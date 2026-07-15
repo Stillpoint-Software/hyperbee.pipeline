@@ -171,6 +171,15 @@ public class ResultMapper
         // 3. Exceptions
         if ( context.IsError )
         {
+            // A PipelineValidationException carries validation failures as data (typically thrown by
+            // ThrowIfInvalid on a nested command); map it as a validation response, not a server error.
+            if ( context.Exception is PipelineValidationException validationException )
+            {
+                var carriedFailures = validationException.ValidationResult.Errors;
+
+                return MapValidationFailures( carriedFailures, GetPriorityStatusCode( carriedFailures ) );
+            }
+
             var exceptionResult = MapException( context.Exception );
 
             if ( exceptionResult is null )

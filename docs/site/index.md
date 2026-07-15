@@ -8,9 +8,13 @@ nav_order: 1
 
 ## Documentation Structure
 
+- [Syntax](syntax.md): The full builder syntax — `Pipe`, `Call`, conditional flow, iterators, reduce, and parallel execution.
 - [Conventions](conventions.md): Guidelines for creating builders, binders, and middleware.
-- [Validation](validation.md): How to validate pipeline inputs using FluentValidation or custom validators.
+- [Command Pattern](command-pattern.md): Commands as injectable pipeline units — `CommandResult`, boundaries, and composition.
+- [Dependency Injection](dependency-injection.md): Registering pipelines and exposing container services.
+- [Validation](validation.md): Validating pipeline inputs, failure types, and consuming validation results inside and outside HTTP.
 - [Middleware](middleware.md): How to use and implement middleware in pipelines.
+- [Child Pipelines](child-pipeline.md): Composing pipelines from other pipelines.
 - [Extending Pipelines](extending.md): How to add new steps, middleware, or binders.
 - [Advanced Patterns](advanced-patterns.md): Real-world examples combining extension methods, custom binders, and middleware.
 
@@ -32,6 +36,9 @@ Some key features are:
 - Dependency injection
 - Early returns and cancellation
 - Child pipelines
+- Declarative and imperative validation, with a FluentValidation adapter
+- Command pattern with assembly scanning and DI registration
+- ASP.NET Core integration with RFC 7807 result mapping (`ToResult()`)
 
 ## Why Use Pipelines
 

@@ -393,6 +393,47 @@ Any lambda not provided falls back to the default behavior.
 See the [AspNetCore README](../src/Hyperbee.Pipeline.AspNetCore/README.md) for full details on
 `ResultMapper` and all `ToResult` overloads.
 
+## Consuming Commands Outside HTTP
+
+`ToResult()` projects validation state at the HTTP edge. When a command is consumed in-process —
+from a background job, a workflow activity, or another service — use the throw helpers to surface
+failure state instead:
+
+```csharp
+using Hyperbee.Pipeline.Validation;
+
+var commandResult = await _calculateCommand.ExecuteAsync(input);
+
+commandResult.Context.ThrowIfError();    // rethrows context.Exception with its original stack trace
+commandResult.Context.ThrowIfInvalid();  // throws PipelineValidationException on validation failures
+
+return commandResult.Result;
+```
+
+`ThrowIfInvalid()` is the validation counterpart to `ThrowIfError()`. It throws a
+`PipelineValidationException` that carries the `IValidationResult`, so callers can inspect
+individual failures — including `ErrorCode` — from the exception:
+
+```csharp
+catch (PipelineValidationException ex)
+{
+    foreach (var failure in ex.ValidationResult.Errors)
+        _logger.LogWarning("{Property}: {Message}", failure.PropertyName, failure.ErrorMessage);
+}
+```
+
+Two things `ThrowIfInvalid()` deliberately does not do:
+
+- **Cancellation is not a failure.** A context canceled without validation failures (for example
+  by `Cancel()` or `CancelWith()`) does not throw; cancellation values surface through the
+  pipeline result as usual.
+- **It does not replace `ThrowIfError()`.** Exceptions and validation failures are independent
+  axes of the context; call both to surface all failure state.
+
+If a `PipelineValidationException` reaches a pipeline boundary — for example, a parent pipeline
+step calls `ThrowIfInvalid()` on a nested command's result — `ToResult()` recognizes it and maps
+the carried failures as a validation response (422/404/403/401) rather than a 500 error.
+
 ## Advanced Scenarios
 
 ### Custom Validators
@@ -484,19 +525,27 @@ services.AddPipelineValidation(config =>
 
 ## Exception Handling
 
-Validation integrates with pipeline exception handling:
+The `WithExceptionHandling` middleware maps configured exception types to validation failures,
+so expected exceptions surface as validation state instead of errors:
 
 ```csharp
+using Hyperbee.Pipeline.Middleware;
+
 var command = PipelineFactory
     .Start<Order>()
+    .WithExceptionHandling(config => config
+        .AddException<TimeoutException>(errorcode: 504)
+        .AddException<OrderProcessingException>()
+    )
     .ValidateAsync()
     .PipeAsync(async (ctx, order) => await ProcessOrder(order))
-    .HandleExceptionsAsync(async (ctx, exception) => {
-        // Log exception
-        ctx.FailAfter(new ValidationFailure("System", exception.Message));
-    })
     .Build();
 ```
+
+A matched exception is recorded as a validation failure (`"{ExceptionType}: {message}"` with the
+configured error code) and the pipeline cancels; unmatched exceptions are re-thrown.
+`WithExceptionHandling` is a hook and must be chained on the start builder, before the
+pipeline's steps.
 
 ## Testing
 

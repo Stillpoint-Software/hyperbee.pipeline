@@ -514,6 +514,43 @@ public static class PipelineValidationExtensions
         return context.GetValidationResult()?.Errors ?? Enumerable.Empty<IValidationFailure>();
     }
 
+    /// <summary>
+    /// Throws a <see cref="PipelineValidationException"/> if the pipeline context contains validation failures.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the validation counterpart to <see cref="IPipelineContext.ThrowIfError"/>, which considers
+    /// only <see cref="IPipelineContext.Exception"/>. Use both to surface all failure state when consuming
+    /// a command outside of HTTP, where <c>ToResult()</c> mapping does not apply.
+    /// </para>
+    /// <para>
+    /// Cancellation is not considered a failure; a context that was canceled without validation failures
+    /// (for example by <c>Cancel()</c> or <c>CancelWith()</c>) does not throw.
+    /// </para>
+    /// </remarks>
+    /// <param name="context">The pipeline context.</param>
+    /// <exception cref="PipelineValidationException">
+    /// Thrown when the context contains a validation result with one or more failures. The exception
+    /// carries the <see cref="IValidationResult"/>.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// var commandResult = await command.ExecuteAsync(input);
+    ///
+    /// commandResult.Context.ThrowIfError();
+    /// commandResult.Context.ThrowIfInvalid();
+    ///
+    /// return commandResult.Result;
+    /// </code>
+    /// </example>
+    public static void ThrowIfInvalid( this IPipelineContext context )
+    {
+        var validationResult = context.GetValidationResult();
+
+        if ( validationResult is { IsValid: false } )
+            throw new PipelineValidationException( validationResult );
+    }
+
     // pipeline builder extensions
 
     /// <summary>
