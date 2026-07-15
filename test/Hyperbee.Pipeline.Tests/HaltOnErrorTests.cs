@@ -73,7 +73,7 @@ public class HaltOnErrorTests
         // Act
         var result = await pipeline( context, "input" );
 
-        // Assert - the step after the composed command never ran (the Ringba fix)
+        // Assert - the step after the composed command never ran (halt-on-error)
         Assert.IsFalse( followUpRan );
         Assert.IsNull( result );
         Assert.IsTrue( context.IsError );
