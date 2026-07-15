@@ -47,7 +47,7 @@ Subclass `ResultMapper` to customize error handling, status codes, and success r
 Override only the methods you need.
 
 ```csharp
-public class BillingResultMapper : ResultMapper
+public class ConflictResultMapper : ResultMapper
 {
     public override IResult? MapException( Exception exception ) => exception switch
     {
@@ -62,7 +62,7 @@ public class BillingResultMapper : ResultMapper
 Register with DI and inject into endpoints:
 
 ```csharp
-services.AddSingleton<ResultMapper, BillingResultMapper>();
+services.AddSingleton<ResultMapper, ConflictResultMapper>();
 
 app.MapPost( "/items", async (
     CreateItemRequest request,
