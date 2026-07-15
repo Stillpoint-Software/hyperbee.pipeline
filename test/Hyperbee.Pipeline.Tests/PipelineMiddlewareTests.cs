@@ -71,7 +71,7 @@ public class PipelineMiddlewareTests
     }
 
     [TestMethod]
-    public async Task Pipeline_nested_wrap_should_only_wrap_the_inner_builder()
+    public async Task Pipeline_nested_wrap_should_be_scopped_to_inner_builder()
     {
         var command = PipelineFactory
             .Start<string>()
@@ -88,5 +88,26 @@ public class PipelineMiddlewareTests
         var result = await command( new PipelineContext() );
 
         Assert.AreEqual( "12{34}56", result );
+    }
+
+    [TestMethod]
+    public async Task Pipeline_nested_hook_with_wrap_should_be_scopped_to_inner_builder()
+    {
+        var command = PipelineFactory
+            .Start<string>()
+            .Pipe( ( ctx, arg ) => arg + "1" )
+            .Pipe( ( ctx, arg ) => arg + "2" )
+            .Pipe( builder => builder
+                .HookAsync( async ( ctx, arg, next ) => await next( ctx, arg + "[" ) + "]" )
+                .Pipe( ( ctx, arg ) => arg + "3" )
+                .Pipe( ( ctx, arg ) => arg + "4" )
+                .Pipe( ( ctx, arg ) => arg + "5" ) 
+                .WrapAsync( async ( ctx, arg, next ) => await next( ctx, arg + "{" ) + "}" ) )
+            .Pipe( ( ctx, arg ) => arg + "6" )
+            .Build();
+
+        var result = await command( new PipelineContext() );
+
+        Assert.AreEqual( "12{[3][4][5]}6", result );
     }
 }

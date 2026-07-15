@@ -18,6 +18,9 @@ Some key features are:
 * Dependency injection
 * Early returns and cancellation
 * Child pipelines
+* Declarative and imperative validation, with a FluentValidation adapter
+* Command pattern with assembly scanning and DI registration
+* ASP.NET Core integration with RFC 7807 result mapping (`ToResult()`)
 
 ## Why Use Pipelines
 
@@ -33,7 +36,7 @@ pipelines are not only robust and maintainable but also highly adaptable to chan
 
 ## Getting Started
 
-To get started with Hyperbee.Json, refer to the [documentation](https://stillpoint-software.github.io/hyperbee.pipeline) for 
+To get started with Hyperbee.Pipeline, refer to the [documentation site](https://stillpoint-software.github.io/hyperbee.pipeline) for 
 detailed instructions and examples. 
 
 Install via NuGet:
@@ -139,6 +142,37 @@ These methods provide powerful functionality for manipulating data as it passes 
 - Reduce
 - Parallel execution
 
+## Validation and Error Handling
+
+Pipelines validate their inputs declaratively, and commands surface failure state as data —
+a command returns a result plus diagnostics instead of throwing:
+
+```csharp
+var pipeline = PipelineFactory
+    .Start<CreateUserRequest>()
+    .ValidateAsync()                        // FluentValidation or custom validators
+    .PipeAsync( ( ctx, request ) => CreateUser( request ) )
+    .Build();
+```
+
+Project the diagnostics at your boundary: `ToResult()` maps validation failures to RFC 7807
+responses (422/404/403/401) at the HTTP edge, while `context.ThrowIfError()` and
+`context.ThrowIfInvalid()` surface errors and validation failures to in-process callers. See the
+[Validation documentation](https://stillpoint-software.github.io/hyperbee.pipeline/validation.html)
+for details.
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `Hyperbee.Pipeline` | Core pipeline builders, commands, middleware, and context |
+| `Hyperbee.Pipeline.Validation` | Framework-agnostic validation: `ValidateAsync`, failure types, `ThrowIfInvalid` |
+| `Hyperbee.Pipeline.Validation.FluentValidation` | FluentValidation adapter with assembly scanning |
+| `Hyperbee.Pipeline.AspNetCore` | `ToResult()` command-result mapping for minimal APIs, with customizable `ResultMapper` |
+| `Hyperbee.Pipeline.Auth` | Claims-based pipeline steps (`WithAuth`, `PipeIfClaim`) |
+| `Hyperbee.Pipeline.Caching` | Memory and distributed cache pipeline steps |
+| `Hyperbee.Pipeline.TestHelpers` | Test fixtures and `CommandResult` helpers |
+
 ## Credits
 
 Hyperbee.Pipeline is built upon the great work of several open-source projects. Special thanks to:
@@ -156,7 +190,3 @@ for more details.
 | Branch     | Action                                                                                                                                                                                                                      |
 |------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `main`     | [![Build status](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/actions/workflows/pack_publish.yml/badge.svg)](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/actions/workflows/pack_publish.yml)                 |
-
-# Help
- See [Todo](https://github.com/Stillpoint-Software/Hyperbee.Pipeline/blob/main/docs/todo.md)
-

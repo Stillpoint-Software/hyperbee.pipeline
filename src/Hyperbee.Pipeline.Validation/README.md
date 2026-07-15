@@ -6,7 +6,7 @@ The `Hyperbee.Pipeline.Validation` library provides base validation implementati
 
 - **Base Implementations**: Concrete `ValidationFailure` and `ValidationResult` classes implementing the abstractions
 - **Pipeline Extensions**: `ValidateAsync`, `IfValidAsync`, `ValidateAndCancelOnFailureAsync` for declarative validation
-- **Context Extensions**: Methods to store and retrieve validation results from pipeline contexts
+- **Context Extensions**: Methods to store, retrieve, and throw on validation results from pipeline contexts
 - **Domain Failure Types**: `ApplicationValidationFailure`, `NotFoundValidationFailure`, `UnauthorizedValidationFailure`, `ForbiddenValidationFailure`
 - **Exception Handling**: Middleware to map exceptions to validation failures
 
@@ -93,6 +93,20 @@ if (!context.IsValid())
         Console.WriteLine($"{error.PropertyName}: {error.ErrorMessage}");
     }
 }
+```
+
+### Throwing on Validation Failures
+
+`ThrowIfInvalid` is the validation counterpart to `ThrowIfError` — use both when consuming a
+command outside of HTTP:
+
+```csharp
+var commandResult = await command.ExecuteAsync(input);
+
+commandResult.Context.ThrowIfError();
+commandResult.Context.ThrowIfInvalid(); // throws PipelineValidationException carrying the IValidationResult
+
+return commandResult.Result;
 ```
 
 ### Exception Handling Middleware

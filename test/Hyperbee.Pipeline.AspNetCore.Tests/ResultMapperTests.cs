@@ -393,6 +393,87 @@ public class ResultMapperTests
         Assert.IsInstanceOfType( result, typeof( JsonHttpResult<object> ) );
     }
 
+    // PipelineValidationException mapping
+
+    [TestMethod]
+    public void ToResult_should_map_PipelineValidationException_as_validation_response()
+    {
+        var validationResult = new ValidationResult( new[] { new ValidationFailure( "Name", "Required." ) } );
+        var commandResult = CreateErrorResult<string>( new PipelineValidationException( validationResult ) );
+
+        var result = commandResult.ToResult();
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void ToResult_should_use_priority_status_code_for_PipelineValidationException()
+    {
+        var validationResult = new ValidationResult( new IValidationFailure[]
+        {
+            new ApplicationValidationFailure( "Field", "Invalid." ),
+            new NotFoundValidationFailure( "Item", "Not found." )
+        } );
+        var commandResult = CreateErrorResult<string>( new PipelineValidationException( validationResult ) );
+
+        var result = commandResult.ToResult();
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status404NotFound, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void ToResult_should_map_PipelineValidationException_when_context_is_also_canceled()
+    {
+        // halt-on-error leaves an errored context canceled as well; the cancellation
+        // branch falls through (no IResult cancellation value) to the exception branch
+        var validationResult = new ValidationResult( new[] { new ValidationFailure( "Name", "Required." ) } );
+        var context = new PipelineContext { Exception = new PipelineValidationException( validationResult ) };
+        context.CancelAfter();
+        var commandResult = new CommandResult<string>
+        {
+            Context = context,
+            CommandType = typeof( ResultMapperTests )
+        };
+
+        var result = commandResult.ToResult();
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void ToResult_non_generic_should_map_PipelineValidationException_as_validation_response()
+    {
+        var validationResult = new ValidationResult( new[] { new ValidationFailure( "Name", "Required." ) } );
+        var commandResult = CreateNonGenericErrorResult( new PipelineValidationException( validationResult ) );
+
+        var result = commandResult.ToResult();
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
+    }
+
+    [TestMethod]
+    public void Custom_MapException_should_not_intercept_PipelineValidationException()
+    {
+        // Carried validation failures are mapped before MapException is consulted
+        var mapper = new RethrowMapper();
+        var validationResult = new ValidationResult( new[] { new ValidationFailure( "Name", "Required." ) } );
+        var commandResult = CreateErrorResult<string>( new PipelineValidationException( validationResult ) );
+
+        var result = commandResult.ToResult( mapper );
+
+        Assert.IsInstanceOfType( result, typeof( ProblemHttpResult ) );
+        var problem = (ProblemHttpResult) result;
+        Assert.AreEqual( StatusCodes.Status422UnprocessableEntity, problem.StatusCode );
+    }
+
     // ContentSelector + mapper on error path
 
     [TestMethod]
