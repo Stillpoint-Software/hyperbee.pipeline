@@ -25,12 +25,19 @@ jobs:
     with:
       branch: ${{ github.event.release.target_commitish }}
       solution_name: ${{ vars.SOLUTION_NAME }}
+      # Opt in. The shared workflow defaults to ["net8.0", "net9.0", "net10.0"],
+      # so without this net11.0 would be built but never tested.
+      frameworks: '["net11.0", "net10.0", "net9.0", "net8.0"]'
   
   publish:
     needs: [set-config, tests]
     uses: Stillpoint-Software/shared-workflows/.github/workflows/pack_and_publish.yml@main
     with:
       build_configuration: ${{ needs.set-config.outputs.build_configuration }}
+      # The shared workflow defaults to a 10.0.x SDK, which cannot build net11.0.
+      # One 11.0.x SDK builds every target here; the older targeting packs come
+      # from NuGet, so no extra SDK is needed to pack net8.0 or net9.0.
+      dotnet_version: '11.0.x'
     secrets:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
