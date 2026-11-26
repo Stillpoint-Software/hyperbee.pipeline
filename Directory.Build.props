@@ -55,7 +55,9 @@
       those, a netstandard2.1 asset would be redundant: a net8 consumer gets the
       better assembly from lib/net8.0 than it would from a fallback.
 
-      net8.0 goes out of support on 2026-11-10. Drop it after that, not before.
+      net8.0 and net9.0 both reached end of support on 2026-11-10. They are kept
+      anyway: the constraints above rule out a netstandard2.1 fallback, so
+      dropping them would leave a downlevel consumer nothing to resolve.
     -->
     <TargetFrameworks>net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>

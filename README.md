@@ -173,6 +173,26 @@ for details.
 | `Hyperbee.Pipeline.Caching` | Memory and distributed cache pipeline steps |
 | `Hyperbee.Pipeline.TestHelpers` | Test fixtures and `CommandResult` helpers |
 
+## Target frameworks
+
+`net11.0`, `net10.0`, `net9.0`, `net8.0`. All seven packages ship all four.
+
+This repository is the one exception to the `netstandard2.1` compatibility floor used
+elsewhere in Hyperbee, because four of the seven packages cannot ship a `netstandard2.1`
+asset at all. `Hyperbee.Pipeline.AspNetCore` and `Hyperbee.Pipeline.Auth` carry a
+`FrameworkReference` on `Microsoft.AspNetCore.App`, a shared framework only a runtime
+target can resolve. The FluentValidation-backed projects depend on FluentValidation 12.x,
+which ships `lib/net8.0` only.
+
+`net8.0` therefore has to stay a real target, and once it is one a `netstandard2.1` asset
+is redundant: a `net8.0` consumer gets a better assembly from `lib/net8.0` than from a
+fallback. `net8.0` and `net9.0` both reached end of support on 2026-11-10 and are kept
+here deliberately, since the constraints above leave a downlevel consumer nothing else to
+resolve.
+
+Building this repository requires the .NET 11 SDK; the older targeting packs come from
+NuGet, so one SDK covers all four targets.
+
 ## Credits
 
 Hyperbee.Pipeline is built upon the great work of several open-source projects. Special thanks to:

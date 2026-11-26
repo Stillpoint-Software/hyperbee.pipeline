@@ -106,3 +106,8 @@ An Optional `ICacheSerializer` can be registered. If one is missing the `JsonCac
 services.AddTransient<ICacheSerializer, JsonCacheSerializer>()
 ```
 
+
+## Target frameworks
+
+`net11.0`, `net10.0`, `net9.0`, `net8.0`. This repository ships four runtime targets and no
+`netstandard2.1`; see the [repository README](../../README.md#target-frameworks) for why.
