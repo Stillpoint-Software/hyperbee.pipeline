@@ -42,10 +42,21 @@
           PackagePath="\"
           Link="LICENSE" />
   </ItemGroup>
-  <!-- Global project properties - .NET 10 LTS First Strategy -->
+  <!-- Global project properties - .NET 11 first, older runtimes kept for compatibility -->
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Primary target: .NET 10 (next LTS), with .NET 9 for current support, .NET 8 for compatibility -->
-    <TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
+    <!--
+      Four runtime targets and deliberately no netstandard2.1, unlike the other
+      Hyperbee repos. Four of the seven packages here cannot ship a netstandard2.1
+      asset at all: Hyperbee.Pipeline.AspNetCore and Hyperbee.Pipeline.Auth carry a
+      FrameworkReference on Microsoft.AspNetCore.App, which only a runtime TFM can
+      resolve, and the FluentValidation-backed projects depend on FluentValidation
+      12.x, which ships lib/net8.0 only. Since net8.0 has to stay a real target for
+      those, a netstandard2.1 asset would be redundant: a net8 consumer gets the
+      better assembly from lib/net8.0 than it would from a fallback.
+
+      net8.0 goes out of support on 2026-11-10. Drop it after that, not before.
+    -->
+    <TargetFrameworks>net11.0;net10.0;net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 </Project>
