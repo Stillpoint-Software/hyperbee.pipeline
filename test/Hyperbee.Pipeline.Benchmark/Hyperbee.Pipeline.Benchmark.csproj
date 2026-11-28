@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Pinned, not inherited: Benchmarks run on .NET 10. -->
+    <TargetFrameworks>net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -15,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Hyperbee.Pipeline.Auth\Hyperbee.Pipeline.Auth.csproj" />
     <ProjectReference Include="..\..\src\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
-    <ProjectReference Include="..\..\src\Hyperbee.Pipline.Caching\Hyperbee.Pipeline.Caching.csproj" />
+    <ProjectReference Include="..\..\src\Hyperbee.Pipeline.Caching\Hyperbee.Pipeline.Caching.csproj" />
     <ProjectReference Include="..\Hyperbee.Pipeline.Auth.Tests\Hyperbee.Pipeline.Auth.Tests.csproj" />
   </ItemGroup>
 

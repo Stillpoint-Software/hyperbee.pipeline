@@ -188,5 +188,6 @@ Classes for building composable async pipelines supporting:
 
 ## Target frameworks
 
-`net11.0`, `net10.0`, `net9.0`, `net8.0`. This repository ships four runtime targets and no
-`netstandard2.1`; see the [repository README](../../README.md#target-frameworks) for why.
+`net11.0`, `net10.0`, `net8.0`. The `FrameworkReference` on `Microsoft.AspNetCore.App`
+rules out `netstandard2.1`, so a `net8.0` or `net9.0` project resolves the `net8.0` asset;
+see the [repository README](../../README.md#target-frameworks).

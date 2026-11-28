@@ -6,11 +6,15 @@
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.10.94">
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.102">
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="11.0.100">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build;    native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
+    <!--
+      Build-time only: PolySharp is a source generator. Every project references it
+      with PrivateAssets="all", so it never appears in package dependencies.
+    -->
+    <PackageVersion Include="PolySharp" Version="1.17.1" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- Test packages -->

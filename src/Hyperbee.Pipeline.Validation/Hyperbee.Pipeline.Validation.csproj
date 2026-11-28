@@ -20,4 +20,17 @@
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
+  <!--
+    netstandard2.1: the compiler-required types come from PolySharp (see
+    Directory.Build.props). ArgumentNullException.ThrowIfNull is shimmed in
+    Internal/NetstandardShims.cs, which compiles into netstandard2.1 only.
+  -->
+  <ItemGroup>
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
+    <Compile Remove="Internal\NetstandardShims.cs" />
+  </ItemGroup>
+
 </Project>

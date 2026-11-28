@@ -119,5 +119,8 @@ var exception = CommandResultHelpers.CreateWithException<Order>(
 
 ## Target frameworks
 
-`net11.0`, `net10.0`, `net9.0`, `net8.0`. This repository ships four runtime targets and no
-`netstandard2.1`; see the [repository README](../../README.md#target-frameworks) for why.
+`net11.0`, `net10.0`, `netstandard2.1`. A `net8.0` or `net9.0` project resolves the
+`netstandard2.1` asset; see the [repository README](../../README.md#target-frameworks).
+
+On `netstandard2.1` this package depends on FluentValidation 11.12, the last release line
+with a `netstandard2.1` asset. `net10.0` and `net11.0` use FluentValidation 12.

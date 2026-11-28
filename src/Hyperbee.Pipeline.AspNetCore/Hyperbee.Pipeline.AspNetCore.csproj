@@ -1,6 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!--
+      Pinned, not inherited: the FrameworkReference on Microsoft.AspNetCore.App
+      resolves only for a runtime TFM, so this package cannot offer netstandard2.1.
+      net8.0 stays so net8.0 and net9.0 consumers keep an asset.
+    -->
+    <TargetFrameworks>net11.0;net10.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <!--
+      Microsoft.SourceLink.GitHub 11.x depends on System.IO.Hashing 11.0.0, whose
+      build targets warn on net8.0. SourceLink is build-only (PrivateAssets="all")
+      and never reaches the package, so the warning says nothing about what ships.
+      Check the net8.0 dependency group by hand when adding a runtime package here.
+    -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <IsPackable>true</IsPackable>
     <Nullable>enable</Nullable>
     <Authors>Stillpoint Software, Inc.</Authors>

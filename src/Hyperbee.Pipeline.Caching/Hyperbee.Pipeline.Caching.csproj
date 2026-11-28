@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <Authors>Stillpoint Software, Inc.</Authors>
+    <Copyright>Stillpoint Software, Inc.</Copyright>
+    <PackageTags>pipeline;caching</PackageTags>
+    <PackageId>Hyperbee.Pipeline.Caching</PackageId>
+    <Title>Hyperbee Pipeline Caching</Title>
+    <Description>Caching for Hyperbee.Pipelines async pipelines</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hyperbee.Pipeline\Hyperbee.Pipeline.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+  </ItemGroup>
+
+  <!--
+    netstandard2.1: the compiler-required types come from PolySharp (see
+    Directory.Build.props). ArgumentNullException.ThrowIfNull is shimmed in
+    Internal/NetstandardShims.cs, which compiles into netstandard2.1 only.
+
+    Microsoft.Extensions packages are pinned to 8.0.x on netstandard2.1 alone. That
+    asset exists to serve net8.0 and net9.0 consumers, and the newer packages declare
+    no support for either, so a net8.0 consumer would collect a support warning per
+    package on every build. 8.0.x still ships a netstandard2.0 asset. A package that
+    is part of the framework on net10.0 and net11.0, such as System.Text.Json, is
+    referenced here for netstandard2.1 only.
+  -->
+  <ItemGroup>
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
+    <Compile Remove="Internal\NetstandardShims.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Update="Microsoft.Extensions.Caching.Abstractions" VersionOverride="8.0.0" />
+    <PackageReference Include="System.Text.Json" VersionOverride="8.0.6" />
+  </ItemGroup>
+
+</Project>

@@ -175,23 +175,31 @@ for details.
 
 ## Target frameworks
 
-`net11.0`, `net10.0`, `net9.0`, `net8.0`. All seven packages ship all four.
+| Package | Targets |
+|---------|---------|
+| `Hyperbee.Pipeline`, `.Validation`, `.Validation.FluentValidation`, `.Caching`, `.TestHelpers` | `net11.0`, `net10.0`, `netstandard2.1` |
+| `Hyperbee.Pipeline.AspNetCore`, `.Auth` | `net11.0`, `net10.0`, `net8.0` |
 
-This repository is the one exception to the `netstandard2.1` compatibility floor used
-elsewhere in Hyperbee, because four of the seven packages cannot ship a `netstandard2.1`
-asset at all. `Hyperbee.Pipeline.AspNetCore` and `Hyperbee.Pipeline.Auth` carry a
-`FrameworkReference` on `Microsoft.AspNetCore.App`, a shared framework only a runtime
-target can resolve. The FluentValidation-backed projects depend on FluentValidation 12.x,
-which ships `lib/net8.0` only.
+`net8.0` and `net9.0` reached end of support on 2026-11-10 and are not built directly.
+`netstandard2.1` is the compatibility floor, so a `net8.0` or `net9.0` project resolves that
+asset. `Hyperbee.Pipeline.AspNetCore` and `Hyperbee.Pipeline.Auth` are the exception: their
+`FrameworkReference` on `Microsoft.AspNetCore.App` resolves only for a runtime target, so they
+ship `net8.0` instead.
 
-`net8.0` therefore has to stay a real target, and once it is one a `netstandard2.1` asset
-is redundant: a `net8.0` consumer gets a better assembly from `lib/net8.0` than from a
-fallback. `net8.0` and `net9.0` both reached end of support on 2026-11-10 and are kept
-here deliberately, since the constraints above leave a downlevel consumer nothing else to
-resolve.
+On `netstandard2.1`, `Hyperbee.Pipeline.Validation.FluentValidation` and
+`Hyperbee.Pipeline.TestHelpers` depend on FluentValidation 11.12, the last release line with a
+`netstandard2.1` asset; `net10.0` and `net11.0` use FluentValidation 12. A `net8.0` application
+may still reference FluentValidation 12 itself.
 
-Building this repository requires the .NET 11 SDK; the older targeting packs come from
-NuGet, so one SDK covers all four targets.
+### Upgrading from 2.x
+
+3.0 replaces the `net8.0` and `net9.0` assets of the five packages above with `netstandard2.1`.
+Applications rebuild against it without source changes. A library that was compiled against a
+2.x `net8.0` asset and sets an `init` property, for example
+`new PipelineContext { HaltOnError = false }`, throws `MissingMethodException` until it is
+rebuilt against 3.0.
+
+Building this repository requires the .NET 11 SDK; the older targeting packs come from NuGet.
 
 ## Credits
 

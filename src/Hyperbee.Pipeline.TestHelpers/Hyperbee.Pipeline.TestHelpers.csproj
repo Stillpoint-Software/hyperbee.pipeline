@@ -22,4 +22,20 @@
     <PackageReference Update="Microsoft.SourceLink.GitHub" />
   </ItemGroup>
 
+  <!--
+    netstandard2.1: the compiler-required types come from PolySharp (see
+    Directory.Build.props).
+
+    FluentValidation 12 ships lib/net8.0 only, so netstandard2.1 builds against
+    FluentValidation 11.12, the last line with a netstandard2.1 asset. net10.0 and
+    net11.0 keep FluentValidation 12.
+  -->
+  <ItemGroup>
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Update="FluentValidation" VersionOverride="11.12.0" />
+  </ItemGroup>
+
 </Project>

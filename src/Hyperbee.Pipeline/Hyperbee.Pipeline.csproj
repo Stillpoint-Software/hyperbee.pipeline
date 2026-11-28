@@ -6,7 +6,7 @@
     <PackageTags>pipeline;fluent-pipeline;middleware;hooks;dependency-injection</PackageTags>
     <PackageProjectUrl>https://stillpoint-software.github.io/hyperbee.pipeline/</PackageProjectUrl>
     <PackageId>Hyperbee.Pipeline</PackageId>
-    <Title>Hyperbee Piplines</Title>
+    <Title>Hyperbee Pipeline</Title>
     <Description>A pipeline library for constructing asynchronous functional fluent pipelines in .NET</Description>
   </PropertyGroup>
   <ItemGroup>
@@ -18,4 +18,30 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
   </ItemGroup>
+
+  <!--
+    netstandard2.1: the compiler-required types come from PolySharp (see
+    Directory.Build.props). ArgumentNullException.ThrowIfNull is shimmed in
+    Internal/NetstandardShims.cs, which compiles into netstandard2.1 only.
+
+    Microsoft.Extensions packages are pinned to 8.0.x on netstandard2.1 alone. That
+    asset exists to serve net8.0 and net9.0 consumers, and the newer packages declare
+    no support for either, so a net8.0 consumer would collect a support warning per
+    package on every build. 8.0.x still ships a netstandard2.0 asset. A package that
+    is part of the framework on net10.0 and net11.0, such as System.Text.Json, is
+    referenced here for netstandard2.1 only.
+  -->
+  <ItemGroup>
+    <PackageReference Include="PolySharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
+    <Compile Remove="Internal\NetstandardShims.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Update="Microsoft.Extensions.DependencyInjection.Abstractions" VersionOverride="8.0.2" />
+    <PackageReference Update="Microsoft.Extensions.Logging" VersionOverride="8.0.1" />
+  </ItemGroup>
+
 </Project>

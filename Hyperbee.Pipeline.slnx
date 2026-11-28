@@ -11,6 +11,7 @@
   <Folder Name="/Solution Items/.github/workflows/">
     <File Path=".github/workflows/create_release.yml" />
     <File Path=".github/workflows/create_test_report.yml" />
+    <File Path=".github/workflows/deploy-gh-pages.yml" />
     <File Path=".github/workflows/format.yml" />
     <File Path=".github/workflows/issue_branch.yml" />
     <File Path=".github/workflows/pack_publish.yml" />
@@ -20,8 +21,8 @@
   <Folder Name="/Solution Tests/">
     <Project Path="test/Hyperbee.Pipeline.Auth.Tests/Hyperbee.Pipeline.Auth.Tests.csproj" />
     <Project Path="test/Hyperbee.Pipeline.Tests/Hyperbee.Pipeline.Tests.csproj" />
-    <Project Path="test/Hyperbee.PipelineCaching.Tests/Hyperbee.Pipeline.Caching.Tests.csproj" />
-    <Project Path="test/Hyperbee.Pipleline.Benchmark/Hyperbee.Pipeline.Benchmark.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.Caching.Tests/Hyperbee.Pipeline.Caching.Tests.csproj" />
+    <Project Path="test/Hyperbee.Pipeline.Benchmark/Hyperbee.Pipeline.Benchmark.csproj" />
     <Project Path="test/Hyperbee.Pipeline.Validation.Tests/Hyperbee.Pipeline.Validation.Tests.csproj" />
     <Project Path="test/Hyperbee.Pipeline.Validation.FluentValidation.Tests/Hyperbee.Pipeline.Validation.FluentValidation.Tests.csproj" />
     <Project Path="test/Hyperbee.Pipeline.AspNetCore.Tests/Hyperbee.Pipeline.AspNetCore.Tests.csproj" />
@@ -29,7 +30,7 @@
   </Folder>
   <Project Path="src/Hyperbee.Pipeline.Auth/Hyperbee.Pipeline.Auth.csproj" />
   <Project Path="src/Hyperbee.Pipeline/Hyperbee.Pipeline.csproj" />
-  <Project Path="src/Hyperbee.Pipline.Caching/Hyperbee.Pipeline.Caching.csproj" />
+  <Project Path="src/Hyperbee.Pipeline.Caching/Hyperbee.Pipeline.Caching.csproj" />
   <Project Path="src/Hyperbee.Pipeline.Validation/Hyperbee.Pipeline.Validation.csproj" />
   <Project Path="src/Hyperbee.Pipeline.Validation.FluentValidation/Hyperbee.Pipeline.Validation.FluentValidation.csproj" />
 <Project Path="src/Hyperbee.Pipeline.AspNetCore/Hyperbee.Pipeline.AspNetCore.csproj" />
